@@ -14,6 +14,8 @@ from scipy.signal import square
 def get_parser():
     parser = argparse.ArgumentParser(
         description="Create Create 1D stimulation vector for BIOPAC stmisola")
+    parser.add_argument('-type', required=True, type=str,
+                        help="biphasic or monophasic")
     parser.add_argument('-stim_f', required=True, type=int,
                         help="Stimulation frequency in Hz")
     parser.add_argument('-stim_pw', required=True, type=float,
@@ -49,13 +51,20 @@ def main():
         raise ValueError('Pulse width greater than sampling period. Reduce pulse width for this sampling frequency')
     
     #pw/1/sampling_f = duty cycle
-    stim_block=args.stim_amp*(square((2 * np.pi * args.stim_f * time), args.stim_pw/(1/args.stim_f))) 
+    if args.type.lower() == 'biphasic':
+        stim_block=args.stim_amp*(square((2 * np.pi * args.stim_f * time), args.stim_pw/(1/args.stim_f))) 
+    elif args.type.lower() == 'monophasic':
+        stim_block=args.stim_amp*((square((2 * np.pi * args.stim_f * time), args.stim_pw/(1/args.stim_f)) + 1)/2)
+
+    else:
+        raise ValueError('Biphasic or monophasic not specified correctly.')
 
     for block in np.arange(1, (args.n_stim_blocks*2)+1, 2):
         block_start=(block*args.samp_f*args.stim_duration)
         stim_vector[block_start:block_start+(args.stim_duration*args.samp_f)]=stim_block
     
-    plt.plot(stim_vector)
+    plt.plot(np.arange(0,len(stim_vector)/args.samp_f, 1/args.samp_f), stim_vector, linewidth=0.01)
+    plt.savefig(args.filename + '.pdf')
 
     np.savetxt(args.filename, stim_vector, fmt='%.1f\n', newline='')
 
