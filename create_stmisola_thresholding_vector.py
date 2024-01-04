@@ -14,22 +14,20 @@ from scipy.signal import square
 def get_parser():
     parser = argparse.ArgumentParser(
         description="Create Create 1D stimulation vector for BIOPAC stmisola")
-    parser.add_argument('-type', required=True, type=str,
+    parser.add_argument('-type', default="monophasic", required=False, type=str,
                         help="biphasic or monophasic")
-    parser.add_argument('-stim_f', required=True, type=int,
+    parser.add_argument('-stim_f', default=100, required=False, type=int,
                         help="Stimulation frequency in Hz")
-    parser.add_argument('-stim_pw', required=True, type=float,
+    parser.add_argument('-stim_pw', default=0.00015, required=False, type=float,
                         help="Stimulation pulse width in seconds")
-    parser.add_argument('-stim_duration', required=True, type=int,
+    parser.add_argument('-stim_duration', default=5, required=False, type=int,
                         help="Duration of stimulation block in seconds.")
-    parser.add_argument('-no_stim_duration', required=True, type=int,
+    parser.add_argument('-no_stim_duration', default=2, required=False, type=int,
                     help="Duration of no stimulation block in seconds.")
-    parser.add_argument('-stim_amps', required=True, type=str,
-                        help="Comma separated amplitudes of BIOPAC stim file in Volts. For example: 0.2,0.4,0.6,0.8,1.0")
-    parser.add_argument('-samp_f', required=True, type=int,
+    parser.add_argument('-stim_amps', default='0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5,1.6,1.7,1.8,1.9,2.0,2.1,2.2,2.3,2.4,2.5,2.6,2.7,2.8,2.9,3.0', required=False, type=str,
+                        help="Comma separated amplitudes of BIOPAC stim file in Volts. For example: '0.2,0.4,0.6,0.8,1.0'")
+    parser.add_argument('-samp_f', default=100000, required=False, type=int,
                         help="Sampling frequency of stimulation vector in Hz")
-    parser.add_argument('-filename', required=True, type=str,
-                        help="Filename of tab delimited stimulation vector file")
     return parser
 
 def main():
@@ -70,8 +68,15 @@ def main():
 
     plt.plot(np.arange(0,len(stim_vector)/args.samp_f, 1/args.samp_f), stim_vector, linewidth=0.01)
     plt.savefig(args.filename + '.pdf')
-
-    np.savetxt(args.filename, stim_vector, fmt='%.1f\n', newline='')
+    filename = args.type + '_stim_f_' + \
+        str(args.stim_f) + 'hz_stim_pw_' + \
+        str(args.stim_pw) + 's_stim_duration_' + \
+        str(args.stim_duration) + 's_no_stim_duration'+ \
+        str(args.no_stim_duration)  + '_s_amps_' + \
+        args.stim_amps + 'mA_samp_f' + \
+        str(args.samp_f) + '*.tsv'
+    np.savetxt(filename, stim_vector, fmt='%.1f\n', newline='')
 
 if __name__ == '__main__':
     main()
+    
