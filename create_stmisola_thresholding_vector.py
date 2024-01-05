@@ -77,7 +77,7 @@ def main():
     plt.savefig(filename + '.pdf')
     plt.close()
 
-    np.savetxt(filename + '.tsv', stim_vector, fmt='%.1f\n', newline='')
+    np.savetxt(filename + '.txt', stim_vector, fmt='%.1f\n', newline='')
 
 if __name__ == '__main__':
     main()

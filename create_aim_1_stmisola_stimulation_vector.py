@@ -118,7 +118,7 @@ def main():
     plt.plot(np.arange(0,len(stim_vector)/args.samp_f, 1/args.samp_f), stim_vector, linewidth=0.01)
     plt.savefig(os.path.join(save_directory, subject_id, filename + '_biopac_stim_vector.pdf'))
     plt.close()
-    np.savetxt(os.path.join(save_directory, subject_id, filename + '_biopac_stim_vector.tsv'), stim_vector, fmt='%.1f\n', newline='')
+    np.savetxt(os.path.join(save_directory, subject_id, filename + '_biopac_stim_vector.txt'), stim_vector, fmt='%.1f\n', newline='')
 
     for stim_amp in np.arange(1, len(stim_amps)+1):
         fsl_vector = np.concatenate([np.arange(0,len(fsl_stim_vector)/100, 1/100).reshape((-1, 1)), (np.ones(len(fsl_stim_vector))/100).reshape(-1, 1), ((fsl_stim_vector == stim_amps[stim_amp - 1])*1).reshape(-1, 1)], axis=1)
@@ -126,7 +126,7 @@ def main():
         plt.plot(np.arange(0,len(fsl_stim_vector)/100, 1/100), ((fsl_stim_vector == stim_amps[stim_amp - 1])*1), linewidth=0.01)  #Using 100 Hz sampling frequency for fsl vector
         plt.savefig(os.path.join(save_directory, subject_id, filename + '_stim_amp_' + str(stim_amp) + '.pdf'))
         plt.close()
-        np.savetxt(os.path.join(save_directory, subject_id, filename + '_stim_amp_' + str(stim_amp) + '.tsv'), fsl_vector, fmt='%.2f\t%.2f\t%d\n', newline='')
+        np.savetxt(os.path.join(save_directory, subject_id, filename + '_stim_amp_' + str(stim_amp) + '.txt'), fsl_vector, fmt='%.2f\t%.2f\t%d\n', newline='')
         
 if __name__ == '__main__':
     main()
