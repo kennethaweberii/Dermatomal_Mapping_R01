@@ -21,7 +21,7 @@ def get_parser():
                         help="biphasic or monophasic")
     parser.add_argument('-stim_f', default=100, required=False, type=int,
                         help="Stimulation frequency in Hz")
-    parser.add_argument('-stim_pw', default=0.00015, required=False, type=float,
+    parser.add_argument('-stim_pw', default=0.0002, required=False, type=float,
                         help="Stimulation pulse width in seconds")
     parser.add_argument('-stim_duration', default=15, required=False, type=int,
                         help="Duration of stimulation block in seconds.")
@@ -31,10 +31,10 @@ def get_parser():
                         help="Number of stimulation amplitudes")
     parser.add_argument('-n_stim_blocks', default=10, required=False, type=int,
                         help="Number of stimulation blocks per stimulation amplitude")
-    parser.add_argument('-samp_f', default=100000, required=False, type=int,
+    parser.add_argument('-samp_f', default=5000, required=False, type=int,
                         help="Sampling frequency of stimulation vector in Hz")
     parser.add_argument('-filename', required=False, type=int,
-                        help="Sampling frequency of stimulation vector in Hz")
+                        help="Filename prefix of outputs")
     return parser
 
 def main():
@@ -116,6 +116,8 @@ def main():
           str(args.samp_f)  + 'hz'
 
     plt.plot(np.arange(0,len(stim_vector)/args.samp_f, 1/args.samp_f), stim_vector, linewidth=0.01)
+    plt.xlabel("Seconds")
+    plt.ylabel("mA")
     plt.savefig(os.path.join(save_directory, subject_id, filename + '_biopac_stim_vector.pdf'))
     plt.close()
     np.savetxt(os.path.join(save_directory, subject_id, filename + '_biopac_stim_vector.txt'), stim_vector, fmt='%.1f\n', newline='')
@@ -124,6 +126,8 @@ def main():
         fsl_vector = np.concatenate([np.arange(0,len(fsl_stim_vector)/100, 1/100).reshape((-1, 1)), (np.ones(len(fsl_stim_vector))/100).reshape(-1, 1), ((fsl_stim_vector == stim_amps[stim_amp - 1])*1).reshape(-1, 1)], axis=1)
 
         plt.plot(np.arange(0,len(fsl_stim_vector)/100, 1/100), ((fsl_stim_vector == stim_amps[stim_amp - 1])*1), linewidth=0.01)  #Using 100 Hz sampling frequency for fsl vector
+        plt.xlabel("Seconds")
+        plt.ylabel("AU")
         plt.savefig(os.path.join(save_directory, subject_id, filename + '_stim_amp_' + str(stim_amp) + '.pdf'))
         plt.close()
         np.savetxt(os.path.join(save_directory, subject_id, filename + '_stim_amp_' + str(stim_amp) + '.txt'), fsl_vector, fmt='%.2f\t%.2f\t%d\n', newline='')
