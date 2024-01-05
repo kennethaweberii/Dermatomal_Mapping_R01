@@ -24,7 +24,7 @@ def get_parser():
                         help="Duration of stimulation block in seconds.")
     parser.add_argument('-no_stim_duration', default=2, required=False, type=int,
                     help="Duration of no stimulation block in seconds.")
-    parser.add_argument('-stim_amps', default='0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5,1.6,1.7,1.8,1.9,2.0,2.1,2.2,2.3,2.4,2.5,2.6,2.7,2.8,2.9,3.0', required=False, type=str,
+    parser.add_argument('-stim_amps', default='0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5,1.6,1.7,1.8,1.9,2.0', required=False, type=str,
                         help="Comma separated amplitudes of BIOPAC stim file in Volts. For example: '0.2,0.4,0.6,0.8,1.0'")
     parser.add_argument('-samp_f', default=100000, required=False, type=int,
                         help="Sampling frequency of stimulation vector in Hz")
