@@ -51,8 +51,8 @@ def main():
     save_directory = filedialog.askdirectory()
     root.withdraw()
     
-    #Raise error if stim_amp_high > 3.0
-    if stim_amp_low > 3.0 or stim_amp_high > 3.0 or stim_amp_low < 0 or stim_amp_high < 0 or stim_amp_low > stim_amp_high or stim_amp_low == stim_amp_high:
+    #Raise error if stim_amp_high > 10.0
+    if stim_amp_low > 10.0 or stim_amp_high > 10.0 or stim_amp_low < 0 or stim_amp_high < 0 or stim_amp_low > stim_amp_high or stim_amp_low == stim_amp_high:
         raise ValueError('Error with stim amp low or stim amp high.')
     
     os.makedirs(os.path.join(save_directory, subject_id), exist_ok=True)
@@ -79,17 +79,34 @@ def main():
     time=np.arange(0,args.stim_duration, 1/args.samp_f)+phase
     fsl_time=np.arange(0,args.stim_duration, 1/100)+phase #Using 100 Hz sampling frequency for fsl vector
 
-    #Raise error if pulse width is greater than sampling period
+    #Raise errors regarding pulse width
     if args.stim_pw/(1/args.stim_f) > 1:
-        raise ValueError('Pulse width greater than sampling period. Reduce pulse width for this sampling frequency')
-    
+        raise ValueError('Pulse width greater than sampling period. Reduce pulse width for this sampling frequency.')
+
+    if args.stim_pw % (1/args.samp_f) != 0:
+        raise ValueError('Pulse width needs to be multiple of sampling period. Adjust pulse width for this sampling frequency.')
+
+    if (args.type.lower() == 'biphasic') & ((args.stim_pw * args.samp_f) % 2 != 0):
+        raise ValueError('Duration of pulse width not possible with biphasic and current sampling frequency. Adjust pulse width or sampling frequency.')
+
     stim_index=0
     for block in np.arange(0, len(amps)):
         #pw/1/sampling_f = duty cycle
         if args.type.lower() == 'biphasic':
-            stim_block=amps[block]*(square((2 * np.pi * args.stim_f * time), args.stim_pw/(1/args.stim_f))) 
+            #Noticed some interpolation erros with using square function, so rewrote not using square function
+            #stim_block=float(amps[block-1])*(square((2 * np.pi * args.stim_f * time), args.stim_pw/(1/args.stim_f))) 
+            single_stim_block = np.zeros(int((1/args.stim_f)*args.samp_f))
+            single_stim_block[:int(args.stim_pw/2*args.samp_f)] = 1
+            single_stim_block[int(args.stim_pw/2*args.samp_f):int(args.stim_pw/2*args.samp_f)+int(args.stim_pw/2*args.samp_f)] = -1
+            stim_block = float(amps[block-1])*np.tile(single_stim_block, args.stim_duration*args.stim_f)
+
         elif args.type.lower() == 'monophasic':
-            stim_block=amps[block]*((square((2 * np.pi * args.stim_f * time), args.stim_pw/(1/args.stim_f)) + 1)/2)
+            #Noticed some interpolation erros with using square function, so rewrote not using square function
+            #stim_block=float(amps[block-1])*((square((2 * np.pi * args.stim_f * time), args.stim_pw/(1/args.stim_f)) + 1)/2)
+            single_stim_block = np.zeros(int((1/args.stim_f)*args.samp_f))
+            single_stim_block[:int(args.stim_pw*args.samp_f)] = 1
+            stim_block = float(amps[block-1])*np.tile(single_stim_block, args.stim_duration*args.stim_f)
+
         else:
             raise ValueError('Biphasic or monophasic not specified correctly.')
         

@@ -24,7 +24,7 @@ def get_parser():
                         help="Duration of stimulation block in seconds.")
     parser.add_argument('-no_stim_duration', default=2, required=False, type=int,
                     help="Duration of no stimulation block in seconds.")
-    parser.add_argument('-stim_amps', default='0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5,1.6,1.7,1.8,1.9,2.0', required=False, type=str,
+    parser.add_argument('-stim_amps', default='0.2,0.4,0.6,0.8,1.0,1.2,1.4,1.6,1.8,2.0,2.2,2.4,2.6,2.8,3.0,3.2,3.4,3.6,3.8,4.0,4.2,4.4,4.6,4.8,5.0,5.2,5.4,5.6,5.8,6.0,6.2,6.4,6.6,6.8,7.0,7.2,7.4,7.6,7.8,8.0,8.2,8.4,8.6,8.8,9.0,9.2,9.4,9.6,9.8,10.0', required=False, type=str,
                         help="Comma separated amplitudes of BIOPAC stim file in Volts. For example: '0.2,0.4,0.6,0.8,1.0'")
     parser.add_argument('-samp_f', default=5000, required=False, type=int,
                         help="Sampling frequency of stimulation vector in Hz")
@@ -49,24 +49,40 @@ def main():
     #create time vector for stim_block
     time=np.arange(0,args.stim_duration, 1/args.samp_f)+phase
 
-
-    #Raise erorr if pulse width is greater than sampling period
+    #Raise errors regarding pulse width
     if args.stim_pw/(1/args.stim_f) > 1:
-        raise ValueError('Pulse width greater than sampling period. Reduce pulse width for this sampling frequency')
-    
-    stim_index=0
+        raise ValueError('Pulse width greater than sampling period. Reduce pulse width for this sampling frequency.')
+
+    if args.stim_pw % (1/args.samp_f) != 0:
+        raise ValueError('Pulse width needs to be multiple of sampling period. Adjust pulse width for this sampling frequency.')
+
+    if (args.type.lower() == 'biphasic') & ((args.stim_pw * args.samp_f) % 2 != 0):
+        raise ValueError('Duration of pulse width not possible with biphasic and current sampling frequency. Adjust pulse width or sampling frequency.')
+
+
     for block in np.arange(1, (n_stim_blocks)+1):
         #pw/1/sampling_f = duty cycle
         if args.type.lower() == 'biphasic':
-            stim_block=float(amps[block-1])*(square((2 * np.pi * args.stim_f * time), args.stim_pw/(1/args.stim_f))) 
+            #Noticed some interpolation erros with using square function, so rewrote not using square function
+            #stim_block=float(amps[block-1])*(square((2 * np.pi * args.stim_f * time), args.stim_pw/(1/args.stim_f))) 
+            single_stim_block = np.zeros(int((1/args.stim_f)*args.samp_f))
+            single_stim_block[:int(args.stim_pw/2*args.samp_f)] = 1
+            single_stim_block[int(args.stim_pw/2*args.samp_f):int(args.stim_pw/2*args.samp_f)+int(args.stim_pw/2*args.samp_f)] = -1
+            stim_block = float(amps[block-1])*np.tile(single_stim_block, args.stim_duration*args.stim_f)
+
         elif args.type.lower() == 'monophasic':
-            stim_block=float(amps[block-1])*((square((2 * np.pi * args.stim_f * time), args.stim_pw/(1/args.stim_f)) + 1)/2)
+            #Noticed some interpolation erros with using square function, so rewrote not using square function
+            #stim_block=float(amps[block-1])*((square((2 * np.pi * args.stim_f * time), args.stim_pw/(1/args.stim_f)) + 1)/2)
+            single_stim_block = np.zeros(int((1/args.stim_f)*args.samp_f))
+            single_stim_block[:int(args.stim_pw*args.samp_f)] = 1
+            stim_block = float(amps[block-1])*np.tile(single_stim_block, args.stim_duration*args.stim_f)
+
         else:
             raise ValueError('Biphasic or monophasic not specified correctly.')
 
         block_start=(block*args.samp_f*args.no_stim_duration) + ((block-1)*args.samp_f*args.stim_duration)
         stim_vector[block_start:block_start+(args.stim_duration*args.samp_f)]=stim_block
-        stim_index+=1
+
     try:
        filename
     except:
@@ -77,10 +93,10 @@ def main():
             str(args.no_stim_duration)  + 's_samp_f_' + \
             str(args.samp_f) + 'hz'
    
-    plt.plot(np.arange(0,len(stim_vector)/args.samp_f, 1/args.samp_f), stim_vector, linewidth=0.01)
+    plt.plot(np.arange(0,len(stim_vector)/args.samp_f, 1/args.samp_f), stim_vector, linewidth=0.001)
     plt.xlabel("Seconds")
     plt.ylabel("mA")
-    plt.savefig(filename + '.pdf')
+    plt.savefig(filename + '.pdf', dpi=1000)
     plt.close()
 
     np.savetxt(filename + '.txt', stim_vector, fmt='%.1f\n', newline='')
