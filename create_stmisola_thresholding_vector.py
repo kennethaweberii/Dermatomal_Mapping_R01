@@ -96,10 +96,10 @@ def main():
     plt.plot(np.arange(0,len(stim_vector)/args.samp_f, 1/args.samp_f), stim_vector, linewidth=0.001)
     plt.xlabel("Seconds")
     plt.ylabel("mA")
-    plt.savefig(filename + '.pdf', dpi=1000)
+    plt.savefig('thresholding_vector_' + filename + '.pdf', dpi=1000)
     plt.close()
 
-    np.savetxt(filename + '.txt', stim_vector, fmt='%.1f\n', newline='')
+    np.savetxt('thresholding_vector_' + filename + '.txt', stim_vector, fmt='%.1f\n', newline='')
 
 if __name__ == '__main__':
     main()

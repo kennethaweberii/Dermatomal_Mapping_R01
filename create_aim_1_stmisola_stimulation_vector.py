@@ -35,6 +35,8 @@ def get_parser():
                         help="Sampling frequency of stimulation vector in Hz")
     parser.add_argument('-filename', required=False, type=int,
                         help="Filename prefix of outputs")
+    parser.add_argument('-save_directory', default=os.path.join('C:\\','Users','sdc','Documents','Weber','Dermatomal_Mapping_R01','data'), required=False, type=str,
+                        help="Default save directory")
     return parser
 
 def main():
@@ -45,17 +47,21 @@ def main():
     root = tk.Tk()
     root.attributes('-topmost', True)
     root.tk.eval(f'tk::PlaceWindow {root._w} center')
-    subject_id = simpledialog.askstring("Subject ID", "Enter subject ID (For example: sub-DMAim1HC000)")
+    root.withdraw()
+    subject_id = simpledialog.askstring("Subject ID", "Enter subject ID (For example: sub-DMAim1HC000)", initialvalue="sub-DMAim1")
+    
+    if not os.path.isdir(args.save_directory):
+        args.save_directory = os.getcwd()
+    args.save_directory = filedialog.askdirectory()
+    
     stim_amp_low = float(simpledialog.askstring("Stim Amp Low", "Enter Stim Amp Low to mA(For example: 0.1)"))
     stim_amp_high = float(simpledialog.askstring("Stim Amp High", "Enter Stim Amp High in mA (For example: 2.0)"))
-    save_directory = filedialog.askdirectory()
-    root.withdraw()
     
     #Raise error if stim_amp_high > 10.0
     if stim_amp_low > 10.0 or stim_amp_high > 10.0 or stim_amp_low < 0 or stim_amp_high < 0 or stim_amp_low > stim_amp_high or stim_amp_low == stim_amp_high:
         raise ValueError('Error with stim amp low or stim amp high.')
     
-    os.makedirs(os.path.join(save_directory, subject_id), exist_ok=True)
+    os.makedirs(os.path.join(args.save_directory, subject_id), exist_ok=True)
 
     #Create vector of amplitudes
     stim_amps = np.linspace(stim_amp_low,stim_amp_high,args.n_stim_amps)
@@ -122,8 +128,7 @@ def main():
     try:
        filename
     except:
-       filename = subject_id + '_' + \
-          args.type + '_stim_f_' + \
+       filename = args.type + '_stim_f_' + \
           str(args.stim_f) + 'hz_stim_pw_' + \
           str(args.stim_pw) + 's_stim_duration_' + \
           str(args.stim_duration) + 's_no_stim_duration_'+ \
@@ -132,22 +137,22 @@ def main():
           str(stim_amp_high)  + 'ma_samp_f_' + \
           str(args.samp_f)  + 'hz'
 
-    plt.plot(np.arange(0,len(stim_vector)/args.samp_f, 1/args.samp_f), stim_vector, linewidth=0.01)
+    plt.plot(np.arange(0,len(stim_vector)/args.samp_f, 1/args.samp_f), stim_vector, linewidth=0.001)
     plt.xlabel("Seconds")
     plt.ylabel("mA")
-    plt.savefig(os.path.join(save_directory, subject_id, filename + '_biopac_stim_vector.pdf'))
+    plt.savefig(os.path.join(args.save_directory, subject_id, subject_id + '_biopac_stim_vector_' + filename + '.pdf'))
     plt.close()
-    np.savetxt(os.path.join(save_directory, subject_id, filename + '_biopac_stim_vector.txt'), stim_vector, fmt='%.1f\n', newline='')
+    np.savetxt(os.path.join(args.save_directory, subject_id, subject_id + '_biopac_stim_vector_' + filename + '.txt'), stim_vector, fmt='%.1f\n', newline='')
 
     for stim_amp in np.arange(1, len(stim_amps)+1):
         fsl_vector = np.concatenate([np.arange(0,len(fsl_stim_vector)/100, 1/100).reshape((-1, 1)), (np.ones(len(fsl_stim_vector))/100).reshape(-1, 1), ((fsl_stim_vector == stim_amps[stim_amp - 1])*1).reshape(-1, 1)], axis=1)
 
-        plt.plot(np.arange(0,len(fsl_stim_vector)/100, 1/100), ((fsl_stim_vector == stim_amps[stim_amp - 1])*1), linewidth=0.01)  #Using 100 Hz sampling frequency for fsl vector
+        plt.plot(np.arange(0,len(fsl_stim_vector)/100, 1/100), ((fsl_stim_vector == stim_amps[stim_amp - 1])*1), linewidth=0.001)  #Using 100 Hz sampling frequency for fsl vector
         plt.xlabel("Seconds")
         plt.ylabel("AU")
-        plt.savefig(os.path.join(save_directory, subject_id, filename + '_stim_amp_' + str(stim_amp) + '.pdf'))
+        plt.savefig(os.path.join(args.save_directory, subject_id, subject_id + '_fsl_vector_' + filename + '_stim_amp_' + str(stim_amp) + '.pdf'))
         plt.close()
-        np.savetxt(os.path.join(save_directory, subject_id, filename + '_stim_amp_' + str(stim_amp) + '.txt'), fsl_vector, fmt='%.2f\t%.2f\t%d\n', newline='')
+        np.savetxt(os.path.join(args.save_directory, subject_id, subject_id + '_fsl_vector_' + filename + '_stim_amp_' + str(stim_amp) + '.txt'), fsl_vector, fmt='%.2f\t%.2f\t%d\n', newline='')
         
 if __name__ == '__main__':
     main()
