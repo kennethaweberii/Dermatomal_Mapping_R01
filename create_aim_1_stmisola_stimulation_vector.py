@@ -50,7 +50,9 @@ def main():
     root.withdraw()
     subject_id = simpledialog.askstring("Subject ID", "Enter subject ID (For example: sub-DMAim1HC000)", initialvalue="sub-DMAim1")
     
-    if not os.path.isdir(args.save_directory):
+    if os.path.isdir(args.save_directory):
+        os.chdir(args.save_directory)
+    else:
         args.save_directory = os.getcwd()
     args.save_directory = filedialog.askdirectory()
     
