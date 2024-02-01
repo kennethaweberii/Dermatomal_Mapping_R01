@@ -35,7 +35,7 @@ def get_parser():
                         help="Sampling frequency of stimulation vector in Hz")
     parser.add_argument('-filename', required=False, type=int,
                         help="Filename prefix of outputs")
-    parser.add_argument('-save_directory', default=os.path.join('C:\\','Users','sdc','Documents','Weber','Dermatomal_Mapping_R01','data'), required=False, type=str,
+    parser.add_argument('-save_directory', default=os.path.join('C:\\','Users','sdc','Documents','Users','Weber','Dermatomal_Mapping_R01','data'), required=False, type=str,
                         help="Default save directory")
     return parser
 
