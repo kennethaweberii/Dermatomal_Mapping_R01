@@ -54,7 +54,7 @@ def main():
         os.chdir(args.save_directory)
     else:
         args.save_directory = os.getcwd()
-    args.save_directory = filedialog.askdirectory()
+    args.save_directory = filedialog.askdirectory(initialdir=args.save_directory)
     
     stim_amp_low = float(simpledialog.askstring("Stim Amp Low", "Enter Stim Amp Low to mA(For example: 0.1)"))
     stim_amp_high = float(simpledialog.askstring("Stim Amp High", "Enter Stim Amp High in mA (For example: 2.0)"))
