@@ -29,7 +29,7 @@ def get_parser():
                     help="Duration of no stimulation block in seconds.")
     parser.add_argument('-n_stim_amps', default=5, required=False, type=int,
                         help="Number of stimulation amplitudes")
-    parser.add_argument('-n_stim_blocks', default=10, required=False, type=int,
+    parser.add_argument('-n_stim_blocks', default=5, required=False, type=int,
                         help="Number of stimulation blocks per stimulation amplitude")
     parser.add_argument('-samp_f', default=5000, required=False, type=int,
                         help="Sampling frequency of stimulation vector in Hz")
@@ -64,6 +64,7 @@ def main():
         raise ValueError('Error with stim amp low or stim amp high.')
     
     os.makedirs(os.path.join(args.save_directory, subject_id), exist_ok=True)
+    os.makedirs(os.path.join(args.save_directory, subject_id, 'fsl_stim_vectors'), exist_ok=True)
 
     #Create vector of amplitudes
     stim_amps = np.linspace(stim_amp_low,stim_amp_high,args.n_stim_amps)
@@ -152,10 +153,26 @@ def main():
         plt.plot(np.arange(0,len(fsl_stim_vector)/100, 1/100), ((fsl_stim_vector == stim_amps[stim_amp - 1])*1), linewidth=0.001)  #Using 100 Hz sampling frequency for fsl vector
         plt.xlabel("Seconds")
         plt.ylabel("AU")
-        plt.savefig(os.path.join(args.save_directory, subject_id, subject_id + '_fsl_vector_' + filename + '_stim_amp_' + str(stim_amp) + '.pdf'))
+        plt.savefig(os.path.join(args.save_directory, subject_id, 'fsl_stim_vectors', subject_id + '_fsl_vector_' + filename + '_stim_amp_' + str(stim_amp) + '.pdf'))
         plt.close()
-        np.savetxt(os.path.join(args.save_directory, subject_id, subject_id + '_fsl_vector_' + filename + '_stim_amp_' + str(stim_amp) + '.txt'), fsl_vector, fmt='%.2f\t%.2f\t%d\n', newline='')
+        np.savetxt(os.path.join(args.save_directory, subject_id, 'fsl_stim_vectors', subject_id + '_fsl_vector_' + filename + '_stim_amp_' + str(stim_amp) + '.txt'), fsl_vector, fmt='%.2f\t%.2f\t%d\n', newline='')
         
+        for stim_index in np.arange(1,len(np.where((fsl_vector[:,2][:-1]==0) & (fsl_vector[:,2][1:]==1))[0])+1):
+            stim_starts = np.where((fsl_vector[:,2][:-1]==0) & (fsl_vector[:,2][1:]==1))[0] + 1
+            stim_stops = np.where((fsl_vector[:,2][:-1]==1) & (fsl_vector[:,2][1:]==0))[0] + 1
+
+            fsl_single_stim_vector = fsl_vector[:,2]*0
+            fsl_single_stim_vector[stim_starts[stim_index-1]:stim_stops[stim_index-1]]=1
+
+            fsl_single_stim_vector = np.concatenate([np.arange(0,len(fsl_stim_vector)/100, 1/100).reshape((-1, 1)), (np.ones(len(fsl_stim_vector))/100).reshape(-1, 1), fsl_single_stim_vector.reshape(-1, 1)], axis=1)
+
+            plt.plot(np.arange(0,len(fsl_stim_vector)/100, 1/100), fsl_single_stim_vector[:,2], linewidth=0.001)  #Using 100 Hz sampling frequency for fsl vector
+            plt.xlabel("Seconds")
+            plt.ylabel("AU")
+            plt.savefig(os.path.join(args.save_directory, subject_id, 'fsl_stim_vectors', subject_id + '_fsl_vector_' + filename + '_stim_amp_' + str(stim_amp) + '_stim_' + str(stim_index) + '.pdf'))
+            plt.close()
+            np.savetxt(os.path.join(args.save_directory, subject_id, 'fsl_stim_vectors', subject_id + '_fsl_vector_' + filename + '_stim_amp_' + str(stim_amp) + '_stim_' + str(stim_index) + '.txt'), fsl_single_stim_vector, fmt='%.2f\t%.2f\t%d\n', newline='')
+
 if __name__ == '__main__':
     main()
     
