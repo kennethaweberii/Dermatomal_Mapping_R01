@@ -98,27 +98,25 @@ def main():
     if (args.type.lower() == 'biphasic') & ((args.stim_pw * args.samp_f) % 2 != 0):
         raise ValueError('Duration of pulse width not possible with biphasic and current sampling frequency. Adjust pulse width or sampling frequency.')
 
-    stim_index=0
     for block in np.arange(0, len(amps)):
         #pw/1/sampling_f = duty cycle
         if args.type.lower() == 'biphasic':
             #Noticed some interpolation erros with using square function, so rewrote not using square function
-            #stim_block=float(amps[block-1])*(square((2 * np.pi * args.stim_f * time), args.stim_pw/(1/args.stim_f))) 
+            #stim_block=float(amps[block])*(square((2 * np.pi * args.stim_f * time), args.stim_pw/(1/args.stim_f))) 
             single_stim_block = np.zeros(int((1/args.stim_f)*args.samp_f))
             single_stim_block[:int(args.stim_pw/2*args.samp_f)] = 1
             single_stim_block[int(args.stim_pw/2*args.samp_f):int(args.stim_pw/2*args.samp_f)+int(args.stim_pw/2*args.samp_f)] = -1
-            stim_block = float(amps[block-1])*np.tile(single_stim_block, args.stim_duration*args.stim_f)
+            stim_block = float(amps[block])*np.tile(single_stim_block, args.stim_duration*args.stim_f)
 
         elif args.type.lower() == 'monophasic':
             #Noticed some interpolation erros with using square function, so rewrote not using square function
-            #stim_block=float(amps[block-1])*((square((2 * np.pi * args.stim_f * time), args.stim_pw/(1/args.stim_f)) + 1)/2)
+            #stim_block=float(amps[block])*((square((2 * np.pi * args.stim_f * time), args.stim_pw/(1/args.stim_f)) + 1)/2)
             single_stim_block = np.zeros(int((1/args.stim_f)*args.samp_f))
             single_stim_block[:int(args.stim_pw*args.samp_f)] = 1
-            stim_block = float(amps[block-1])*np.tile(single_stim_block, args.stim_duration*args.stim_f)
+            stim_block = float(amps[block])*np.tile(single_stim_block, args.stim_duration*args.stim_f)
 
         else:
             raise ValueError('Biphasic or monophasic not specified correctly.')
-        
         
         block_start=((block*args.stim_duration) + (block*args.no_stim_duration))*args.samp_f
         stim_vector[block_start:block_start+(args.stim_duration*args.samp_f)]=stim_block
@@ -126,7 +124,6 @@ def main():
         fsl_stim_block=amps[block]*np.ones(len(fsl_time))
         fsl_block_start=((block*args.stim_duration) + (block*args.no_stim_duration))*100 #Using 100 Hz sampling frequency for fsl vector
         fsl_stim_vector[fsl_block_start:fsl_block_start+(args.stim_duration*100)]=fsl_stim_block #Using 100 Hz sampling frequency for fsl vector
-        stim_index+=1
     
     try:
        filename
