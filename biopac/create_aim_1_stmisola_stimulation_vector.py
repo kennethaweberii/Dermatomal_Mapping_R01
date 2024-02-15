@@ -71,10 +71,9 @@ def main():
     stim_amps = np.linspace(stim_amp_low,stim_amp_high,args.n_stim_amps)
     amps=np.empty(((args.n_stim_amps+1)*args.n_stim_blocks)+1)
 
-    rng = np.random.default_rng()
+    rng = np.random.RandomState()
 
     for stim_block in np.arange(0,args.n_stim_blocks):
-        np.random.seed(stim_block+20)
         amps[stim_block*(args.n_stim_amps+1):(stim_block*(args.n_stim_amps+1))+args.n_stim_amps+1] = np.concatenate([np.array([0]), rng.permutation(stim_amps)])
 
     #Create vector of zeros length of stimulation experiment
