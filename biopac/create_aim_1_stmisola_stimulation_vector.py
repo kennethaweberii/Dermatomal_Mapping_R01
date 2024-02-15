@@ -13,6 +13,7 @@ from scipy.signal import square
 import tkinter as tk
 from tkinter import simpledialog
 from tkinter import filedialog
+import time
 
 def get_parser():
     parser = argparse.ArgumentParser(
@@ -73,7 +74,7 @@ def main():
     rng = np.random.default_rng()
 
     for stim_block in np.arange(0,args.n_stim_blocks):
-        np.random.seed(stim_block+10)
+        np.random.seed(stim_block+20)
         amps[stim_block*(args.n_stim_amps+1):(stim_block*(args.n_stim_amps+1))+args.n_stim_amps+1] = np.concatenate([np.array([0]), rng.permutation(stim_amps)])
 
     #Create vector of zeros length of stimulation experiment
