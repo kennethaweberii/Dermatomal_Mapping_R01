@@ -86,10 +86,10 @@ def main():
     try:
        filename
     except:
-        filename = args.type + '_stim_f_' + \
-            str(args.stim_f) + 'hz_stim_pw_' + \
-            str(args.stim_pw) + 's_stim_duration_' + \
-            str(args.stim_duration) + 's_no_stim_duration_'+ \
+        filename = args.type + '_f_' + \
+            str(args.stim_f) + 'hz_pw_' + \
+            str(args.stim_pw) + 's_stim_dur_' + \
+            str(args.stim_duration) + 's_no_stim_dur_'+ \
             str(args.no_stim_duration)  + 's_samp_f_' + \
             str(args.samp_f) + 'hz'
    
