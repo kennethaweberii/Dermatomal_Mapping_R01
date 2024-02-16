@@ -43,13 +43,25 @@ def get_parser():
 def main():
     parser = get_parser()
     args = parser.parse_args()
+
+    try:
+       filename = args.filename
+    except:
+       filename = args.type + '_f_' + \
+          str(args.stim_f) + 'hz_pw_' + \
+          str(args.stim_pw) + 's_stim_' + \
+          str(args.stim_duration) + 's_no_stim_'+ \
+          str(args.no_stim_duration)  + 's_low_' + \
+          str(stim_amp_low)  + 'ma_high_' + \
+          str(stim_amp_high)  + 'ma_samp_f_' + \
+          str(args.samp_f)  + 'hz'
     
     #Get directory for saving
     root = tk.Tk()
     root.attributes('-topmost', True)
     root.tk.eval(f'tk::PlaceWindow {root._w} center')
     root.withdraw()
-    subject_id = simpledialog.askstring("Subject ID", "Enter subject ID (For example: sub-DMAim1HC000)", initialvalue="sub-DMAim1")
+    subject_id = simpledialog.askstring("Subject ID", "Enter subject ID (For example: sub-DMAim1HC000)", initialvalue="sub-DMAim1HC")
     
     if os.path.isdir(args.save_directory):
         os.chdir(args.save_directory)
@@ -124,18 +136,6 @@ def main():
         fsl_stim_block=amps[block]*np.ones(len(fsl_time))
         fsl_block_start=((block*args.stim_duration) + (block*args.no_stim_duration))*100 #Using 100 Hz sampling frequency for fsl vector
         fsl_stim_vector[fsl_block_start:fsl_block_start+(args.stim_duration*100)]=fsl_stim_block #Using 100 Hz sampling frequency for fsl vector
-    
-    try:
-       filename
-    except:
-       filename = args.type + '_f_' + \
-          str(args.stim_f) + 'hz_pw_' + \
-          str(args.stim_pw) + 's_stim_dur_' + \
-          str(args.stim_duration) + 's_no_stim_dur_'+ \
-          str(args.no_stim_duration)  + 's_low_' + \
-          str(stim_amp_low)  + 'ma_high_' + \
-          str(stim_amp_high)  + 'ma_samp_f_' + \
-          str(args.samp_f)  + 'hz'
 
     #Change cwd to save directory because running into issues with long file name on some systems
     os.chdir(os.path.join(args.save_directory, subject_id))

@@ -20,7 +20,7 @@ def get_parser():
                         help="Stimulation frequency in Hz")
     parser.add_argument('-stim_pw', default=0.0002, required=False, type=float,
                         help="Stimulation pulse width in seconds")
-    parser.add_argument('-stim_duration', default=5, required=False, type=int,
+    parser.add_argument('-stim_duration', default=2, required=False, type=int,
                         help="Duration of stimulation block in seconds.")
     parser.add_argument('-no_stim_duration', default=2, required=False, type=int,
                     help="Duration of no stimulation block in seconds.")
@@ -35,6 +35,16 @@ def get_parser():
 def main():
     parser = get_parser()
     args = parser.parse_args()
+
+    try:
+       filename
+    except:
+        filename = args.type + '_f_' + \
+            str(args.stim_f) + 'hz_pw_' + \
+            str(args.stim_pw) + 's_stim_' + \
+            str(args.stim_duration) + 's_no_stim_'+ \
+            str(args.no_stim_duration)  + 's_samp_f_' + \
+            str(args.samp_f) + 'hz'
 
     amps=args.stim_amps.split(',')
 
@@ -59,6 +69,7 @@ def main():
     if (args.type.lower() == 'biphasic') & ((args.stim_pw * args.samp_f) % 2 != 0):
         raise ValueError('Duration of pulse width not possible with biphasic and current sampling frequency. Adjust pulse width or sampling frequency.')
 
+    stim_vector_key=np.empty([n_stim_blocks,3])
 
     for block in np.arange(1, (n_stim_blocks)+1):
         #pw/1/sampling_f = duty cycle
@@ -83,15 +94,10 @@ def main():
         block_start=(block*args.samp_f*args.no_stim_duration) + ((block-1)*args.samp_f*args.stim_duration)
         stim_vector[block_start:block_start+(args.stim_duration*args.samp_f)]=stim_block
 
-    try:
-       filename
-    except:
-        filename = args.type + '_f_' + \
-            str(args.stim_f) + 'hz_pw_' + \
-            str(args.stim_pw) + 's_stim_dur_' + \
-            str(args.stim_duration) + 's_no_stim_dur_'+ \
-            str(args.no_stim_duration)  + 's_samp_f_' + \
-            str(args.samp_f) + 'hz'
+        #Create key for knowing stimulation amplitude of each block based on time
+        stim_vector_key[block-1,0] = amps[block-1] #amp
+        stim_vector_key[block-1,1] = block_start/args.samp_f #block start in seconds
+        stim_vector_key[block-1,2] = (block_start+(args.stim_duration*args.samp_f))/args.samp_f  #block end in seconds
    
     plt.plot(np.arange(0,len(stim_vector)/args.samp_f, 1/args.samp_f), stim_vector, linewidth=0.001)
     plt.xlabel("Seconds")
@@ -100,6 +106,8 @@ def main():
     plt.close()
 
     np.savetxt('thresholding_vector_' + filename + '.txt', stim_vector, fmt='%.1f\n', newline='')
+
+    np.savetxt('thresholding_vector_' + filename + '.key', stim_vector_key, fmt='%.1f\t%.0f\t%.0f\n', newline='', header='amp\tstart\tend\n')
 
 if __name__ == '__main__':
     main()
