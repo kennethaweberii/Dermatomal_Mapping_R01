@@ -28,7 +28,7 @@ def get_parser():
                         help="Comma separated amplitudes of BIOPAC stim file in Volts. For example: '0.2,0.4,0.6,0.8,1.0'")
     parser.add_argument('-samp_f', default=5000, required=False, type=int,
                         help="Sampling frequency of stimulation vector in Hz")
-    parser.add_argument('-filename', required=False, type=int,
+    parser.add_argument('-filename', required=False, type=str,
                         help="Filename prefix of outputs")
     return parser
 

@@ -34,7 +34,7 @@ def get_parser():
                         help="Number of stimulation blocks per stimulation amplitude")
     parser.add_argument('-samp_f', default=5000, required=False, type=int,
                         help="Sampling frequency of stimulation vector in Hz")
-    parser.add_argument('-filename', required=False, type=int,
+    parser.add_argument('-filename', required=False, type=str,
                         help="Filename prefix of outputs")
     parser.add_argument('-save_directory', default=os.path.join('C:\\','Users','sdc','Documents','Users','Weber','Dermatomal_Mapping_R01','data'), required=False, type=str,
                         help="Default save directory")
@@ -44,18 +44,6 @@ def main():
     parser = get_parser()
     args = parser.parse_args()
 
-    try:
-       filename = args.filename
-    except:
-       filename = args.type + '_f_' + \
-          str(args.stim_f) + 'hz_pw_' + \
-          str(args.stim_pw) + 's_stim_' + \
-          str(args.stim_duration) + 's_no_stim_'+ \
-          str(args.no_stim_duration)  + 's_low_' + \
-          str(stim_amp_low)  + 'ma_high_' + \
-          str(stim_amp_high)  + 'ma_samp_f_' + \
-          str(args.samp_f)  + 'hz'
-    
     #Get directory for saving
     root = tk.Tk()
     root.attributes('-topmost', True)
@@ -75,7 +63,21 @@ def main():
     #Raise error if stim_amp_high > 10.0
     if stim_amp_low > 10.0 or stim_amp_high > 10.0 or stim_amp_low < 0 or stim_amp_high < 0 or stim_amp_low > stim_amp_high or stim_amp_low == stim_amp_high:
         raise ValueError('Error with stim amp low or stim amp high.')
-    
+
+    try:
+       filename
+    except:
+       filename = args.type + '_f_' + \
+          str(args.stim_f) + 'hz_pw_' + \
+          str(args.stim_pw) + 's_stim_' + \
+          str(args.stim_duration) + 's_no_stim_'+ \
+          str(args.no_stim_duration)  + 's_low_' + \
+          str(stim_amp_low)  + 'ma_high_' + \
+          str(stim_amp_high)  + 'ma_samp_f_' + \
+          str(args.samp_f)  + 'hz'
+    print(filename)
+
+
     os.makedirs(os.path.join(args.save_directory, subject_id), exist_ok=True)
     os.makedirs(os.path.join(args.save_directory, subject_id, 'fsl_stim_vectors'), exist_ok=True)
 
