@@ -78,8 +78,8 @@ def main():
     print(filename)
 
 
-    os.makedirs(os.path.join(args.save_directory, subject_id), exist_ok=True)
-    os.makedirs(os.path.join(args.save_directory, subject_id, 'fsl_stim_vectors'), exist_ok=True)
+    os.makedirs(os.path.join(args.save_directory, subject_id, 'biopac'), exist_ok=True)
+    os.makedirs(os.path.join(args.save_directory, subject_id, 'biopac', 'fsl_stim_vectors'), exist_ok=True)
 
     #Create vector of amplitudes
     stim_amps = np.linspace(stim_amp_low,stim_amp_high,args.n_stim_amps)
@@ -140,7 +140,7 @@ def main():
         fsl_stim_vector[fsl_block_start:fsl_block_start+(args.stim_duration*100)]=fsl_stim_block #Using 100 Hz sampling frequency for fsl vector
 
     #Change cwd to save directory because running into issues with long file name on some systems
-    os.chdir(os.path.join(args.save_directory, subject_id))
+    os.chdir(os.path.join(args.save_directory, subject_id, 'biopac'))
 
     plt.plot(np.arange(0,len(stim_vector)/args.samp_f, 1/args.samp_f), stim_vector, linewidth=0.001)
     plt.xlabel("Seconds")
@@ -150,7 +150,7 @@ def main():
     np.savetxt(subject_id + '_biopac_stim_vector_' + filename + '.txt', stim_vector, fmt='%.1f\n', newline='')
 
     #Change cwd to save directory because running into issues with long file name on some systems
-    os.chdir(os.path.join(args.save_directory, subject_id, 'fsl_stim_vectors'))
+    os.chdir(os.path.join(args.save_directory, subject_id, 'biopac', 'fsl_stim_vectors'))
 
     for stim_amp in np.arange(1, len(stim_amps)+1):
         fsl_vector = np.concatenate([np.arange(0,len(fsl_stim_vector)/100, 1/100).reshape((-1, 1)), (np.ones(len(fsl_stim_vector))/100).reshape(-1, 1), ((fsl_stim_vector == stim_amps[stim_amp - 1])*1).reshape(-1, 1)], axis=1)
