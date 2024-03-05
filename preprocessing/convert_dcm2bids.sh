@@ -79,16 +79,27 @@ output_path=${output_path}/${subject}
 
 mkdir -p ${output_path}
 
-mkdir -p ${output_path}/ses-brain
-mkdir -p ${output_path}/ses-brain/anat
-mkdir -p ${output_path}/ses-brain/func
-mkdir -p ${output_path}/ses-brain/fmap
+mkdir -p ${output_path}/ses-brain21Ch
+mkdir -p ${output_path}/ses-brain21Ch/anat
+mkdir -p ${output_path}/ses-brain21Ch/func
+mkdir -p ${output_path}/ses-brain21Ch/fmap
 
-mkdir -p ${output_path}/ses-spinalcord
-mkdir -p ${output_path}/ses-spinalcord/anat
-mkdir -p ${output_path}/ses-spinalcord/dwi
-mkdir -p ${output_path}/ses-spinalcord/func
-mkdir -p ${output_path}/ses-spinalcord/fmap
+mkdir -p ${output_path}/ses-spinalcord21Ch
+mkdir -p ${output_path}/ses-spinalcord21Ch/anat
+mkdir -p ${output_path}/ses-spinalcord21Ch/dwi
+mkdir -p ${output_path}/ses-spinalcord21Ch/func
+mkdir -p ${output_path}/ses-spinalcord21Ch/fmap
+
+mkdir -p ${output_path}/ses-brain56Ch
+mkdir -p ${output_path}/ses-brain56Ch/anat
+mkdir -p ${output_path}/ses-brain56Ch/func
+mkdir -p ${output_path}/ses-brain56Ch/fmap
+
+mkdir -p ${output_path}/ses-spinalcord56Ch
+mkdir -p ${output_path}/ses-spinalcord56Ch/anat
+mkdir -p ${output_path}/ses-spinalcord56Ch/dwi
+mkdir -p ${output_path}/ses-spinalcord56Ch/func
+mkdir -p ${output_path}/ses-spinalcord56Ch/fmap
 
 cd ${folder}
 data_path=`pwd`
@@ -160,8 +171,8 @@ for dir in nii_*/ ; do
 
     if [[ ${series} == *"Ch_T1w"* ]] && [[ ${series} != *"ORIG"* ]]; then
 
-      cp ${filename}.json ${output_path}/ses-brain/anat/${subject}_ses-brain_desc-${coil}_T1w.json
-      cp ${filename}.nii.gz ${output_path}/ses-brain/anat/${subject}_ses-brain_desc-${coil}_T1w.nii.gz
+      cp ${filename}.json ${output_path}/ses-brain${coil}/anat/${subject}_ses-brain${coil}_T1w.json
+      cp ${filename}.nii.gz ${output_path}/ses-brain${coil}/anat/${subject}_ses-brain${coil}_T1w.nii.gz
 
     
     ###########################################################################################
@@ -169,8 +180,8 @@ for dir in nii_*/ ; do
     ###########################################################################################
 
     elif [[ ${series} == *"T2w"* ]] && [[ ${series} != *"ORIG"* ]]; then
-      cp ${filename}.json ${output_path}/ses-spinalcord/anat/${subject}_ses-spinalcord_desc-${coil}_T2w.json
-      cp ${filename}.nii.gz ${output_path}/ses-spinalcord/anat/${subject}_ses-spinalcord_desc-${coil}_T2w.nii.gz
+      cp ${filename}.json ${output_path}/ses-spinalcord${coil}/anat/${subject}_ses-spinalcord${coil}_T2w.json
+      cp ${filename}.nii.gz ${output_path}/ses-spinalcord${coil}/anat/${subject}_ses-spinalcord${coil}_T2w.nii.gz
 
     ###########################################################################################
     #Functional Scans
@@ -190,14 +201,14 @@ for dir in nii_*/ ; do
         run=
       fi
       
-      cp ${filename}.json ${output_path}/ses-brain/func/${subject}_ses-brain_desc-${coil}_task-tens_run-${run}_bold.json
-      cp ${filename}.nii.gz ${output_path}/ses-brain/func/${subject}_ses-brain_desc-${coil}_task-tens_run-${run}_bold.nii.gz
+      cp ${filename}.json ${output_path}/ses-brain${coil}/func/${subject}_ses-brain${coil}_task-tens_run-${run}_bold.json
+      cp ${filename}.nii.gz ${output_path}/ses-brain${coil}/func/${subject}_ses-brain${coil}_task-tens_run-${run}_bold.nii.gz
       
       physio_file=`ls ${analysis_path}/*S$(printf "%03d" ${filename})P*`
 
-      cp ${analysis_path}/Data_${folder:1}/P$${physio_file: -8:6}.physio ${output_path}/ses-brain/func/${subject}_ses-brain_desc-${coil}_task-tens_physio.physio
-      sed -i 's/"ConversionSoftwareVersion"/"PhaseEncodingDirection": "j",\n\t"ConversionSoftwareVersion"/' ${output_path}/ses-brain/func/${subject}_ses-brain_desc-${coil}_task-tens_run-${run}_bold.json
-      sed -i 's/"SAR"/"TaskName": "'"tens"'",\n\t"SAR"/' ${output_path}/ses-brain/func/${subject}_ses-brain_desc-${coil}_task-tens_run-${run}_bold.json
+      cp ${analysis_path}/Data_${folder:1}/P${physio_file: -8:6}.physio ${output_path}/ses-brain${coil}/func/${subject}_ses-brain${coil}_task-tens_physio.physio
+      sed -i 's/"ConversionSoftwareVersion"/"PhaseEncodingDirection": "j",\n\t"ConversionSoftwareVersion"/' ${output_path}/ses-brain${coil}/func/${subject}_ses-brain${coil}_task-tens_run-${run}_bold.json
+      sed -i 's/"SAR"/"TaskName": "'"tens"'",\n\t"SAR"/' ${output_path}/ses-brain${coil}/func/${subject}_ses-brain${coil}_task-tens_run-${run}_bold.json
 
     ###########################################################################################
     #Brain pepolar
@@ -213,12 +224,12 @@ for dir in nii_*/ ; do
         run=
       fi
       
-      cp ${filename}.json ${output_path}/ses-brain/fmap/${subject}_ses-brain_desc-${coil}_task-tens_run-${run}_dir-AP_bold.json
-      cp ${filename}.nii.gz ${output_path}/ses-brain/fmap/${subject}_ses-brain_desc-${coil}_task-tens_run-${run}_dir-AP_bold.nii.gz
+      cp ${filename}.json ${output_path}/ses-brain${coil}/fmap/${subject}_ses-brain${coil}_task-tens_run-${run}_dir-AP_bold.json
+      cp ${filename}.nii.gz ${output_path}/ses-brain${coil}/fmap/${subject}_ses-brain${coil}_task-tens_run-${run}_dir-AP_bold.nii.gz
 
-      sed -i 's/"ConversionSoftwareVersion"/"PhaseEncodingDirection": "j-",\n\t"ConversionSoftwareVersion"/' ${output_path}/ses-brain/fmap/${subject}_ses-brain_desc-${coil}_task-tens_run-${run}_dir-AP_bold.json
-      sed -i 's/"ConversionSoftwareVersion"/"IntendedFor": "ses-brain\/func\/'${subject}'_ses-brain_desc-${coil}_task-tens_run-${run}_bold.nii.gz",\n\t"ConversionSoftwareVersion"/' ${output_path}/ses-brain/fmap/${subject}_ses-brain_desc-${coil}_task-tens_run-${run}_dir-AP_bold.json
-      sed -i 's/"SAR"/"TaskName": "'"tens"'",\n\t"SAR"/' ${output_path}/ses-brain/fmap/${subject}_ses-brain_desc-${coil}_task-tens_run-${run}_dir-AP_bold.json
+      sed -i 's/"ConversionSoftwareVersion"/"PhaseEncodingDirection": "j-",\n\t"ConversionSoftwareVersion"/' ${output_path}/ses-brain${coil}/fmap/${subject}_ses-brain${coil}_task-tens_run-${run}_dir-AP_bold.json
+      sed -i 's/"ConversionSoftwareVersion"/"IntendedFor": "ses-brain${coil}\/func\/'${subject}'_ses-brain${coil}_task-tens_run-${run}_bold.nii.gz",\n\t"ConversionSoftwareVersion"/' ${output_path}/ses-brain${coil}/fmap/${subject}_ses-brain${coil}_task-tens_run-${run}_dir-AP_bold.json
+      sed -i 's/"SAR"/"TaskName": "'"tens"'",\n\t"SAR"/' ${output_path}/ses-brain${coil}/fmap/${subject}_ses-brain${coil}_task-tens_run-${run}_dir-AP_bold.json
     
     ###########################################################################################
     #SC Functional Scans
@@ -255,13 +266,13 @@ for dir in nii_*/ ; do
       fi
       echo "EES=$EES, Ny=$Ny, R=$R, kynover=$kynover, TotalReadoutTime=$TotalReadoutTime"
       
-      cp ${filename}.json ${output_path}/ses-spinalcord/func/${subject}_ses-spinalcord_desc-${coil}_task-tens_run-${run}_bold.json
-      cp ${filename}.nii.gz ${output_path}/ses-spinalcord/func/${subject}_ses-spinalcord_desc-${coil}_task-tens_run-${run}_bold.nii.gz
+      cp ${filename}.json ${output_path}/ses-spinalcord${coil}/func/${subject}_ses-spinalcord${coil}_task-tens_run-${run}_bold.json
+      cp ${filename}.nii.gz ${output_path}/ses-spinalcord${coil}/func/${subject}_ses-spinalcord${coil}_task-tens_run-${run}_bold.nii.gz
       
-      cp ${analysis_path}/Data_${folder:1}/P${pfile}.physio ${output_path}/ses-spinalcord/func/${subject}_ses-spinalcord_desc-${coil}_task-tens_physio.physio
-      sed -i 's/"ConversionSoftwareVersion"/"PhaseEncodingDirection": "j",\n\t"ConversionSoftwareVersion"/' ${output_path}/ses-spinalcord/func/${subject}_ses-spinalcord_desc-${coil}_task-tens_run-${run}_bold.json
-      sed -i 's/"SAR"/"TaskName": "'"tens"'",\n\t"SAR"/' ${output_path}/ses-spinalcord/func/${subject}_ses-spinalcord_desc-${coil}_task-tens_run-${run}_bold.json
-      sed -i 's/"SAR"/"TotalReadoutTime": "'"${TotalReadoutTime}"'",\n\t"SAR"/' ${output_path}/ses-spinalcord/func/${subject}_ses-spinalcord_desc-${coil}_task-tens_run-${run}_bold.json
+      cp ${analysis_path}/Data_${folder:1}/P${pfile}.physio ${output_path}/ses-spinalcord${coil}/func/${subject}_ses-spinalcord${coil}_task-tens_physio.physio
+      sed -i 's/"ConversionSoftwareVersion"/"PhaseEncodingDirection": "j",\n\t"ConversionSoftwareVersion"/' ${output_path}/ses-spinalcord${coil}/func/${subject}_ses-spinalcord${coil}_task-tens_run-${run}_bold.json
+      sed -i 's/"SAR"/"TaskName": "'"tens"'",\n\t"SAR"/' ${output_path}/ses-spinalcord${coil}/func/${subject}_ses-spinalcord${coil}_task-tens_run-${run}_bold.json
+      sed -i 's/"SAR"/"TotalReadoutTime": "'"${TotalReadoutTime}"'",\n\t"SAR"/' ${output_path}/ses-spinalcord${coil}/func/${subject}_ses-spinalcord${coil}_task-tens_run-${run}_bold.json
 
     ###########################################################################################
     #SC pepolar
@@ -295,19 +306,19 @@ for dir in nii_*/ ; do
       fi
       echo "EES=$EES, Ny=$Ny, R=$R, kynover=$kynover, TotalReadoutTime=$TotalReadoutTime"
 
-      cp ${filename}.json ${output_path}/ses-spinalcord/fmap/${subject}_ses-spinalcord_desc-${coil}_task-tens_run-${run}_dir-AP_bold.json
-      cp ${filename}.nii.gz ${output_path}/ses-spinalcord/fmap/${subject}_ses-spinalcord_desc-${coil}_task-tens_run-${run}_dir-AP_bold.nii.gz
+      cp ${filename}.json ${output_path}/ses-spinalcord${coil}/fmap/${subject}_ses-spinalcord${coil}_task-tens_run-${run}_dir-AP_bold.json
+      cp ${filename}.nii.gz ${output_path}/ses-spinalcord${coil}/fmap/${subject}_ses-spinalcord${coil}_task-tens_run-${run}_dir-AP_bold.nii.gz
 
-      sed -i 's/"ConversionSoftwareVersion"/"PhaseEncodingDirection": "j-",\n\t"ConversionSoftwareVersion"/' ${output_path}/ses-spinalcord/fmap/${subject}_ses-spinalcord_desc-${coil}_task-tens_run-${run}_dir-AP_bold.json
-      sed -i 's/"ConversionSoftwareVersion"/"IntendedFor": "ses-spinalcord\/func\/'${subject}'_ses-spinalcord_desc-${coil}_task-tens_run-${run}_bold.nii.gz",\n\t"ConversionSoftwareVersion"/' ${output_path}/ses-spinalcord/fmap/${subject}_ses-spinalcord_desc-${coil}_task-tens_run-${run}_dir-AP_bold.json
-      sed -i 's/"SAR"/"TaskName": "'"tens"'",\n\t"SAR"/' ${output_path}/ses-spinalcord/fmap/${subject}_ses-spinalcord_desc-${coil}_task-tens_run-${run}_dir-AP_bold.json
-      sed -i 's/"SAR"/"TotalReadoutTime": "'"${TotalReadoutTime}"'",\n\t"SAR"/' ${output_path}/ses-spinalcord/fmap/${subject}_ses-spinalcord_desc-${coil}_task-tens_run-${run}_dir-AP_bold.json
+      sed -i 's/"ConversionSoftwareVersion"/"PhaseEncodingDirection": "j-",\n\t"ConversionSoftwareVersion"/' ${output_path}/ses-spinalcord${coil}/fmap/${subject}_ses-spinalcord${coil}_task-tens_run-${run}_dir-AP_bold.json
+      sed -i 's/"ConversionSoftwareVersion"/"IntendedFor": "ses-spinalcord${coil}\/func\/'${subject}'_ses-spinalcord${coil}_task-tens_run-${run}_bold.nii.gz",\n\t"ConversionSoftwareVersion"/' ${output_path}/ses-spinalcord${coil}/fmap/${subject}_ses-spinalcord${coil}_task-tens_run-${run}_dir-AP_bold.json
+      sed -i 's/"SAR"/"TaskName": "'"tens"'",\n\t"SAR"/' ${output_path}/ses-spinalcord${coil}/fmap/${subject}_ses-spinalcord${coil}_task-tens_run-${run}_dir-AP_bold.json
+      sed -i 's/"SAR"/"TotalReadoutTime": "'"${TotalReadoutTime}"'",\n\t"SAR"/' ${output_path}/ses-spinalcord${coil}/fmap/${subject}_ses-spinalcord${coil}_task-tens_run-${run}_dir-AP_bold.json
     
     ###########################################################################################
     #highres
     ###########################################################################################
 
-    elif [[ ${series} == *"highres"* ]]; then
+    elif [[ ${series} == *"highres"* ]] && [[ ${dir} == "nii_e"* ]] && [[ ${series} == *"SC"* ]]; then
       
       series_folder=`echo ${dir} | cut -d "_" -f2`
       recon_json_file=${analysis_path}/${series_folder}/*.json
@@ -327,45 +338,45 @@ for dir in nii_*/ ; do
       fi
       echo "EES=$EES, Ny=$Ny, R=$R, kynover=$kynover, TotalReadoutTime=$TotalReadoutTime"
 
-      cp ${filename}.json ${output_path}/ses-spinalcord/func/${subject}_ses-spinalcord_desc-${coil}_acq-highres_bold.json
-      cp ${filename}.nii.gz ${output_path}/ses-spinalcord/func/${subject}_ses-spinalcord_desc-${coil}_acq-highres_bold.nii.gz
+      cp ${filename}.json ${output_path}/ses-spinalcord${coil}/func/${subject}_ses-spinalcord${coil}_acq-highres_bold.json
+      cp ${filename}.nii.gz ${output_path}/ses-spinalcord${coil}/func/${subject}_ses-spinalcord${coil}_acq-highres_bold.nii.gz
 
-      sed -i 's/"ConversionSoftwareVersion"/"PhaseEncodingDirection": "j",\n\t"ConversionSoftwareVersion"/' ${output_path}/ses-spinalcord/func/${subject}_ses-spinalcord_desc-${coil}_acq-highres_bold.json
-      sed -i 's/"SAR"/"TotalReadoutTime": "'"${TotalReadoutTime}"'",\n\t"SAR"/' ${output_path}/ses-spinalcord/func/${subject}_ses-spinalcord_desc-${coil}_acq-highres_bold.json
+      sed -i 's/"ConversionSoftwareVersion"/"PhaseEncodingDirection": "j",\n\t"ConversionSoftwareVersion"/' ${output_path}/ses-spinalcord${coil}/func/${subject}_ses-spinalcord${coil}_acq-highres_bold.json
+      sed -i 's/"SAR"/"TotalReadoutTime": "'"${TotalReadoutTime}"'",\n\t"SAR"/' ${output_path}/ses-spinalcord${coil}/func/${subject}_ses-spinalcord${coil}_acq-highres_bold.json
 
     ###########################################################################################
     #SC_DWI
     ###########################################################################################
 
     elif [[ ${series} == *"DWI"* ]]; then
-        cp ${filename}.json ${output_path}/ses-spinalcord/dwi/${subject}_ses-spinalcord_desc-${coil}_dwi.json
-        cp ${filename}.nii.gz ${output_path}/ses-spinalcord/dwi/${subject}_ses-spinalcord_desc-${coil}_dwi.nii.gz
-        cp ${filename}.bval ${output_path}/ses-spinalcord/dwi/${subject}_ses-spinalcord_desc-${coil}_dwi.bval
-        cp ${filename}.bvec ${output_path}/ses-spinalcord/dwi/${subject}_ses-spinalcord_desc-${coil}_dwi.bvec
+        cp ${filename}.json ${output_path}/ses-spinalcord${coil}/dwi/${subject}_ses-spinalcord${coil}_dwi.json
+        cp ${filename}.nii.gz ${output_path}/ses-spinalcord${coil}/dwi/${subject}_ses-spinalcord${coil}_dwi.nii.gz
+        cp ${filename}.bval ${output_path}/ses-spinalcord${coil}/dwi/${subject}_ses-spinalcord${coil}_dwi.bval
+        cp ${filename}.bvec ${output_path}/ses-spinalcord${coil}/dwi/${subject}_ses-spinalcord${coil}_dwi.bvec
 
     ###########################################################################################
     #MERGE
     ###########################################################################################
 
     elif [[ ${series} == *"MERGE"* ]] && [[ ${series} != *"ORIG"* ]]; then
-        cp ${filename}.json ${output_path}/ses-spinalcord/anat/${subject}_ses-spinalcord_desc-${coil}_T2star.json
-        cp ${filename}.nii.gz ${output_path}/ses-spinalcord/anat/${subject}_ses-spinalcord_desc-${coil}_T2star.nii.gz
+        cp ${filename}.json ${output_path}/ses-spinalcord${coil}/anat/${subject}_ses-spinalcord${coil}_T2star.json
+        cp ${filename}.nii.gz ${output_path}/ses-spinalcord${coil}/anat/${subject}_ses-spinalcord${coil}_T2star.nii.gz
     
     ###########################################################################################
     #MT
     ###########################################################################################
 
     elif [[ ${series} == *"GRE-T1w"* ]] && [[ ${series} != *"ORIG"* ]]; then
-      cp ${filename}.json ${output_path}/ses-spinalcord/anat/${subject}_ses-spinalcord_desc-${coil}_acq-T1w_MTS.json
-      cp ${filename}.nii.gz ${output_path}/ses-spinalcord/anat/${subject}_ses-spinalcord_desc-${coil}_acq-T1w_MTS.nii.gz
+      cp ${filename}.json ${output_path}/ses-spinalcord${coil}/anat/${subject}_ses-spinalcord${coil}_acq-T1w_MTS.json
+      cp ${filename}.nii.gz ${output_path}/ses-spinalcord${coil}/anat/${subject}_ses-spinalcord${coil}_acq-T1w_MTS.nii.gz
 
     elif [[ ${series} == *"GRE-MT1"* ]] && [[ ${series} != *"ORIG"* ]]; then
-      cp ${filename}.json ${output_path}/ses-spinalcord/anat/${subject}_ses-spinalcord_desc-${coil}_acq-MTon_MTS.json
-      cp ${filename}.nii.gz ${output_path}/ses-spinalcord/anat/${subject}_ses-spinalcord_desc-${coil}_acq-MTon_MTS.nii.gz
+      cp ${filename}.json ${output_path}/ses-spinalcord${coil}/anat/${subject}_ses-spinalcord${coil}_acq-MTon_MTS.json
+      cp ${filename}.nii.gz ${output_path}/ses-spinalcord${coil}/anat/${subject}_ses-spinalcord${coil}_acq-MTon_MTS.nii.gz
 
     elif [[ ${series} == *"GRE-MT0"* ]] && [[ ${series} != *"ORIG"* ]]; then
-      cp ${filename}.json ${output_path}/ses-spinalcord/anat/${subject}_ses-spinalcord_desc-${coil}_acq-MToff_MTS.json
-      cp ${filename}.nii.gz ${output_path}/ses-spinalcord/anat/${subject}_ses-spinalcord_desc-${coil}_acq-MToff_MTS.nii.gz
+      cp ${filename}.json ${output_path}/ses-spinalcord${coil}/anat/${subject}_ses-spinalcord${coil}_acq-MToff_MTS.json
+      cp ${filename}.nii.gz ${output_path}/ses-spinalcord${coil}/anat/${subject}_ses-spinalcord${coil}_acq-MToff_MTS.nii.gz
     
 
     else 
@@ -379,14 +390,16 @@ done
 ###########################################################################################
 #Run fix_pixdim_and_affine.sh using highres
 ###########################################################################################
-coils=(21 56)
+echo ${script_path}
+
+coils=(21Ch 56Ch)
 runs=(1 2)
 for coil in ${coils[@]}; do
   for run in ${runs[@]}; do
 
-    if [ -f ${output_path}/ses-spinalcord/func/${subject}_ses-spinalcord_desc-${coil}_task-tens_run-${run}_bold.nii.gz ] && [ -f ${output_path}/ses-spinalcord/func/${subject}_ses-spinalcord_desc-${coil}_acq-highres_bold.nii.gz ] && [ -f ${script_path}/fix_pixdim_and_affine.sh ]; then
+    if [ -f ${output_path}/ses-spinalcord${coil}/func/${subject}_ses-spinalcord${coil}_task-tens_run-${run}_bold.nii.gz ] && [ -f ${output_path}/ses-spinalcord${coil}/func/${subject}_ses-spinalcord${coil}_acq-highres_bold.nii.gz ] && [ -f ${script_path}/fix_pixdim_and_affine.sh ]; then
       echo Fixing pixdim and affine for ${coil}-Ch_SC_run-${run}
-      bash ${script_path}/fix_pixdim_and_affine.sh -i ${output_path}/ses-spinalcord/func/${subject}_ses-spinalcord_desc-${coil}_task-tens_run-${run}_bold.nii.gz -r ${output_path}/ses-spinalcord/func/${subject}_ses-spinalcord_desc-${coil}_acq-highres_bold.nii.gz -p 1.25,1.25,5.00  -o ${output_path}/ses-spinalcord/func/${subject}_ses-spinalcord_desc-${coil}_task-tens_run-${run}_bold.nii.gz
+      bash ${script_path}/fix_pixdim_and_affine.sh -i ${output_path}/ses-spinalcord${coil}/func/${subject}_ses-spinalcord${coil}_task-tens_run-${run}_bold.nii.gz -r ${output_path}/ses-spinalcord${coil}/func/${subject}_ses-spinalcord${coil}_acq-highres_bold.nii.gz -p 1,1,4.00  -o ${output_path}/ses-spinalcord${coil}/func/${subject}_ses-spinalcord${coil}_task-tens_run-${run}_bold.nii.gz
 
     else  
       echo Skipping pixdim and affine for ${coil}-Ch_SC_run-${run}
@@ -399,9 +412,9 @@ runs=(1 2)
 for coil in ${coils[@]}; do
   for run in ${runs[@]}; do
 
-    if [ -f ${output_path}/ses-spinalcord/fmap/${subject}_ses-spinalcord_desc-${coil}_task-tens_run-${run}_dir-AP_bold.nii.gz ] && [ -f ${output_path}/ses-spinalcord/func/${subject}_ses-spinalcord_desc-${coil}_acq-highres_bold.nii.gz ] && [ -f ${script_path}/fix_pixdim_and_affine.sh ]; then
+    if [ -f ${output_path}/ses-spinalcord${coil}/fmap/${subject}_ses-spinalcord${coil}_task-tens_run-${run}_dir-AP_bold.nii.gz ] && [ -f ${output_path}/ses-spinalcord${coil}/func/${subject}_ses-spinalcord${coil}_acq-highres_bold.nii.gz ] && [ -f ${script_path}/fix_pixdim_and_affine.sh ]; then
       echo Fixing pixdim and affine for for ${coil}-Ch_SC_run-${run}_pepolar
-      bash ${script_path}/fix_pixdim_and_affine.sh -i ${output_path}/ses-spinalcord/fmap/${subject}_ses-spinalcord_desc-${coil}_task-tens_run-${run}_dir-AP_bold.nii.gz -r ${output_path}/ses-spinalcord/func/${subject}_ses-spinalcord_desc-${coil}_acq-highres_bold.nii.gz -p 1.25,1.25,5.00  -o ${output_path}/ses-spinalcord/fmap/${subject}_ses-spinalcord_desc-${coil}_task-tens_run-${run}_dir-AP_bold.nii.gz
+      bash ${script_path}/fix_pixdim_and_affine.sh -i ${output_path}/ses-spinalcord${coil}/fmap/${subject}_ses-spinalcord${coil}_task-tens_run-${run}_dir-AP_bold.nii.gz -r ${output_path}/ses-spinalcord${coil}/func/${subject}_ses-spinalcord${coil}_acq-highres_bold.nii.gz -p 1,1,4.00  -o ${output_path}/ses-spinalcord${coil}/fmap/${subject}_ses-spinalcord${coil}_task-tens_run-${run}_dir-AP_bold.nii.gz
 
     else  
       echo Skipping pixdim and affine for ${coil}-Ch_SC_run-${run}_pepolar
