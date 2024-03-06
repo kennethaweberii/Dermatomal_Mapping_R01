@@ -211,7 +211,7 @@ for dir in nii_*/ ; do
       
       physio_file=`ls ${analysis_path}/*S$(printf "%03d" ${filename})P*`
 
-      cp ${analysis_path}/Data_${folder:1}/P${physio_file: -8:6}.physio ${output_path}/ses-brain${coil}${session}/func/${subject}_ses-brain${coil}${session}_task-tens_run-${run}_physio.physio
+      cp ${analysis_path}/Data_${folder:1}/${physio_file: -8:6}.physio ${output_path}/ses-brain${coil}${session}/func/${subject}_ses-brain${coil}${session}_task-tens_run-${run}_physio.physio
       sed -i 's/"ConversionSoftwareVersion"/"PhaseEncodingDirection": "j",\n\t"ConversionSoftwareVersion"/' ${output_path}/ses-brain${coil}${session}/func/${subject}_ses-brain${coil}${session}_task-tens_run-${run}_bold.json
       sed -i 's/"SAR"/"TaskName": "'"tens"'",\n\t"SAR"/' ${output_path}/ses-brain${coil}${session}/func/${subject}_ses-brain${coil}${session}_task-tens_run-${run}_bold.json
 
