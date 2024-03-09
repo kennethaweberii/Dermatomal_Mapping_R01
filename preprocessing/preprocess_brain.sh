@@ -25,6 +25,7 @@ USAGE
 MANDATORY ARGUMENTS
   -f <folder>               Path to BIDS sourcedata folder (BIDS/sourcedata)
   -s <subject>              Subject Study ID (sub-DMAim1HC###, or sub-DMAim2HC###)
+  -v <stim_vectors>         Path to FSL stim vectors folder
   -x <session>              Optional argument to specify a session (Default=Blank)
 
 EOF
@@ -40,9 +41,10 @@ fi
 scriptname=${0}
 folder=
 subject=
+stim=
 session=
 
-while getopts “hf:s:x:” OPTION
+while getopts “hf:s:v:x:” OPTION
 do
   case $OPTION in
   h)
@@ -54,6 +56,9 @@ do
     ;;
   s)
     subject=$OPTARG
+    ;;
+  v)
+    stim=$OPTARG
     ;;
   x)
     session=$OPTARG
@@ -73,17 +78,45 @@ if [[ -z ${folder} ]]; then
    echo "ERROR: Folder not specified. Exit program."
      exit 1
 fi
+
 if [[ -z ${subject} ]]; then
      echo "ERROR: Subject not specified. Exit program."
      exit 1
 fi
 
-if [[ -d ${folder}/${subject} ]]; then
+if [[ -z ${stim} ]]; then
+     echo "ERROR: FSL stim vector folder not specified. Exit program."
+     exit 1
+fi
+
+folder=`readlink -f ${folder}`
+stim=`readlink -f ${stim}`
+
+if [[ ! -d ${stim} ]]; then
+     echo "ERROR: ${stim} does not exist. Exit program."
+     exit 1
+fi
+
+if [[ ! -d ${folder}/${subject} ]]; then
      echo "ERROR: ${folder}/${subject} does not exist. Exit program."
      exit 1
 fi
 
+# Exit if user presses CTRL+C (Linux) or CMD+C (OSX)
+trap "echo Caught Keyboard Interrupt within script. Exiting now.; exit" INT
+
+if [[ -f ${HOME}/anaconda3/etc/profile.d/conda.sh ]]; then
+  source ${HOME}/anaconda3/etc/profile.d/conda.sh
+elif [[ -f ${HOME}/Miniconda3/etc/profile.d/conda.sh ]]; then
+  source ${HOME}/Miniconda3/etc/profile.d/conda.sh
+else
+  echo Python not installed. Exit program.
+  exit 1
+fi
+
 #Activate conda environment
+source ${HOME}/anaconda3/etc/profile.d/conda.sh
+#eval "$(conda shell.bash hook)"
 conda activate Dermatomal_Mapping_R01
 
 #Setup output path
@@ -108,7 +141,7 @@ for coil in ${coils[@]}; do
 
     cd ${analysis_path}/ses-brain${coil}${session}/anat
 
-    antsBrainExtraction.sh -d 3 -a ${subject}_ses-brain${coil}${session}_T1w.nii.gz -m /usr/local/fsl/data/standard/MNI152_T1_2mm_brain_mask.nii.gz  -e /usr/local/fsl/data/standard/MNI152_T1_2mm.nii.gz -o T1w_brain
+    antsBrainExtraction.sh -d 3 -a ${subject}_ses-brain${coil}${session}_T1w.nii.gz -m ${FSLDIR}/data/standard/MNI152_T1_2mm_brain_mask.nii.gz  -e ${FSLDIR}/data/standard/MNI152_T1_2mm.nii.gz -o T1w_brain
     immv T1w_brainBrainExtractionBrain ${subject}_ses-brain${coil}${session}_T1w_brain
     immv T1w_brainBrainExtractionMask ${subject}_ses-brain${coil}${session}_T1w_brain_seg
 
@@ -134,9 +167,11 @@ for coil in ${coils[@]}; do
   ###########################################################################################
   runs=(1)
   for run in ${runs[@]}; do
-    if [[ -f ${analysis_path}/ses-brain${coil}${session}/anat/${subject}_ses-brain${coil}${session}_T1w_brain.nii.gz ]] && [[ -f ${analysis_path}/ses-brain${coil}${session}/func/${subject}_ses-brain${coil}${session}_task-tens_run-${run}_bold.nii.gz]];
+    if [[ -f ${analysis_path}/ses-brain${coil}${session}/anat/${subject}_ses-brain${coil}${session}_T1w_brain.nii.gz ]] && [[ -f ${analysis_path}/ses-brain${coil}${session}/func/${subject}_ses-brain${coil}${session}_task-tens_run-${run}_bold.nii.gz ]]; then
 
       cd ${analysis_path}/ses-brain${coil}${session}/func
+
+      cp -rf ${stim} ./
       
       #Remove dummy volumes
       fslroi ${subject}_ses-brain${coil}${session}_task-tens_run-${run}_bold ${subject}_ses-brain${coil}${session}_task-tens_run-${run}_bold 3 -1
@@ -166,7 +201,7 @@ for coil in ${coils[@]}; do
         #Run topup
         fslroi ${analysis_path}/ses-brain${coil}${session}/fmap/${subject}_ses-brain${coil}${session}_task-tens_run-${run}_dir-AP_bold ${subject}_ses-brain${coil}${session}_task-tens_run-${run}_dir-AP_bold_ref 1 1
         fslroi ${subject}_ses-brain${coil}${session}_task-tens_run-${run}_bold ${subject}_ses-brain${coil}${session}_task-tens_run-${run}_dir-PA_bold_ref ${moco_ref_volume} 1
-        flirt -in ${subject}_ses-brain${coil}${session}_task-tens_run-${run}_dir-AP_bold_ref -ref ${subject}_ses-brain${coil}${session}_task-tens_run-${run}_bold ${subject}_ses-brain${coil}${session}_task-tens_run-${run}_dir-PA_bold_ref ${moco_ref_volume}  -out ${subject}_ses-brain${coil}${session}_task-tens_run-${run}_dir-AP_bold_ref
+        flirt -in ${subject}_ses-brain${coil}${session}_task-tens_run-${run}_dir-AP_bold_ref -ref ${subject}_ses-brain${coil}${session}_task-tens_run-${run}_dir-PA_bold_ref -out ${subject}_ses-brain${coil}${session}_task-tens_run-${run}_dir-AP_bold_ref
         fslmerge -t ${subject}_ses-brain${coil}${session}_task-tens_run-${run}_bold_topup ${subject}_ses-brain${coil}${session}_task-tens_run-${run}_dir-PA_bold_ref ${subject}_ses-brain${coil}${session}_task-tens_run-${run}_dir-AP_bold_ref
 
         rm -f acq_param.txt
@@ -196,9 +231,10 @@ for coil in ${coils[@]}; do
       fslmeants -i ${func_data} --eig -m ${func_data}_wm_seg -o ${func_data}_wm.txt
 
       #Process physio
-      if [[ -f ${subject}_ses-brain{coil}${session}_task-tens_run-${run}_physio.physio ]] && [[ -f ${script_path}/create_FSL_physio_text_file.py ]]; then
+      if [[ -f ${subject}_ses-brain${coil}${session}_task-tens_run-${run}_physio.physio ]] && [[ -f ${script_path}/create_FSL_physio_text_file.py ]]; then
         
-        conda activate Dermatomal_Mapping_R01
+        echo starting physio
+
         python ${script_path}/create_FSL_physio_text_file.py -i ${subject}_ses-brain${coil}${session}_task-tens_run-${run}_physio.physio -TR ${tr} -number-of-volumes ${number_of_volumes}
         python ${script_path}/detect_peak_pnm.py -i ${subject}_ses-brain${coil}${session}_task-tens_run-${run}_physio.txt -o ${subject}_ses-brain${coil}${session}_task-tens_run-${run}_physio_peak.txt
 
@@ -235,7 +271,7 @@ for coil in ${coils[@]}; do
 	    feat ${func_data}_first_level.fsf
 
       #Run registration for first level analysis
-      cd ${analysis_path}/ses-${region}${coil}${session}/func/${func_data}_first_level.feat
+      cd ${analysis_path}/ses-brain${coil}${session}/func/${func_data}_first_level.feat
       mkdir reg
       fslmaths mean_func -bin mask
       imcp mean_func ./reg/example_func
@@ -256,7 +292,7 @@ for coil in ${coils[@]}; do
 	    feat ${func_data}_first_level_trialwise.fsf
 
       #Run registration for first level trialwise analysis
-      cd ${analysis_path}/ses-${region}${coil}${session}/func/${func_data}_first_level_trialwise.feat
+      cd ${analysis_path}/ses-brain${coil}${session}/func/${func_data}_trialwise.feat
       mkdir reg
       fslmaths mean_func -bin mask
       imcp mean_func ./reg/example_func
@@ -276,12 +312,16 @@ for coil in ${coils[@]}; do
       envsubst < "${script_path}/second_level_trialwise.fsf" > "${func_data}_second_level_trialwise.fsf"
 	    feat ${func_data}_second_level_trialwise.fsf
       
-  else
+    else
 
-    echo Error!
-    echo Skipping ${subject}_ses-brain${coil}${session}_task-tens_run-${run}_bold.nii.gz!
+      echo Error!
+      echo Skipping ${subject}_ses-brain${coil}${session}_task-tens_run-${run}_bold.nii.gz!
+
+    fi
 
   done
 done
+
+
 
 exit 0
