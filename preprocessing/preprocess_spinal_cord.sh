@@ -310,7 +310,7 @@ if [[ $SES == *"spinalcord"* ]];then
             # Select mid volume
             fslroi ${file_task} ${file_task}_mc1_ref 177 1
             # Apply motion correction
-            ${PATH_SCRIPTS}/motion_correction/2D_slicewise_motion_correction.sh -i ${file_task}.nii.gz -r ${file_task}_mc1_ref.nii.gz -m ${file_task_mean}_mask.nii.gz -o mc1
+            ${PATH_SCRIPTS}/2D_slicewise_motion_correction.sh -i ${file_task}.nii.gz -r ${file_task}_mc1_ref.nii.gz -m ${file_task_mean}_mask.nii.gz -o mc1
             
             # Step 2 of 2D motion correction using mean of mc1 as ref
             # Create mask if doesn't exist:
@@ -334,7 +334,7 @@ if [[ $SES == *"spinalcord"* ]];then
               sct_qc -i  mc1_mean.nii.gz -p sct_deepseg_sc -qc ${PATH_QC} -s mc1_mask.nii.gz -qc-subject ${SUBJECT}
             fi
             # Apply motion correction step 2
-            ${PATH_SCRIPTS}/motion_correction/2D_slicewise_motion_correction.sh -i mc1.nii.gz -r mc1_mean.nii.gz -m mc1_mask.nii.gz -o mc2
+            ${PATH_SCRIPTS}/2D_slicewise_motion_correction.sh -i mc1.nii.gz -r mc1_mean.nii.gz -m mc1_mask.nii.gz -o mc2
 
             mv mc2.nii.gz ${file_task}_mc2.nii.gz
             mv mc2_mean.nii.gz ${file_task}_mc2_mean.nii.gz
@@ -368,21 +368,9 @@ if [[ $SES == *"spinalcord"* ]];then
 
           # Create segmentation using sct_deepseg
 
-          # TODO move in function sct_deepseg   
-          FILE_SEG="${PATH_DERIVATIVES}/${SUBJECT}/func/${file_task_mc2_mean}_seg.nii.gz"
-          echo
-          echo "Looking for manual spinal cord segmentation: $FILE_SEG"
-          if [[ -e $FILE_SEG ]]; then
-            echo "Found! Using manual segmentation."
-            rsync -avzh $FILE_SEG "${file_task_mc2_mean}_seg.nii.gz"
-            sct_qc -i ${file_task_mc2_mean}.nii.gz -p sct_deepseg_sc -qc ${PATH_QC} -s ${file_task_mc2_mean}_seg.nii.gz -qc-subject ${SUBJECT}
-          else
-            python $PATH_SCRIPTS/contrast-agnostic-seg-model/run_inference_single_image.py --path-img ${file_task_mc2_mean}.nii.gz --path-out . --chkp-path "$PATH_MODEL/contrast-agnostic-seg-model/nnunet_nf=32_DS=1_opt=adam_lr=0.001_AdapW_CCrop_bs=2_64x192x320_20230918-2253"
-            sct_maths -i ${file_task_mc2_mean}_pred.nii.gz -bin 0.5 -o ${file_task_mc2_mean}_pred_bin.nii.gz
-            sct_qc -i ${file_task_mc2_mean}.nii.gz -p sct_deepseg_sc -qc ${PATH_QC} -s ${file_task_mc2_mean}_pred_bin.nii.gz -qc-subject ${SUBJECT}
-            mv ${file_task_mc2_mean}_pred_bin.nii.gz ${file_task_mc2_mean}_seg.nii.gz
-          fi
-          file_task_mc2_mean_seg="${file_task_mc2_mean}_seg"
+          # Segment spinal cord after motion correction
+          segment_if_does_not_exist ${file_task_mc2_mean}.nii.gz 't2' 'deepseg' 'func'
+          file_task_mc2_mean_seg="${file_task_mc2_mean}_label-SC_seg"
 
           # QC for motion correction
           sct_qc -i ${file_task_mc2}.nii.gz -p sct_fmri_moco -qc ${PATH_QC} -s ${file_task_mc2_mean_seg}.nii.gz -d  ${file_task}.nii.gz -qc-subject ${SUBJECT}
@@ -399,7 +387,6 @@ if [[ $SES == *"spinalcord"* ]];then
           fslmaths ${file_task_mc2}_mean_seg -binv temp_mask
           fslmaths ${file_task_mc2}_mean_label-canal_seg -mul temp_mask ${file_task_mc2}_csf_mask
           rm temp_mask.nii.gz
-          # TODO: switch to eig value
           ${PATH_SCRIPTS}/create_slicewise_regressor_from_mask.sh -i ${file_task_mc2}.nii.gz -m ${file_task_mc2}_csf_mask.nii.gz -o csf_regressor
           mv ${file_task_mc2}_csf_regressor.nii.gz ./PNM_run-${run}
 
@@ -408,7 +395,7 @@ if [[ $SES == *"spinalcord"* ]];then
           ${PATH_SCRIPTS}/create_slicewise_regressor_from_mask.sh -i ${file_task_mc2}.nii.gz -m ${file_task_mc2}_wm_mask.nii.gz -o wm_regressor
           mv ${file_task_mc2}_wm_regressor.nii.gz ./PNM_run-${run}
 
-          # Run popp to get physio_rep.txt
+        # Run popp to get physio_rep.txt
         FILE_PHYSIO_CARD="${PATH_DERIVATIVES}/${SUBJECT}/func/${file_task_rest_physio}_peak.txt"
         echo
         echo "Looking for manual peak detection: $FILE_PHYSIO_CARD"
@@ -421,9 +408,8 @@ if [[ $SES == *"spinalcord"* ]];then
     	  popp -i ${file_task_rest_physio}_peak.txt -o ./physio -s 100 --tr=3.0 --smoothcard=0.1 --smoothresp=0.1 --resp=2 --cardiac=5 --trigger=3 -v --pulseox_trigger
         # Run PNM using manual peak detections in derivatives
         pnm_evs -i ${file_task_rest_bold}.nii.gz -c physio_card.txt -r physio_resp.txt -o physio_ --tr=3.0 --oc=4 --or=4 --multc=2 --multr=2 --sliceorder=interleaved_up --slicedir=z
-        mkdir -p PNM
-    	  mv physio* ./PNM/
-        mv ${file_task_rest_physio}_peak.txt ./PNM/
+    	  mv physio* ./PNM_run-${run}/
+        mv ${file_task_rest_physio}_peak.txt ./PNM_run-${run}/
 
 
       #Process physio
@@ -452,69 +438,72 @@ if [[ $SES == *"spinalcord"* ]];then
 
       fi
 
+        cp ${PATH_SCRIPTS}/spinal_cord_pnm.fsf ./
+        export PATH_DATA_PROCESSED SUBJECT file_task run
+        envsubst < "spinal_cord_pnm.fsf" > "spinal_cord_pnm_${file_task}.fsf"
+        # Remove existing feat repo if already exists
+        if [[ -d "${file_task_mc2}_pnm.feat" ]]; then
+          rm -r "${file_task_mc2}_pnm.feat"
+        fi
+        feat denoise_${file_task}.fsf
 
-          # TODO: remove
-          #Get session number
-          ses_num=${SES%"spinalcord"} # TODO change
-          PATH_EVS="${PATH_MODEL}/${sub_id}/${ses_num}brain/func/PNM_$task" 
-          echo " Path with spinal cord EVS : $PATH_EVS"
-          echo "Looking for spinal cord EVS"
-          if [[ -d $PATH_EVS ]]; then
-            echo "Found! Using existing EVS."
-            rsync -avzh $PATH_EVS/physio_spinalcord* ./PNM_$task/
-            ls ${PWD}/PNM_$task/*.nii.gz > ./PNM_$task/cord_evlist.txt # Create ev list
-          else
-            echo "No evs found. exiting"
-            #exit
-          fi
+        # Create denoised image
+        fslmaths ./${file_task_mc2}_pnm.feat/stats/res4d.nii.gz -add ./${file_task_mc2}_pnm.feat/mean_func.nii.gz ${file_task_mc2}_pnm
+        tr=`fslval ${file_task_mc2} pixdim4` # Get TR of volumes
+        fslsplit ${file_task_mc2}_pnm vol -t
+        v=vol????.nii.gz
+        fslmerge -tr ${file_task_bold_mc2}_pnm ${v} ${tr}
+        rm $v
 
-          cp ${PATH_SCRIPTS}/denoise.fsf ./
-          export PATH_DATA_PROCESSED SUBJECT file_task task
-          envsubst < "denoise.fsf" > "denoise_${file_task}.fsf"
-          # Remove existing feat repo if already exists
-          if [[ -d "${file_task_mc2}_pnm.feat" ]]; then
-            rm -r "${file_task_mc2}_pnm.feat"
-          fi
-          feat denoise_${file_task}.fsf
+        # Find motion outliers
+        fsl_motion_outliers -i ${file_task_mc2} -m ${file_task_mc2_mean_seg} --dvars --nomoco -o ${file_task_mc2}_dvars_motion_outliers.txt
 
-          # Create denoised image
-          fslmaths ./${file_task_mc2}_pnm.feat/stats/res4d.nii.gz -add ./${file_task_mc2}_pnm.feat/mean_func.nii.gz ${file_task_mc2}_pnm
-          tr=`fslval ${file_task_mc2} pixdim4` # Get TR of volumes
-          fslsplit ${file_task_mc2}_pnm vol -t
-          v=vol????.nii.gz
-          fslmerge -tr ${file_task_bold_mc2}_pnm ${v} ${tr}
-          rm $v
+        # Warp each volume to the template
+        fslsplit ${file_task_mc2}_pnm vol -t
+        tr=(fslval ${file_task_mc2}_pnm pixdim) # Get TR of volumes
+        tdimi=(fslval ${file_task_mc2}_pnm dim4) # Get the number of volumes
+        last_volume=$(echo "scale=0; $tdimi-1" | bc) # Find index of last volume
+        for ((k=0; k<=$last_volume; k++));do
+            vol="$(printf "vol%04d" ${k})"
+            sct_apply_transfo -i ${vol}.nii.gz -d ${SCT_DIR}/data/PAM50/template/PAM50_t2.nii.gz -w warp_${file_task_mc2_mean}2PAM50_t2.nii.gz -o ${vol}2template.nii.gz -x spline
+            fslmaths ${vol}2template.nii.gz -mul ${SCT_DIR}/data/PAM50/template/PAM50_cord.nii.gz ${vol}2template.nii.gz
+            fslroi ${vol}2template.nii.gz ${vol}2template.nii.gz 32 75 34 75 691 263
+        done
+        v="vol????2template.nii.gz"
+        fslmerge -tr ${file_task_mc2}_pnm2template $v $tr # Merge warped volumes together
+        rm $v
+        v=vol????.nii.gz
+        rm $v
 
-          # Find motion outliers
-          fsl_motion_outliers -i ${file_task_mc2} -m ${file_task_mc2_mean_seg} --dvars --nomoco -o ${file_task_mc2}_dvars_motion_outliers.txt
+        #Remove outside voxels based on spinal cord mask z limits
+        sct_apply_transfo -i ${file_task_mc2_mean_seg}.nii.gz -d ${SCT_DIR}/data/PAM50/template/PAM50_t2.nii.gz -w warp_${file_task_mc2_mean}2PAM50_t2.nii.gz -o ${file_task_mc2_mean_seg}2template.nii.gz -x nn
+        fslroi ${file_task_mc2_mean_seg}2template.nii.gz ${file_task_mc2_mean_seg}2template.nii.gz 32 75 34 75 691 263
+        fslmaths ${file_task_mc2_mean_seg}2template.nii.gz -kernel 2 -dilD -dilD -dilD -dilD -dilD temp_mask
+        fslmaths ${file_task_mc2}_pnm2template -mul temp_mask ${file_task_mc2}_pnm2template
+        rm temp_mask.nii.gz
+        # Smoothing 2x2x5 mm
+        #sigma= 2mm/2.354 = | sigma = 5m/2.354 for 2mm and 5 mm of full width at half maximum (FWHM)
+        fslmaths ${file_task_mc2}_pnm2template.nii.gz -s 0.85,0.84,2.124 ${file_task_mc2}_pnm2template_smooth225.nii.gz
+        
+        # Run first-level analysis
+        ###############################
+        region=brain
+        #func_data=${file_task}_mc2_pnm2template_smooth225.nii.gz" TODO 
+        export analysis_path subject coil session run func_data region tr number_of_volumes
+        envsubst < "${PATH_SCRIPTS}/first_level.fsf" > "${func_data}_first_level.fsf"
+        feat ${func_data}_first_level.fsf
 
-          # Warp each volume to the template
-          fslsplit ${file_task_mc2}_pnm vol -t
-          tr=`fslval ${file_task_mc2}_pnm pixdim4` # Get TR of volumes
-          tdimi=`fslval ${file_task_mc2}_pnm dim4` # Get the number of volumes
-          last_volume=$(echo "scale=0; $tdimi-1" | bc) # Find index of last volume
-          for ((k=0; k<=$last_volume; k++));do
-              vol="$(printf "vol%04d" ${k})"
-              sct_apply_transfo -i ${vol}.nii.gz -d ${SCT_DIR}/data/PAM50/template/PAM50_t2.nii.gz -w warp_${file_task_mc2_mean}2PAM50_t2.nii.gz -o ${vol}2template.nii.gz -x spline
-              fslmaths ${vol}2template.nii.gz -mul ${SCT_DIR}/data/PAM50/template/PAM50_cord.nii.gz ${vol}2template.nii.gz
-              fslroi ${vol}2template.nii.gz ${vol}2template.nii.gz 32 75 34 75 691 263
-          done
-          v="vol????2template.nii.gz"
-          fslmerge -tr ${file_task_mc2}_pnm2template $v $tr # Merge warped volumes together
-          rm $v
-          v=vol????.nii.gz
-          rm $v
+        # Create false registration 
+        ################################
+        cd ${func_data}.feat
+        mkdir -p reg
+        cp /usr/local/fsl/etc/flirtsch/ident.mat reg/example_func2standard.mat
+        cp example_func.nii.gz reg/example_func.nii.gz
+        cp $SCT_DIR/data/PAM50/template/PAM50_t2s.nii.gz reg/standard.nii.gz
+        fslmaths reg/standard.nii.gz -mas $SCT_DIR/data/PAM50/template/PAM50_cord.nii.gz reg/standard_masked.nii.gz
+        fslroi reg/standard_masked.nii.gz reg/standard.nii.gz 32 75 34 75 691 263
 
-          #Remove outside voxels based on spinal cord mask z limits
-          sct_apply_transfo -i ${file_task_mc2_mean_seg}.nii.gz -d ${SCT_DIR}/data/PAM50/template/PAM50_t2.nii.gz -w warp_${file_task_mc2_mean}2PAM50_t2.nii.gz -o ${file_task_mc2_mean_seg}2template.nii.gz -x nn
-          fslroi ${file_task_mc2_mean_seg}2template.nii.gz ${file_task_mc2_mean_seg}2template.nii.gz 32 75 34 75 691 263
-          fslmaths ${file_task_mc2_mean_seg}2template.nii.gz -kernel 2 -dilD -dilD -dilD -dilD -dilD temp_mask
-          fslmaths ${file_task_mc2}_pnm2template -mul temp_mask ${file_task_mc2}_pnm2template
-          rm temp_mask.nii.gz
-          #Smoothing 2x2x5 mm
-          #sigma= 2mm/2.354 = | sigma = 5m/2.354 for 2mm and 5 mm of full width at half maximum (FWHM)
-          fslmaths ${file_task_mc2}_pnm2template.nii.gz -s 0.85,0.84,2.124 ${file_task_mc2}_pnm2template_smooth.nii.gz
-          cd ..
+        cd ..
       fi
     done
 
@@ -524,9 +513,9 @@ fi
 # Verify presence of output files and write log file if error
 # ------------------------------------------------------------------------------
 FILES_TO_CHECK=(
-  "FingerTap/${file_task_finger}_mc2_pnm2template_smooth.nii.gz"
-  "ForcePercent/${file_task_percent}_mc2_pnm2template_smooth.nii.gz"
-  "ForceAbs/${file_task_abs}_mc2_pnm2template_smooth.nii.gz"
+  #"FingerTap/${file_task_finger}_mc2_pnm2template_smooth.nii.gz"
+  #"ForcePercent/${file_task_percent}_mc2_pnm2template_smooth.nii.gz"
+  #"ForceAbs/${file_task_abs}_mc2_pnm2template_smooth.nii.gz"
   #"rest/${file_task_rest}_mc2_pnm2template_smooth.nii.gz" # To uncomment
 )
 pwd
