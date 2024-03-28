@@ -409,7 +409,7 @@ if [[ $SES == *"spinalcord"* ]];then
         mv physio* ./PNM_run-${run}
         ls ${PWD}/PNM_run-${run}/*.nii.gz > ./PNM_run-${run}/${file_task}_physio_evlist.txt # Create ev list
         cp ${PATH_SCRIPTS}/spinal_cord_pnm.fsf ./
-        export PATH_DATA_PROCESSED SUBJECT file_task run
+        export PATH_DATA_PROCESSED SUBJECT file_task run tr number_of_volumes
         envsubst < "spinal_cord_pnm.fsf" > "spinal_cord_pnm_${file_task}.fsf"
         # Remove existing feat repo if already exists
         if [[ -d "${file_task_mc2}_pnm.feat" ]]; then
@@ -456,7 +456,7 @@ if [[ $SES == *"spinalcord"* ]];then
         fslmaths ${file_task_mc2}_pnm2template.nii.gz -s 0.85,0.84,2.124 ${file_task_mc2}_pnm2template_smooth225.nii.gz
         
         # Run first-level analysis
-        ###############################
+        ############################### # TODO fix names here
         region=brain
         #func_data=${file_task}_mc2_pnm2template_smooth225.nii.gz" TODO 
         export analysis_path subject coil session run func_data region tr number_of_volumes
