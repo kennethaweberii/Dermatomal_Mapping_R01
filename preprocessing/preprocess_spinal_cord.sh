@@ -358,7 +358,7 @@ if [[ $SES == *"spinalcord"* ]];then
           # Create segmentation using sct_deepseg
 
           # Segment spinal cord after motion correction
-          segment_if_does_not_exist ${file_task_mc2_mean}.nii.gz 't2' 'deepseg' 'func'
+          segment_if_does_not_exist ${file_task_mc2_mean} 't2' 'deepseg' 'func'
           file_task_mc2_mean_seg="${file_task_mc2_mean}_label-SC_seg"
 
           # QC for motion correction
