@@ -350,43 +350,43 @@ if [[ $SES == *"spinalcord"* ]];then
             sct_maths -i ${file_task_mc2_mean}_seg.nii.gz -add ${file_task_mc2_mean}_CSF_seg.nii.gz -o ${file_task_mc2_mean}_label-canal_seg.nii.gz
 
           fi
-          # Change dtype:
-          sct_image -i ${file_task_mc2_mean}_label-canal_seg.nii.gz -type uint8
-          # Qc of Spinal canal segmentation
-          sct_qc -i ${file_task_mc2_mean}.nii.gz -p sct_deepseg_sc -qc ${PATH_QC} -s ${file_task_mc2_mean}_label-canal_seg.nii.gz -qc-subject ${SUBJECT}
+      # Change dtype:
+      sct_image -i ${file_task_mc2_mean}_label-canal_seg.nii.gz -type uint8
+      # Qc of Spinal canal segmentation
+      sct_qc -i ${file_task_mc2_mean}.nii.gz -p sct_deepseg_sc -qc ${PATH_QC} -s ${file_task_mc2_mean}_label-canal_seg.nii.gz -qc-subject ${SUBJECT}
 
-          # Create segmentation using sct_deepseg
+      # Create segmentation using sct_deepseg
 
-          # Segment spinal cord after motion correction
-          segment_if_does_not_exist ${file_task_mc2_mean} 't2' 'deepseg' 'func'
-          file_task_mc2_mean_seg="${file_task_mc2_mean}_label-SC_seg"
+      # Segment spinal cord after motion correction
+      segment_if_does_not_exist ${file_task_mc2_mean} 't2' 'deepseg' 'func'
+      file_task_mc2_mean_seg="${file_task_mc2_mean}_label-SC_seg"
 
-          # QC for motion correction
-          sct_qc -i ${file_task_mc2}.nii.gz -p sct_fmri_moco -qc ${PATH_QC} -s ${file_task_mc2_mean_seg}.nii.gz -d  ${file_task}.nii.gz -qc-subject ${SUBJECT}
+      # QC for motion correction
+      sct_qc -i ${file_task_mc2}.nii.gz -p sct_fmri_moco -qc ${PATH_QC} -s ${file_task_mc2_mean_seg}.nii.gz -d  ${file_task}.nii.gz -qc-subject ${SUBJECT}
 
-          # Register to T2w image
-          sct_register_multimodal -i ${SCT_DIR}/data/PAM50/template/PAM50_t2.nii.gz -iseg ${SCT_DIR}/data/PAM50/template/PAM50_cord.nii.gz -d ${file_task_mc2_mean}.nii.gz -dseg ${file_task_mc2_mean_seg}.nii.gz -param step=1,type=seg,algo=centermass:step=2,type=seg,algo=bsplinesyn,metric=MeanSquares,slicewise=1,iter=3:step=3,type=im,algo=syn,metric=CC,iter=1,slicewise=1 -initwarp ../../anat/T2w/warp_template2anat.nii.gz -initwarpinv ../../anat/T2w/warp_anat2template.nii.gz -qc ${PATH_QC} -qc-subject ${SUBJECT}
-          
-          # Warp to template (do we want the spinal levels ?? if so add -s 1)
-          sct_warp_template -d ${file_task_mc2_mean}.nii.gz -w warp_PAM50_t22${file_task_mc2_mean}.nii.gz -qc ${PATH_QC} -qc-subject ${SUBJECT}
+      # Register to T2w image
+      sct_register_multimodal -i ${SCT_DIR}/data/PAM50/template/PAM50_t2.nii.gz -iseg ${SCT_DIR}/data/PAM50/template/PAM50_cord.nii.gz -d ${file_task_mc2_mean}.nii.gz -dseg ${file_task_mc2_mean_seg}.nii.gz -param step=1,type=seg,algo=centermass:step=2,type=seg,algo=bsplinesyn,metric=MeanSquares,slicewise=1,iter=3:step=3,type=im,algo=syn,metric=CC,iter=1,slicewise=1 -initwarp ../../anat/T2w/warp_template2anat.nii.gz -initwarpinv ../../anat/T2w/warp_anat2template.nii.gz -qc ${PATH_QC} -qc-subject ${SUBJECT}
+      
+      # Warp to template (do we want the spinal levels ?? if so add -s 1)
+      sct_warp_template -d ${file_task_mc2_mean}.nii.gz -w warp_PAM50_t22${file_task_mc2_mean}.nii.gz -qc ${PATH_QC} -qc-subject ${SUBJECT}
 
-          # Create CSF regressor
-          file_task_mc2=${file_task}_mc2  # to remove
-          # Create CSF mask form spinal cord seg and spinal canal seg
-          fslmaths ${file_task_mc2}_mean_seg -binv temp_mask
-          fslmaths ${file_task_mc2}_mean_label-canal_seg -mul temp_mask ${file_task_mc2}_csf_mask
-          rm temp_mask.nii.gz
-          ${PATH_SCRIPTS}/create_slicewise_regressor_from_mask.sh -i ${file_task_mc2}.nii.gz -m ${file_task_mc2}_csf_mask.nii.gz -o csf_regressor
-          mv ${file_task_mc2}_csf_regressor.nii.gz ./PNM_run-${run}
+      # Create CSF regressor
+      file_task_mc2=${file_task}_mc2  # to remove
+      # Create CSF mask form spinal cord seg and spinal canal seg
+      fslmaths ${file_task_mc2}_mean_seg -binv temp_mask
+      fslmaths ${file_task_mc2}_mean_label-canal_seg -mul temp_mask ${file_task_mc2}_csf_mask
+      rm temp_mask.nii.gz
+      ${PATH_SCRIPTS}/create_slicewise_regressor_from_mask.sh -i ${file_task_mc2}.nii.gz -m ${file_task_mc2}_csf_mask.nii.gz -o csf_regressor
+      mv ${file_task_mc2}_csf_regressor.nii.gz ./PNM_run-${run}
 
-          # Create WM regressor
-          fslmaths ./label/template/PAM50_wm.nii.gz -thr 0.9 -bin ${file_task_mc2}_wm_mask
-          ${PATH_SCRIPTS}/create_slicewise_regressor_from_mask.sh -i ${file_task_mc2}.nii.gz -m ${file_task_mc2}_wm_mask.nii.gz -o wm_regressor
-          mv ${file_task_mc2}_wm_regressor.nii.gz ./PNM_run-${run}
+      # Create WM regressor
+      fslmaths ./label/template/PAM50_wm.nii.gz -thr 0.9 -bin ${file_task_mc2}_wm_mask
+      ${PATH_SCRIPTS}/create_slicewise_regressor_from_mask.sh -i ${file_task_mc2}.nii.gz -m ${file_task_mc2}_wm_mask.nii.gz -o wm_regressor
+      mv ${file_task_mc2}_wm_regressor.nii.gz ./PNM_run-${run}
 
 
       #Process physio
-      if [[ -f ${file_physio}.physio ]] && [[ -f ${PATH_SCRIPTS}/create_FSL_physio_text_file.py ]]; then
+      if [[ -f ${file_physio}.physio ]]; then
         FILE_PHYSIO_CARD="${PATH_DERIVATIVES}/${SUBJECT}/func/${file_physio}_peak.txt"
         echo starting physio
 
@@ -406,10 +406,8 @@ if [[ $SES == *"spinalcord"* ]];then
 
         rm -rf ${file_physio}
         mkdir ${file_physio}
-
-        mv physio* ./${file_physio}
-
       fi
+        mv physio* ./${file_physio}
 
         cp ${PATH_SCRIPTS}/spinal_cord_pnm.fsf ./
         export PATH_DATA_PROCESSED SUBJECT file_task run
