@@ -350,7 +350,8 @@ if [[ $SES == *"spinalcord"* ]];then
             sct_maths -i ${file_task_mc2_mean}_seg.nii.gz -add ${file_task_mc2_mean}_CSF_seg.nii.gz -o ${file_task_mc2_mean}_label-canal_seg.nii.gz
 
           fi
-
+          # Change dtype:
+          sct_image -i ${file_task_mc2_mean}_label-canal_seg.nii.gz -type uint8
           # Qc of Spinal canal segmentation
           sct_qc -i ${file_task_mc2_mean}.nii.gz -p sct_deepseg_sc -qc ${PATH_QC} -s ${file_task_mc2_mean}_label-canal_seg.nii.gz -qc-subject ${SUBJECT}
 
