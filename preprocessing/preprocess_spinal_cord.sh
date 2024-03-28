@@ -405,11 +405,9 @@ if [[ $SES == *"spinalcord"* ]];then
         # Run PNM using manual peak detections in derivatives
         pnm_evs -i ${file_task}.nii.gz -c physio_card.txt -r physio_resp.txt -o physio_ --tr=${tr} --oc=4 --or=4 --multc=2 --multr=2 --sliceorder=interleaved_up --slicedir=z
 
-        rm -rf ${file_physio}
-        mkdir ${file_physio}
       fi
-        mv physio* ./${file_physio}
-
+        mv physio* ./PNM_run-${run}
+        ls ${PWD}/PNM_run-${run}/*.nii.gz > ./PNM_run-${run}/${file_task}_physio_evlist.txt # Create ev list
         cp ${PATH_SCRIPTS}/spinal_cord_pnm.fsf ./
         export PATH_DATA_PROCESSED SUBJECT file_task run
         envsubst < "spinal_cord_pnm.fsf" > "spinal_cord_pnm_${file_task}.fsf"

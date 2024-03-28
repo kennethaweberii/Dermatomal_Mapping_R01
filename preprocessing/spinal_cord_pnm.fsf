@@ -279,7 +279,7 @@ set feat_files(1) "${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}/${file_task
 set fmri(confoundevs) 1
 
 # Confound EVs text file for analysis 1
-set confoundev_files(1) "${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}/PNM_run-${run}/cord_evlist.txt"
+set confoundev_files(1) "${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}/PNM_run-${run}/${file_task}_physio_evlist.txt"
 
 # EV 1 title
 set fmri(evtitle1) "physioev001"
