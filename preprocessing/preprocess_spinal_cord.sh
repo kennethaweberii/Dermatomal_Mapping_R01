@@ -401,7 +401,7 @@ if [[ $SES == *"spinalcord"* ]];then
           python ${PATH_SCRIPTS}/create_FSL_physio_text_file.py -i ${file_physio}.physio -TR ${tr} -number-of-volumes ${number_of_volumes}
           python ${PATH_SCRIPTS}/detect_peak_pnm.py -i ${file_physio}.txt -o ${file_physio}_peak.txt
         fi
-    	  popp -i ${file_physio}_peak.txt -o physio -s 100 --tr={tr} --smoothcard=0.1 --smoothresp=0.1 --resp=2 --cardiac=5 --trigger=3 -v --pulseox_trigger
+    	  popp -i ${file_physio}_peak.txt -o physio -s 100 --tr=${tr} --smoothcard=0.1 --smoothresp=0.1 --resp=2 --cardiac=5 --trigger=3 -v --pulseox_trigger
         # Run PNM using manual peak detections in derivatives
         pnm_evs -i ${file_physio}.nii.gz -c physio_card.txt -r physio_resp.txt -o physio_ --tr=${tr} --oc=4 --or=4 --multc=2 --multr=2 --sliceorder=interleaved_up --slicedir=z
 
