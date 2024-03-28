@@ -418,7 +418,7 @@ if [[ $SES == *"spinalcord"* ]];then
         if [[ -d "${file_task_mc2}_pnm.feat" ]]; then
           rm -r "${file_task_mc2}_pnm.feat"
         fi
-        feat denoise_${file_task}.fsf
+        feat "spinal_cord_pnm_${file_task}.fsf"
 
         # Create denoised image
         fslmaths ./${file_task_mc2}_pnm.feat/stats/res4d.nii.gz -add ./${file_task_mc2}_pnm.feat/mean_func.nii.gz ${file_task_mc2}_pnm
