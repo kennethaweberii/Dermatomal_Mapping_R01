@@ -271,8 +271,8 @@ if [[ $SES == *"spinalcord"* ]];then
           fslroi ${file_task} ${file_task} 3 -1
               
           # Get dims
-          number_of_volumes=(fslval ${file_task} dim4)
-          tr=(fslval ${file_task} pixdim4)
+          number_of_volumes=$(fslval ${file_task} dim4)
+          tr=$(fslval ${file_task} pixdim4)
 
           # Compute mean image
           sct_maths -i ${file_task}.nii.gz -mean t -o ${file_task}_mean.nii.gz
@@ -449,8 +449,8 @@ if [[ $SES == *"spinalcord"* ]];then
 
         # Warp each volume to the template
         fslsplit ${file_task_mc2}_pnm vol -t
-        tr=(fslval ${file_task_mc2}_pnm pixdim) # Get TR of volumes
-        tdimi=(fslval ${file_task_mc2}_pnm dim4) # Get the number of volumes
+        tr=$(fslval ${file_task_mc2}_pnm pixdim) # Get TR of volumes
+        tdimi=$(fslval ${file_task_mc2}_pnm dim4) # Get the number of volumes
         last_volume=$(echo "scale=0; $tdimi-1" | bc) # Find index of last volume
         for ((k=0; k<=$last_volume; k++));do
             vol="$(printf "vol%04d" ${k})"
