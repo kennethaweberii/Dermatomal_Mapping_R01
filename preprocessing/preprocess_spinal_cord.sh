@@ -26,7 +26,7 @@
 set -x
 
 # Immediately exit if error
-#set -e -o pipefail  # comment to not skip
+set -e -o pipefail  # comment to not skip
 
 # Exit if user presses CTRL+C (Linux) or CMD+C (OSX)
 trap "echo Caught Keyboard Interrupt within script. Exiting now.; exit" INT
@@ -67,8 +67,6 @@ segment_if_does_not_exist() {
     echo "Found! Using manual segmentation."
     rsync -avzh $FILESEGMANUAL ${FILESEG}.nii.gz
     sct_qc -i ${file}.nii.gz -s ${FILESEG}.nii.gz -p sct_deepseg_sc -qc ${PATH_QC} -qc-subject ${SUBJECT}
-    # Rename manual seg to seg name
-    #mv ${FILESEG}.nii.gz ${file}_seg.nii.gz
   else
     echo "Not found. Proceeding with automatic segmentation."
     # Segment spinal cord
@@ -225,7 +223,7 @@ if [[ $SES == *"spinalcord"* ]];then
         file_t2_seg="${file_t2w}_label-SC_seg"
 
         # Vertebral labeling 
-        label_if_does_not_exist ${file_t2w} ${file_t2w}_seg
+        label_if_does_not_exist ${file_t2w} ${file_t2_seg}
         file_t2_labels="${file_t2w}_label-SC_seg_labeled"
         file_t2_labels_discs="${file_t2w}_label-SC_seg_labeled_discs"
 
@@ -234,7 +232,7 @@ if [[ $SES == *"spinalcord"* ]];then
         file_t2_labels_discs="${file_t2w}_label-SC_seg_labeled_discs_1to10"
         
         # Label spinal nerve rootlets
-        segment_rootlets_if_does_not_exist ${file_t2w}
+        segment_rootlets_if_does_not_exist ${file_t2w} ${file_t2_seg}
         file_t2_rootlets="${file_t2w}_label-rootlets_dseg"
 
         # Register to template using disc labels
@@ -267,10 +265,10 @@ if [[ $SES == *"spinalcord"* ]];then
           # Go inside folder
           cd "run-${run}"
           # Create folder for PNM
-          mkdir -p ${PATH_DATA_PROCESSED}/${SUBJECT}/func/$task/PNM_run-${run}/
+          mkdir -p ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}/PNM_run-${run}/
 
           # Remove dummy volumes
-          fslroi ${file_task} 3 -1
+          fslroi ${file_task} ${file_task} 3 -1
               
           # Get dims
           number_of_volumes=(fslval ${file_task} dim4)
@@ -289,15 +287,9 @@ if [[ $SES == *"spinalcord"* ]];then
             rsync -avzh $FILE_MASK "${file_task_mean}_mask.nii.gz"
           else
             # Segment the spinal cord
-            segment_if_does_not_exist ${file_task_mean} 't2s' 'propseg' 'func'
-            # Create a spinal canal mask
-            sct_maths -i ${file_task_mean}_seg.nii.gz -add ${file_task_mean}_CSF_seg.nii.gz -o ${file_task_mean}_label-canal_seg.nii.gz
-            # Dilate the spinal canal mask
-            # check dilating
-            sct_maths -i ${file_task_mean}_label-canal_seg.nii.gz -dilate 5 -shape disk -o ${file_task_mean}_mask.nii.gz -dim 2
-
-            # Qc of Spinal canal segmentation
-            sct_qc -i ${file_task_mean}.nii.gz -p sct_deepseg_sc -qc ${PATH_QC} -s ${file_task_mean}_label-canal_seg.nii.gz -qc-subject ${SUBJECT}
+            segment_if_does_not_exist ${file_task_mean} 't2s' 'deepseg' 'func'
+            # Dilate the spinal cord mask
+            sct_maths -i ${file_task_mean}_label-SC_seg.nii.gz -dilate 8 -shape disk -o ${file_task_mean}_mask.nii.gz -dim 2
           fi
           # Qc of mask
           sct_qc -i ${file_task_mean}.nii.gz -p sct_deepseg_sc -qc ${PATH_QC} -s ${file_task_mean}_mask.nii.gz -qc-subject ${SUBJECT}
@@ -308,7 +300,8 @@ if [[ $SES == *"spinalcord"* ]];then
             # --------------------
             # Step 1 of 2D motion correction using mid volume
             # Select mid volume
-            fslroi ${file_task} ${file_task}_mc1_ref 177 1
+            mid_volume=$(($number_of_volumes / 2))
+            fslroi ${file_task} ${file_task}_mc1_ref $mid_volume 1
             # Apply motion correction
             ${PATH_SCRIPTS}/2D_slicewise_motion_correction.sh -i ${file_task}.nii.gz -r ${file_task}_mc1_ref.nii.gz -m ${file_task_mean}_mask.nii.gz -o mc1
             
@@ -322,14 +315,9 @@ if [[ $SES == *"spinalcord"* ]];then
               rsync -avzh $FILE_MASK "mc1_mask.nii.gz"
             else
             # Segment the spinal cord
-              segment_if_does_not_exist mc1_mean 't2s' 'propseg' 'func'
-              # Create a spinal canal mask
-              sct_maths -i mc1_mean_seg.nii.gz -add mc1_mean_CSF_seg.nii.gz -o mc1_mean_label-canal_seg.nii.gz
-              # Dilate the spinal canal mask
+              segment_if_does_not_exist mc1_mean 't2s' 'deepseg' 'func'
               # check dilating
-              sct_maths -i mc1_mean_label-canal_seg.nii.gz -dilate 5 -shape disk -o mc1_mask.nii.gz -dim 2
-              # Qc of Spinal canal segmentation
-              sct_qc -i mc1_mean.nii.gz -p sct_deepseg_sc -qc ${PATH_QC} -s mc1_mean_label-canal_seg.nii.gz -qc-subject ${SUBJECT}
+              sct_maths -i mc1_mean_label-SC_seg.nii.gz -dilate 8 -shape disk -o mc1_mask.nii.gz -dim 2
               # Qc of mask
               sct_qc -i  mc1_mean.nii.gz -p sct_deepseg_sc -qc ${PATH_QC} -s mc1_mask.nii.gz -qc-subject ${SUBJECT}
             fi
