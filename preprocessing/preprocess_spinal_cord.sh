@@ -260,8 +260,9 @@ if [[ $SES == *"spinalcord"* ]];then
       if [[ -f ${file_task}.nii.gz ]];then
           # Create output path for run
           mkdir -p ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}
-          # Copy image inside folder
+          # Copy image & physio inside folder
           cp ${file_task}.nii.gz ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}/
+          cp ${file_physio}.physio ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}/
           # Go inside folder
           cd "run-${run}"
           # Create folder for PNM
@@ -386,7 +387,7 @@ if [[ $SES == *"spinalcord"* ]];then
 
 
       #Process physio
-      if [[ -f ${file_physio}.physio ]]; then
+      if [[ -e ${file_physio}.physio ]]; then
         FILE_PHYSIO_CARD="${PATH_DERIVATIVES}/${SUBJECT}/func/${file_physio}_peak.txt"
         echo starting physio
 
