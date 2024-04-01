@@ -226,7 +226,7 @@ for coil in ${coils[@]}; do
       convert_xfm -inverse -omat ${func_data}_highres2example_func.mat ${func_data}_example_func2highres.mat
       flirt -in ${analysis_path}/ses-brain${coil}${session}/anat/${subject}_ses-brain${coil}${session}_T1w_brain_wm_seg.nii.gz -ref ${func_data}_mean -out ${func_data}_wm_seg -applyxfm -init ${func_data}_highres2example_func.mat -interp nearestneighbour
       flirt -in ${analysis_path}/ses-brain${coil}${session}/anat/${subject}_ses-brain${coil}${session}_T1w_brain_csf_seg.nii.gz -ref ${func_data}_mean -out ${func_data}_csf_seg -applyxfm -init ${func_data}_highres2example_func.mat -interp nearestneighbour
-
+      
       fslmeants -i ${func_data} --eig -m ${func_data}_csf_seg -o ${func_data}_csf.txt
       fslmeants -i ${func_data} --eig -m ${func_data}_wm_seg -o ${func_data}_wm.txt
 

@@ -119,6 +119,19 @@ rsync -avz --exclude="*.h5" ${data_path}/* ${analysis_path}/
 #Convert anat files
 cd ${analysis_path}
 
+if [ -d ${analysis_path}/${folder:1}_*-*-* ]; then
+  cd ${analysis_path}/${folder:1}*
+  echo Converting ${analysis_path}/${folder:1}* to NIFTI
+  for dir in */ ; do
+    echo Converting ${dir} to NIFTI
+    rm -rf ${analysis_path}/nii_${dir}
+    mkdir ${analysis_path}/nii_${dir}
+    dcm2niix -b y  -f %s -z y -x n -v y -o ${analysis_path}/nii_${dir} ./${dir}
+  done
+else
+  echo Skipping ${analysis_path}/anat. Folder does not exist.
+fi
+
 if [ -d ${analysis_path}/anat ]; then
   cd ${analysis_path}/anat
   echo Converting ${analysis_path}/anat to NIFTI
@@ -134,7 +147,7 @@ fi
 
 #Convert func files
 
-cd ${analysis_path}
+cd ${analysis_path}/data
 echo Converting ${analysis_path}/data to NIFTI
 for dir in e${folder:1}*/ ; do
   echo Converting ${dir} to NIFTI
@@ -240,7 +253,7 @@ for dir in nii_*/ ; do
     #SC Functional Scans
     ###########################################################################################
 
-    elif ([[ ${series} == *"run-1"* ]] || [[ ${series} == *"run-2"* ]]) && [[ ${dir} == "nii_e"* ]] && [[ ${series} == *"SC"* ]]  && [[ ${series} != *"pepolar"* ]]; then
+    elif ([[ ${series} == *"run-1"* ]] || [[ ${series} == *"run-2"* ]]) && [[ ${dir} != "nii_e"* ]] && [[ ${series} == *"SC"* ]]  && [[ ${series} != *"pepolar"* ]]; then
 
       if [[ ${series} == *"run-1"* ]]; then
         run=1
@@ -283,7 +296,7 @@ for dir in nii_*/ ; do
     #SC pepolar
     ###########################################################################################
 
-    elif ([[ ${series} == *"run-1_pepolar"* ]] || [[ ${series} == *"run-2_pepolar"* ]]) && [[ ${dir} == "nii_e"* ]] && [[ ${series} == *"SC"* ]] && [[ ${series} == *"pepolar"* ]]; then
+    elif ([[ ${series} == *"run-1_pepolar"* ]] || [[ ${series} == *"run-2_pepolar"* ]]) && [[ ${dir} != "nii_e"* ]] && [[ ${series} == *"SC"* ]] && [[ ${series} == *"pepolar"* ]]; then
       
       if [[ ${series} == *"run-1"* ]]; then
         run=1
