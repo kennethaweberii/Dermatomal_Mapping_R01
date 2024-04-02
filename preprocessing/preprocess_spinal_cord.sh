@@ -457,8 +457,9 @@ if [[ $SES == *"spinalcord"* ]];then
         
         # Run first-level analysis
         ############################### # TODO fix names here
-        region=brain
+        region=spinalcord
         #func_data=${file_task}_mc2_pnm2template_smooth225.nii.gz" TODO 
+        # analysis_path --> PATH_DATAPROCESSED
         export analysis_path subject coil session run func_data region tr number_of_volumes
         envsubst < "${PATH_SCRIPTS}/first_level.fsf" > "${func_data}_first_level.fsf"
         feat ${func_data}_first_level.fsf

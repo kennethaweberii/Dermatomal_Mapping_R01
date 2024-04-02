@@ -3741,7 +3741,7 @@ set fmri(tempfilt_yn24) 0
 set fmri(deriv_yn24) 0
 
 # EV 24 voxelwise image filename
-set fmri(evs_vox_24) ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}/PNM_run-${run}/physioev024.nii.gz
+set fmri(evs_vox_24) ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}/PNM_run-${run}/physio_ev024.nii.gz
 
 # Orthogonalise EV 24 wrt EV 0
 set fmri(ortho24.0) 0
