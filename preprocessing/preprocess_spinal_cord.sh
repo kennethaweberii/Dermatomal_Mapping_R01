@@ -462,7 +462,8 @@ if [[ $SES == *"spinalcord"* ]];then
         analysis_path=$PATH_DATA_PROCESSED
         subject=$(dirname "$SUBJECT")
         region="spinalcord"
-        if [[ $SES ==  "*21*" ]]; then
+        coil="21Ch"
+        if [[ $SES == *"$coil"* ]]; then
           coil="21Ch"
         else
           coil="56Ch"
