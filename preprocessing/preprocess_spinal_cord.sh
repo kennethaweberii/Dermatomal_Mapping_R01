@@ -460,8 +460,8 @@ if [[ $SES == *"spinalcord"* ]];then
         ############################### # TODO fix names here
         region=spinalcord
         func_data="${file_task}_mc2_pnm2template_smooth225.nii.gz" #TODO
-        analysis_path=$PATH_DATA_PROCESSED
         subject=$(dirname "$SUBJECT")
+        analysis_path=$PATH_DATA_PROCESSED/${subject}/
         region="spinalcord"
         coil="21Ch"
         if [[ $SES == *"$coil"* ]]; then
