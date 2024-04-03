@@ -458,6 +458,16 @@ if [[ $SES == *"spinalcord"* ]];then
         
         # Run first-level analysis
         ###############################
+        # rsync the folder fsl_stim_vectors:
+        PATH_VECTORS="${PATH_DERIVATIVES}/${SUBJECT}/func/fsl_stim_vectors/"
+        if [[ -d ${PATH_VECTORS} ]]; then
+          mkdir -p fsl_stim_vectors
+          rsync -av $PATH_VECTORS/ ./fsl_stim_vectors/
+          # todo rsync
+        else
+          echo "fsl_stim_vectors not found."
+        fi
+
         region=spinalcord
         func_data="${file_task}_mc2_pnm2template_smooth225" #TODO
         subject=$(dirname "$SUBJECT")
