@@ -427,7 +427,7 @@ if [[ $SES == *"spinalcord"* ]];then
         rm $v
 
         # Find motion outliers
-        fsl_motion_outliers -i ${file_task_mc2} -m ${file_task_mc2_mean_seg} --dvars --nomoco -o ${file_task_mc2}_dvars_motion_outliers.txt
+        fsl_motion_outliers -i ${file_task_mc2} -m ${file_task_mc2_mean_seg} --dvars --nomoco -o ${file_task}_dvars_motion_outliers.txt
 
         # Warp each volume to the template
         fslsplit ${file_task_mc2}_pnm vol -t
