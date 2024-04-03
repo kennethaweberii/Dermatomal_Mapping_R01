@@ -457,11 +457,11 @@ if [[ $SES == *"spinalcord"* ]];then
         fslmaths ${file_task_mc2}_pnm2template.nii.gz -s 0.85,0.84,2.124 ${file_task_mc2}_pnm2template_smooth225.nii.gz
         
         # Run first-level analysis
-        ############################### # TODO fix names here
+        ###############################
         region=spinalcord
-        func_data="${file_task}_mc2_pnm2template_smooth225.nii.gz" #TODO
+        func_data="${file_task}_mc2_pnm2template_smooth225" #TODO
         subject=$(dirname "$SUBJECT")
-        analysis_path=$PATH_DATA_PROCESSED/${subject}/
+        analysis_path=$PATH_DATA_PROCESSED/${subject}
         region="spinalcord"
         coil="21Ch"
         if [[ $SES == *"$coil"* ]]; then
