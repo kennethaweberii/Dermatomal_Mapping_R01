@@ -460,6 +460,7 @@ if [[ $SES == *"spinalcord"* ]];then
         ###############################
         # rsync the folder fsl_stim_vectors:
         PATH_VECTORS="${PATH_DERIVATIVES}/${SUBJECT}/func/fsl_stim_vectors/"
+        # Create variable with filename to  min max of amp and export to feat
         if [[ -d ${PATH_VECTORS} ]]; then
           mkdir -p fsl_stim_vectors
           rsync -av $PATH_VECTORS/ ./fsl_stim_vectors/
