@@ -471,6 +471,11 @@ if [[ $SES == *"spinalcord"* ]];then
       session="" # TODO change if multiple sessions
       export analysis_path subject coil session run func_data region tr number_of_volumes
       envsubst < "${PATH_SCRIPTS}/first_level.fsf" > "${func_data}_first_level.fsf"
+      
+      # Remove existing feat repo if already exists
+      if [[ -d "${func_data}_first_level.feat" ]]; then
+        rm -r "${func_data}_first_level.feat"
+      fi
       feat ${func_data}_first_level.fsf
 
       # Create false registration 
