@@ -430,6 +430,9 @@ if [[ $SES == *"spinalcord"* ]];then
       fsl_motion_outliers -i ${file_task_mc2} -m ${file_task_mc2_mean_seg} --dvars --nomoco -o ${file_task}_dvars_motion_outliers.txt
       # Warp 4D to template
       sct_apply_transfo -i ${file_task_mc2}_pnm.nii.gz -d ${SCT_DIR}/data/PAM50/template/PAM50_t2.nii.gz -w warp_${file_task_mc2_mean}2PAM50_t2.nii.gz -o ${file_task_mc2}_pnm2template.nii.gz -x spline
+      fslmaths ${file_task_mc2}_pnm2template.nii.gz -mul ${SCT_DIR}/data/PAM50/template/PAM50_cord.nii.gz ${file_task_mc2}_pnm2template.nii.gz
+      fslroi ${file_task_mc2}_pnm2template.nii.gz ${file_task_mc2}_pnm2template.nii.gz 32 75 34 75 691 263
+
 
       # Remove outside voxels based on spinal cord mask z limits
       sct_apply_transfo -i ${file_task_mc2_mean_seg}.nii.gz -d ${SCT_DIR}/data/PAM50/template/PAM50_t2.nii.gz -w warp_${file_task_mc2_mean}2PAM50_t2.nii.gz -o ${file_task_mc2_mean_seg}2template.nii.gz -x nn
