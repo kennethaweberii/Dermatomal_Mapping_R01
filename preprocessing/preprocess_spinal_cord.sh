@@ -375,7 +375,7 @@ if [[ $SES == *"spinalcord"* ]];then
       # Create CSF regressor
       file_task_mc2=${file_task}_mc2  # to remove
       # Create CSF mask form spinal cord seg and spinal canal seg
-      fslmaths ${file_task_mc2}_mean_seg -binv temp_mask
+      fslmaths ${file_task_mc2_mean_seg} -binv temp_mask
       fslmaths ${file_task_mc2}_mean_label-canal_seg -mul temp_mask ${file_task_mc2}_csf_mask
       rm temp_mask.nii.gz
       ${PATH_SCRIPTS}/create_slicewise_regressor_from_mask.sh -i ${file_task_mc2}.nii.gz -m ${file_task_mc2}_csf_mask.nii.gz -o csf_regressor
