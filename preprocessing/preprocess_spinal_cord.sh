@@ -270,7 +270,7 @@ if [[ $SES == *"spinalcord"* ]];then
           mkdir -p ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}/PNM_run-${run}/
 
           # Remove dummy volumes
-          fslroi ${file_task} ${file_task} 2 -1
+          #fslroi ${file_task} ${file_task} 2 -1
               
           # Get dims
           number_of_volumes=$(fslval ${file_task} dim4)
