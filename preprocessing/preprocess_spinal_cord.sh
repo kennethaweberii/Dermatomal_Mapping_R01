@@ -270,7 +270,7 @@ if [[ $SES == *"spinalcord"* ]];then
           mkdir -p ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}/PNM_run-${run}/
 
           # Remove dummy volumes
-          #fslroi ${file_task} ${file_task} 2 -1
+          fslroi ${file_task} ${file_task} 2 -1
               
           # Get dims
           number_of_volumes=$(fslval ${file_task} dim4)
@@ -407,97 +407,82 @@ if [[ $SES == *"spinalcord"* ]];then
         pnm_evs -i ${file_task}.nii.gz -c physio_card.txt -r physio_resp.txt -o physio_ --tr=${tr} --oc=4 --or=4 --multc=2 --multr=2 --sliceorder=interleaved_up --slicedir=z
 
       fi
-        mv physio* ./PNM_run-${run}
-        ls ${PWD}/PNM_run-${run}/*.nii.gz > ./PNM_run-${run}/${file_task}_physio_evlist.txt # Create ev list
-        cp ${PATH_SCRIPTS}/spinal_cord_pnm.fsf ./
-        export PATH_DATA_PROCESSED SUBJECT file_task run tr number_of_volumes
-        envsubst < "spinal_cord_pnm.fsf" > "spinal_cord_pnm_${file_task}.fsf"
-        # Remove existing feat repo if already exists
-        if [[ -d "${file_task_mc2}_pnm.feat" ]]; then
-          rm -r "${file_task_mc2}_pnm.feat"
-        fi
-        feat "spinal_cord_pnm_${file_task}.fsf"
-
-        # Create denoised image
-        fslmaths ./${file_task_mc2}_pnm.feat/stats/res4d.nii.gz -add ./${file_task_mc2}_pnm.feat/mean_func.nii.gz ${file_task_mc2}_pnm
-        tr=`fslval ${file_task_mc2} pixdim4` # Get TR of volumes
-        fslsplit ${file_task_mc2}_pnm vol -t
-        v=vol????.nii.gz
-        fslmerge -tr ${file_task_bold_mc2}_pnm ${v} ${tr}
-        rm $v
-
-        # Find motion outliers
-        fsl_motion_outliers -i ${file_task_mc2} -m ${file_task_mc2_mean_seg} --dvars --nomoco -o ${file_task}_dvars_motion_outliers.txt
-
-        # Warp each volume to the template
-        fslsplit ${file_task_mc2}_pnm vol -t
-        tr=$(fslval ${file_task_mc2}_pnm pixdim) # Get TR of volumes
-        tdimi=$(fslval ${file_task_mc2}_pnm dim4) # Get the number of volumes
-        last_volume=$(echo "scale=0; $tdimi-1" | bc) # Find index of last volume
-        for ((k=0; k<=$last_volume; k++));do
-            vol="$(printf "vol%04d" ${k})"
-            sct_apply_transfo -i ${vol}.nii.gz -d ${SCT_DIR}/data/PAM50/template/PAM50_t2.nii.gz -w warp_${file_task_mc2_mean}2PAM50_t2.nii.gz -o ${vol}2template.nii.gz -x spline
-            fslmaths ${vol}2template.nii.gz -mul ${SCT_DIR}/data/PAM50/template/PAM50_cord.nii.gz ${vol}2template.nii.gz
-            fslroi ${vol}2template.nii.gz ${vol}2template.nii.gz 32 75 34 75 691 263
-        done
-        v="vol????2template.nii.gz"
-        fslmerge -tr ${file_task_mc2}_pnm2template $v $tr # Merge warped volumes together
-        rm $v
-        v=vol????.nii.gz
-        rm $v
-
-        #Remove outside voxels based on spinal cord mask z limits
-        sct_apply_transfo -i ${file_task_mc2_mean_seg}.nii.gz -d ${SCT_DIR}/data/PAM50/template/PAM50_t2.nii.gz -w warp_${file_task_mc2_mean}2PAM50_t2.nii.gz -o ${file_task_mc2_mean_seg}2template.nii.gz -x nn
-        fslroi ${file_task_mc2_mean_seg}2template.nii.gz ${file_task_mc2_mean_seg}2template.nii.gz 32 75 34 75 691 263
-        fslmaths ${file_task_mc2_mean_seg}2template.nii.gz -kernel 2 -dilD -dilD -dilD -dilD -dilD temp_mask
-        fslmaths ${file_task_mc2}_pnm2template -mul temp_mask ${file_task_mc2}_pnm2template
-        rm temp_mask.nii.gz
-        # Smoothing 2x2x5 mm
-        #sigma= 2mm/2.354 = | sigma = 5m/2.354 for 2mm and 5 mm of full width at half maximum (FWHM)
-        fslmaths ${file_task_mc2}_pnm2template.nii.gz -s 0.85,0.84,2.124 ${file_task_mc2}_pnm2template_smooth225.nii.gz
-        
-        # Run first-level analysis
-        ###############################
-        # rsync the folder fsl_stim_vectors:
-        PATH_VECTORS="${PATH_DERIVATIVES}/${SUBJECT}/func/fsl_stim_vectors/"
-        # Create variable with filename to  min max of amp and export to feat
-        if [[ -d ${PATH_VECTORS} ]]; then
-          mkdir -p fsl_stim_vectors
-          rsync -av $PATH_VECTORS/ ./fsl_stim_vectors/
-          # todo rsync
-        else
-          echo "fsl_stim_vectors not found."
-        fi
-
-        region=spinalcord
-        func_data="${file_task}_mc2_pnm2template_smooth225" #TODO
-        subject=$(dirname "$SUBJECT")
-        analysis_path=$PATH_DATA_PROCESSED/${subject}
-        region="spinalcord"
-        coil="21Ch"
-        if [[ $SES == *"$coil"* ]]; then
-          coil="21Ch"
-        else
-          coil="56Ch"
-        fi
-        session="" # TODO change if multiple sessions
-        export analysis_path subject coil session run func_data region tr number_of_volumes
-        envsubst < "${PATH_SCRIPTS}/first_level.fsf" > "${func_data}_first_level.fsf"
-        feat ${func_data}_first_level.fsf
-
-        # Create false registration 
-        ################################
-        cd ${func_data}.feat
-        mkdir -p reg
-        cp /usr/local/fsl/etc/flirtsch/ident.mat reg/example_func2standard.mat
-        cp example_func.nii.gz reg/example_func.nii.gz
-        cp $SCT_DIR/data/PAM50/template/PAM50_t2s.nii.gz reg/standard.nii.gz
-        fslmaths reg/standard.nii.gz -mas $SCT_DIR/data/PAM50/template/PAM50_cord.nii.gz reg/standard_masked.nii.gz
-        fslroi reg/standard_masked.nii.gz reg/standard.nii.gz 32 75 34 75 691 263
-
-        cd ..
+      mv physio* ./PNM_run-${run}
+      ls ${PWD}/PNM_run-${run}/*.nii.gz > ./PNM_run-${run}/${file_task}_physio_evlist.txt # Create ev list
+      cp ${PATH_SCRIPTS}/spinal_cord_pnm.fsf ./
+      export PATH_DATA_PROCESSED SUBJECT file_task run tr number_of_volumes
+      envsubst < "spinal_cord_pnm.fsf" > "spinal_cord_pnm_${file_task}.fsf"
+      # Remove existing feat repo if already exists
+      if [[ -d "${file_task_mc2}_pnm.feat" ]]; then
+        rm -r "${file_task_mc2}_pnm.feat"
       fi
-    done
+      feat "spinal_cord_pnm_${file_task}.fsf"
+
+      # Create denoised image
+      fslmaths ./${file_task_mc2}_pnm.feat/stats/res4d.nii.gz -add ./${file_task_mc2}_pnm.feat/mean_func.nii.gz ${file_task_mc2}_pnm
+      #tr=$(fslval ${file_task_mc2} pixdim4) # Get TR of volumes
+      fslsplit ${file_task_mc2}_pnm vol -t
+      v=vol????.nii.gz
+      fslmerge -tr ${file_task_mc2}_pnm ${v} ${tr}
+      rm $v
+
+      # Find motion outliers
+      fsl_motion_outliers -i ${file_task_mc2} -m ${file_task_mc2_mean_seg} --dvars --nomoco -o ${file_task}_dvars_motion_outliers.txt
+      # Warp 4D to template
+      sct_apply_transfo -i ${file_task_mc2}_pnm.nii.gz -d ${SCT_DIR}/data/PAM50/template/PAM50_t2.nii.gz -w warp_${file_task_mc2_mean}2PAM50_t2.nii.gz -o ${file_task_mc2}_pnm2template -x spline
+
+      # Remove outside voxels based on spinal cord mask z limits
+      sct_apply_transfo -i ${file_task_mc2_mean_seg}.nii.gz -d ${SCT_DIR}/data/PAM50/template/PAM50_t2.nii.gz -w warp_${file_task_mc2_mean}2PAM50_t2.nii.gz -o ${file_task_mc2_mean_seg}2template.nii.gz -x nn
+      fslroi ${file_task_mc2_mean_seg}2template.nii.gz ${file_task_mc2_mean_seg}2template.nii.gz 32 75 34 75 691 263
+      fslmaths ${file_task_mc2_mean_seg}2template.nii.gz -kernel 2 -dilD -dilD -dilD -dilD -dilD temp_mask
+      fslmaths ${file_task_mc2}_pnm2template -mul temp_mask ${file_task_mc2}_pnm2template
+      rm temp_mask.nii.gz
+      # Smoothing 2x2x5 mm
+      #sigma= 2mm/2.354 = | sigma = 5m/2.354 for 2mm and 5 mm of full width at half maximum (FWHM)
+      fslmaths ${file_task_mc2}_pnm2template.nii.gz -s 0.85,0.84,2.124 ${file_task_mc2}_pnm2template_smooth225.nii.gz
+      
+      # Run first-level analysis
+      ###############################
+      # rsync the folder fsl_stim_vectors:
+      PATH_VECTORS="${PATH_DERIVATIVES}/${SUBJECT}/func/fsl_stim_vectors/"
+      # Create variable with filename to  min max of amp and export to feat
+      if [[ -d ${PATH_VECTORS} ]]; then
+        mkdir -p fsl_stim_vectors
+        rsync -av $PATH_VECTORS/ ./fsl_stim_vectors/
+        # todo rsync
+      else
+        echo "fsl_stim_vectors not found."
+      fi
+
+      region=spinalcord
+      func_data="${file_task}_mc2_pnm2template_smooth225" #TODO
+      subject=$(dirname "$SUBJECT")
+      analysis_path=$PATH_DATA_PROCESSED/${subject}
+      region="spinalcord"
+      coil="21Ch"
+      if [[ $SES == *"$coil"* ]]; then
+        coil="21Ch"
+      else
+        coil="56Ch"
+      fi
+      session="" # TODO change if multiple sessions
+      export analysis_path subject coil session run func_data region tr number_of_volumes
+      envsubst < "${PATH_SCRIPTS}/first_level.fsf" > "${func_data}_first_level.fsf"
+      feat ${func_data}_first_level.fsf
+
+      # Create false registration 
+      ################################
+      cd ${func_data}.feat
+      mkdir -p reg
+      cp /usr/local/fsl/etc/flirtsch/ident.mat reg/example_func2standard.mat
+      cp example_func.nii.gz reg/example_func.nii.gz
+      cp $SCT_DIR/data/PAM50/template/PAM50_t2s.nii.gz reg/standard.nii.gz
+      fslmaths reg/standard.nii.gz -mas $SCT_DIR/data/PAM50/template/PAM50_cord.nii.gz reg/standard_masked.nii.gz
+      fslroi reg/standard_masked.nii.gz reg/standard.nii.gz 32 75 34 75 691 263
+
+      cd ..
+    fi
+  done
 
 fi
 
