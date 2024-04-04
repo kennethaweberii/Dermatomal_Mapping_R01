@@ -59,7 +59,7 @@ segment_if_does_not_exist() {
   local segmentation_method="$3"  # deepseg or propseg
   local subfolder="$4"
   # Update global variable with segmentation file name
-  FILESEG="${file}_label-SC-seg"
+  FILESEG="${file}_label-SC_seg"
   FILESEGMANUAL="${PATH_DERIVATIVES}/${SUBJECT}/${subfolder}/${FILESEG}.nii.gz"
   echo
   echo "Looking for manual segmentation: $FILESEGMANUAL"
