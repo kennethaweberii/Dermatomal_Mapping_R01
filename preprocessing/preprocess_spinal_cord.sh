@@ -475,7 +475,7 @@ if [[ $SES == *"spinalcord"* ]];then
 
       # Create false registration 
       ################################
-      cd ${func_data}.feat
+      cd ${func_data}_first_level.feat
       mkdir -p reg
       cp /usr/local/fsl/etc/flirtsch/ident.mat reg/example_func2standard.mat
       cp example_func.nii.gz reg/example_func.nii.gz
