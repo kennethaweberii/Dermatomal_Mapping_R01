@@ -266,7 +266,13 @@ for coil in ${coils[@]}; do
 
       #Run first-level analysis
       region=brain
-      export analysis_path subject coil session run func_data region tr number_of_volumes
+
+      #Get stim parameters
+      stim_file=./fsl_stim_vectors/*_stim_amp_1.txt
+      stim_parameters=`echo ${stim_file} | awk -F 'fsl_stim_vector_' '{print $2}' | awk -F '_stim_amp' '{print $1}'`
+
+      stim_params=./fsl_stim_vectors/*_stim_amp_1.txt
+      export analysis_path subject coil session run func_data region tr number_of_volumes stim_parameters
       envsubst < "${script_path}/first_level.fsf" > "${func_data}_first_level.fsf"
 	    feat ${func_data}_first_level.fsf
 
@@ -287,7 +293,7 @@ for coil in ${coils[@]}; do
 
       #Run first-level trialwise analysis
       region=brain
-      export analysis_path subject coil session run func_data region tr number_of_volumes
+      export analysis_path subject coil session run func_data region tr number_of_volumes stim_parameters
       envsubst < "${script_path}/first_level_trialwise.fsf" > "${func_data}_first_level_trialwise.fsf"
 	    feat ${func_data}_first_level_trialwise.fsf
 
@@ -308,7 +314,7 @@ for coil in ${coils[@]}; do
 
       #Run second-level trialwise analysis
       region=brain
-      export analysis_path subject coil session run func_data region tr number_of_volumes
+      export analysis_path subject coil session run func_data region tr number_of_volumes stim_parameters
       envsubst < "${script_path}/second_level_trialwise.fsf" > "${func_data}_second_level_trialwise.fsf"
 	    feat ${func_data}_second_level_trialwise.fsf
       

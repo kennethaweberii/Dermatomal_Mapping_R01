@@ -314,7 +314,7 @@ set fmri(tempfilt_yn1) 1
 set fmri(deriv_yn1) 1
 
 # Custom EV file (EV 1)
-set fmri(custom1) "${analysis_path}/ses-${region}${coil}${session}/func/fsl_stim_vectors/${subject}_fsl_stim_vector_monophasic_f_100hz_pw_0.0002s_stim_15s_no_stim_0s_low_0.6ma_high_4.0ma_samp_f_5000hz_stim_amp_1.txt"
+set fmri(custom1) "${analysis_path}/ses-${region}${coil}${session}/func/fsl_stim_vectors/${subject}_fsl_stim_vector_${stim_parameters}_stim_amp_1.txt"
 
 # Gamma sigma (EV 1)
 set fmri(gammasigma1) 3
@@ -373,7 +373,7 @@ set fmri(tempfilt_yn2) 1
 set fmri(deriv_yn2) 1
 
 # Custom EV file (EV 2)
-set fmri(custom2) "${analysis_path}/ses-${region}${coil}${session}/func/fsl_stim_vectors/${subject}_fsl_stim_vector_monophasic_f_100hz_pw_0.0002s_stim_15s_no_stim_0s_low_0.6ma_high_4.0ma_samp_f_5000hz_stim_amp_2.txt"
+set fmri(custom2) "${analysis_path}/ses-${region}${coil}${session}/func/fsl_stim_vectors/${subject}_fsl_stim_vector_${stim_parameters}_stim_amp_2.txt"
 
 # Gamma sigma (EV 2)
 set fmri(gammasigma2) 3
@@ -432,7 +432,7 @@ set fmri(tempfilt_yn3) 1
 set fmri(deriv_yn3) 1
 
 # Custom EV file (EV 3)
-set fmri(custom3) "${analysis_path}/ses-${region}${coil}${session}/func/fsl_stim_vectors/${subject}_fsl_stim_vector_monophasic_f_100hz_pw_0.0002s_stim_15s_no_stim_0s_low_0.6ma_high_4.0ma_samp_f_5000hz_stim_amp_3.txt"
+set fmri(custom3) "${analysis_path}/ses-${region}${coil}${session}/func/fsl_stim_vectors/${subject}_fsl_stim_vector_${stim_parameters}_stim_amp_3.txt"
 
 # Gamma sigma (EV 3)
 set fmri(gammasigma3) 3
@@ -491,7 +491,7 @@ set fmri(tempfilt_yn4) 1
 set fmri(deriv_yn4) 1
 
 # Custom EV file (EV 4)
-set fmri(custom4) "${analysis_path}/ses-${region}${coil}${session}/func/fsl_stim_vectors/${subject}_fsl_stim_vector_monophasic_f_100hz_pw_0.0002s_stim_15s_no_stim_0s_low_0.6ma_high_4.0ma_samp_f_5000hz_stim_amp_4.txt"
+set fmri(custom4) "${analysis_path}/ses-${region}${coil}${session}/func/fsl_stim_vectors/${subject}_fsl_stim_vector_${stim_parameters}_stim_amp_4.txt"
 
 # Gamma sigma (EV 4)
 set fmri(gammasigma4) 3
@@ -550,7 +550,7 @@ set fmri(tempfilt_yn5) 1
 set fmri(deriv_yn5) 1
 
 # Custom EV file (EV 5)
-set fmri(custom5) "${analysis_path}/ses-${region}${coil}${session}/func/fsl_stim_vectors/${subject}_fsl_stim_vector_monophasic_f_100hz_pw_0.0002s_stim_15s_no_stim_0s_low_0.6ma_high_4.0ma_samp_f_5000hz_stim_amp_5.txt"
+set fmri(custom5) "${analysis_path}/ses-${region}${coil}${session}/func/fsl_stim_vectors/${subject}_fsl_stim_vector_${stim_parameters}_stim_amp_5.txt"
 
 # Gamma sigma (EV 5)
 set fmri(gammasigma5) 3
