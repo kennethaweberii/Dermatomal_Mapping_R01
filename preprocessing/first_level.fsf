@@ -276,10 +276,10 @@ set fmri(ncopeinputs) 0
 set feat_files(1) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/${func_data}"
 
 # Add confound EVs text file
-set fmri(confoundevs) 1
+set fmri(confoundevs) ${confoundevs}
 
 # Confound EVs text file for analysis 1
-set confoundev_files(1) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/${subject}_ses-${region}${coil}${session}_task-tens_run-${run}_bold_dvars_motion_outliers.txt"
+set confoundev_files(1) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/${subject}_ses-${region}${coil}${session}_task-tens_run-${run}_bold_motion_outliers.txt"
 
 # EV 1 title
 set fmri(evtitle1) "amp_1"
@@ -311,10 +311,10 @@ set fmri(convolve_phase1) 0
 set fmri(tempfilt_yn1) 1
 
 # Add temporal derivative (EV 1)
-set fmri(deriv_yn1) 1
+set fmri(deriv_yn1) 0
 
 # Custom EV file (EV 1)
-set fmri(custom1) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/fsl_stim_vectors/${stim_file1}"
+set fmri(custom1) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/fsl_stim_vectors/${subject}_fsl_stim_vector_${stim_parameters}_stim_amp_1.txt"
 
 # Gamma sigma (EV 1)
 set fmri(gammasigma1) 3
@@ -370,10 +370,10 @@ set fmri(convolve_phase2) 0
 set fmri(tempfilt_yn2) 1
 
 # Add temporal derivative (EV 2)
-set fmri(deriv_yn2) 1
+set fmri(deriv_yn2) 0
 
 # Custom EV file (EV 2)
-set fmri(custom2) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/fsl_stim_vectors/${stim_file2}"
+set fmri(custom2) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/fsl_stim_vectors/${subject}_fsl_stim_vector_${stim_parameters}_stim_amp_2.txt"
 
 # Gamma sigma (EV 2)
 set fmri(gammasigma2) 3
@@ -429,10 +429,10 @@ set fmri(convolve_phase3) 0
 set fmri(tempfilt_yn3) 1
 
 # Add temporal derivative (EV 3)
-set fmri(deriv_yn3) 1
+set fmri(deriv_yn3) 0
 
 # Custom EV file (EV 3)
-set fmri(custom3) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/fsl_stim_vectors/${stim_file3}"
+set fmri(custom3) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/fsl_stim_vectors/${subject}_fsl_stim_vector_${stim_parameters}_stim_amp_3.txt"
 
 # Gamma sigma (EV 3)
 set fmri(gammasigma3) 3
@@ -488,10 +488,10 @@ set fmri(convolve_phase4) 0
 set fmri(tempfilt_yn4) 1
 
 # Add temporal derivative (EV 4)
-set fmri(deriv_yn4) 1
+set fmri(deriv_yn4) 0
 
 # Custom EV file (EV 4)
-set fmri(custom4) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/fsl_stim_vectors/${stim_file4}"
+set fmri(custom4) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/fsl_stim_vectors/${subject}_fsl_stim_vector_${stim_parameters}_stim_amp_4.txt"
 
 # Gamma sigma (EV 4)
 set fmri(gammasigma4) 3
@@ -547,10 +547,10 @@ set fmri(convolve_phase5) 0
 set fmri(tempfilt_yn5) 1
 
 # Add temporal derivative (EV 5)
-set fmri(deriv_yn5) 1
+set fmri(deriv_yn5) 0
 
 # Custom EV file (EV 5)
-set fmri(custom5) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/fsl_stim_vectors/${stim_file5}"
+set fmri(custom5) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/fsl_stim_vectors/${subject}_fsl_stim_vector_${stim_parameters}_stim_amp_5.txt"
 # Gamma sigma (EV 5)
 set fmri(gammasigma5) 3
 

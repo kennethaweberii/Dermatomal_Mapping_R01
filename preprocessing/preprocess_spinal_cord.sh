@@ -427,7 +427,19 @@ if [[ $SES == *"spinalcord"* ]];then
       rm $v
 
       # Find motion outliers
-      fsl_motion_outliers -i ${file_task_mc2} -m ${file_task_mc2_mean_seg} --dvars --nomoco -o ${file_task}_dvars_motion_outliers.txt
+      fsl_motion_outliers -i ${file_task_mc2} -m ${file_task_mc2_mean_seg} --dvars --nomoco -o ${file_task}_motion_outliers.txt #removed the term dvars to make it compatible with brain naming
+
+      # If file does not exist, create an empty file, otherwise FSL crashes
+      file_outliers="${file_task}_motion_outliers.txt"
+      
+      if [[ ! -f "$file_outliers" ]]; then
+            confoundevs=0
+      else
+            confoundevs=1
+      fi
+
+
+
       # Warp 4D to template
       sct_apply_transfo -i ${file_task_mc2}_pnm.nii.gz -d ${SCT_DIR}/data/PAM50/template/PAM50_t2.nii.gz -w warp_${file_task_mc2_mean}2PAM50_t2.nii.gz -o ${file_task_mc2}_pnm2template.nii.gz -x spline
       fslmaths ${file_task_mc2}_pnm2template.nii.gz -mul ${SCT_DIR}/data/PAM50/template/PAM50_cord.nii.gz ${file_task_mc2}_pnm2template.nii.gz
@@ -459,24 +471,17 @@ if [[ $SES == *"spinalcord"* ]];then
         echo "fsl_stim_vectors not found."
       fi
 
+      #cp -r ${PATH_VECTORS} ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}
+
       cd ${PATH_VECTORS}
-      stim_file1=$(find . -type f -name "*_amp_1.txt")
-      stim_file1=$(basename ${stim_file1})
-      stim_file2=$(find . -type f -name "*_amp_2.txt")
-      stim_file2=$(basename ${stim_file2})
-      stim_file3=$(find . -type f -name "*_amp_3.txt")
-      stim_file3=$(basename ${stim_file3})
-      stim_file4=$(find . -type f -name "*_amp_4.txt")
-      stim_file4=$(basename ${stim_file4})
-      stim_file5=$(find . -type f -name "*_amp_5.txt")
-      stim_file5=$(basename ${stim_file5})
+
+      stim_file=*_stim_amp_1.txt
+      stim_parameters=`echo ${stim_file} | awk -F 'fsl_stim_vector_' '{print $2}' | awk -F '_stim_amp' '{print $1}'`
 
 
-      cp -r ${PATH_VECTORS} ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}
       cd ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}
+      echo ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}
 
-
-      
       func_data="${file_task}_mc2_pnm2template_smooth225" #TODO
       subject=${sub_id}
       analysis_path=$PATH_DATA_PROCESSED/${subject}
@@ -489,7 +494,7 @@ if [[ $SES == *"spinalcord"* ]];then
       fi
       session="" # TODO change if multiple sessions
       smoothing=0
-      export analysis_path subject coil session smoothing run func_data region tr number_of_volumes stim_file1 stim_file2 stim_file3 stim_file4 stim_file5
+      export analysis_path subject coil session smoothing run func_data region tr number_of_volumes stim_parameters confoundevs
       envsubst < "${PATH_SCRIPTS}/first_level.fsf" > "${func_data}_first_level.fsf"
       
       # Remove existing feat repo if already exists
@@ -510,13 +515,41 @@ if [[ $SES == *"spinalcord"* ]];then
 
       cd ..
 
+      cd ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}
 
+      #Run first-level trialwise analysis
+      export analysis_path subject coil session run func_data region tr number_of_volumes stim_parameters smoothing confoundevs
+      envsubst < "${script_path}/first_level_trialwise.fsf" > "${func_data}_first_level_trialwise.fsf"
+	    feat ${func_data}_first_level_trialwise.fsf
+
+      #Run registration for first level trialwise analysis
+      cd ${analysis_path}/ses-brain${coil}${session}/func/run-${run}/${func_data}_first_level_trialwise.feat
+      mkdir reg
+      fslmaths mean_func -bin mask
+      imcp mean_func ./reg/example_func
+      cd reg
+      cp ${FSLDIR}/etc/flirtsch/ident.mat example_func2highres.mat
+      cp ${FSLDIR}/etc/flirtsch/ident.mat highres2standard.mat
+      imcp ../mean_func highres
+      imcp ../mean_func standard
+      cd ..
+      updatefeatreg .
+
+      cd ${analysis_path}/ses-brain${coil}${session}/func/run-${run}
+
+      #Run second-level trialwise analysis
+      region=brain
+      export analysis_path subject coil session run func_data region tr number_of_volumes stim_parameters smoothing
+      envsubst < "${script_path}/second_level_trialwise.fsf" > "${func_data}_second_level_trialwise.fsf"
+	    feat ${func_data}_second_level_trialwise.fsf
+      
 
     fi
   done
   
 fi
 
+#Copy PAM50 template for masking the group level results
 cp $SCT_DIR/data/PAM50/template/PAM50_cord.nii.gz PAM50_cord.nii.gz
 fslroi PAM50_cord.nii.gz PAM50_cord_cropped.nii.gz 32 75 34 75 691 263
 
