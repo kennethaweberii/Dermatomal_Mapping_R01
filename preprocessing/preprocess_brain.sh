@@ -219,7 +219,7 @@ runs=(1)
         cp ${subject}_ses-brain${coil}${session}_task-tens_run-${run}_physio.physio run-${run}/
       fi
 
-      cp ${subject}_ses-brain${coil}${session}_task-tens_run-${run}_physio.physio run-${run}/${subject}_ses-brain${coil}${session}_task-tens_run-${run}_physio.physio
+      #cp ${subject}_ses-brain${coil}${session}_task-tens_run-${run}_physio.physio run-${run}/${subject}_ses-brain${coil}${session}_task-tens_run-${run}_physio.physio
 
       cd ${analysis_path}/ses-brain${coil}${session}/func/run-${run}
 
@@ -309,7 +309,9 @@ runs=(1)
 
         mv physio* ./${subject}_ses-brain${coil}${session}_task-tens_run-${run}_physio
 
-        physio_evlist="${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/${func_data}_physio_evlist.txt"
+        region=brain
+        export analysis_path subject coil session run func_data region tr number_of_volumes physio_evlist
+        physio_evlist="${analysis_path}/ses-brain${coil}${session}/func/run-${run}/${func_data}_physio_evlist.txt"
         envsubst < "${script_path}/physio_evlist.txt" > "${func_data}_physio_evlist.txt"
 
 
@@ -333,7 +335,10 @@ runs=(1)
       #for now copy func_data o func_data stc till you figure out slice timing
       cp ${func_data}.nii.gz ${func_data}_stc.nii.gz
 
-      applywarp -i ${func_data}_stc -o ${func_data}_stc2standard -w ${func_data}.feat/reg/example_func2standard_warp -r ${FSLDIR}/data/standard/MNI152_T1_2mm_brain
+      #applywarp -i ${func_data}_stc -o ${func_data}_stc2standard -w ${func_data}.feat/reg/example_func2standard_warp -r ${FSLDIR}/data/standard/MNI152_T1_2mm_brain
+      #non-linear does not work well, that is why switched to linear which does not produce warp
+      flirt -in ${func_data}_stc -ref ${FSLDIR}/data/standard/MNI152_T1_2mm_brain -applyxfm -init ${func_data}.feat/reg/example_func2standard.mat -out ${func_data}_stc2standard
+
       func_data=${func_data}_stc2standard
     
       PATH_VECTORS="${analysis_path}/ses-brain${coil}${session}/func/run-${run}/"
