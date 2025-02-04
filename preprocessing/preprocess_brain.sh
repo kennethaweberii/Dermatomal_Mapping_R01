@@ -163,6 +163,20 @@ if [[ -f ${analysis_path}/ses-brain${coil}${session}/anat/${subject}_ses-brain${
 
     cd ${analysis_path}/ses-brain${coil}${session}/anat
 
+    # not sure whether ANTs works really well here as data is combined 
+
+    #segment spinal cord 
+    sct_deepseg -i ${subject}_ses-brain${coil}${session}_T1w.nii.gz -task seg_sc_contrast_agnostic
+
+    # get where the mask ends 
+    zmask=$(fslstats ${subject}_ses-brain${coil}${session}_T1w_seg.nii.gz -w | awk '{print $6}')
+
+    #crop the brain image
+    fslroi ${subject}_ses-brain${coil}${session}_T1w.nii.gz ${subject}_ses-brain${coil}${session}_T1w.nii.gz 0 -1 0 -1 ${zmask} -1
+
+    #remove the spinal cord segmentation related things
+    rm *${subject}_ses-brain${coil}${session}_T1w_seg*
+
     antsBrainExtraction.sh -d 3 -a ${subject}_ses-brain${coil}${session}_T1w.nii.gz -m ${FSLDIR}/data/standard/MNI152_T1_2mm_brain_mask.nii.gz  -e ${FSLDIR}/data/standard/MNI152_T1_2mm.nii.gz -o T1w_brain
     immv T1w_brainBrainExtractionBrain ${subject}_ses-brain${coil}${session}_T1w_brain
     immv T1w_brainBrainExtractionMask ${subject}_ses-brain${coil}${session}_T1w_brain_seg
@@ -181,11 +195,9 @@ if [[ -f ${analysis_path}/ses-brain${coil}${session}/anat/${subject}_ses-brain${
     fast ${subject}_ses-brain${coil}${session}_T1w_brain
     fslmaths ${subject}_ses-brain${coil}${session}_T1w_brain_pve_0 -thr 0.5 -bin ${subject}_ses-brain${coil}${session}_T1w_brain_csf_seg
     fslmaths ${subject}_ses-brain${coil}${session}_T1w_brain_pve_2 -thr 0.5 -bin ${subject}_ses-brain${coil}${session}_T1w_brain_wm_seg
-
 else 
 
-    echo NOT EXIST 
-    echo ${analysis_path}/ses-brain${coil}${session}/anat/${subject}_ses-brain${coil}${session}_T1w.nii.gz
+    echo ${analysis_path}/ses-brain${coil}${session}/anat/${subject}_ses-brain${coil}${session}_T1w.nii.gz DOES NOT EXIST 
     
 fi
 
@@ -202,11 +214,16 @@ runs=(1)
 
       cp ${subject}_ses-brain${coil}${session}_task-tens_run-${run}_bold.nii.gz run-${run}/${subject}_ses-brain${coil}${session}_task-tens_run-${run}_bold.nii.gz
       cp ${subject}_ses-brain${coil}${session}_task-tens_run-${run}_bold.json run-${run}/${subject}_ses-brain${coil}${session}_task-tens_run-${run}_bold.json
+      
+      if [[ -f ${subject}_ses-brain${coil}${session}_task-tens_run-${run}_physio.physio ]]; then
+        cp ${subject}_ses-brain${coil}${session}_task-tens_run-${run}_physio.physio run-${run}/
+      fi
+
       cp ${subject}_ses-brain${coil}${session}_task-tens_run-${run}_physio.physio run-${run}/${subject}_ses-brain${coil}${session}_task-tens_run-${run}_physio.physio
 
       cd ${analysis_path}/ses-brain${coil}${session}/func/run-${run}
 
-      #cp -rf ${stim} ./
+     
       
       #Remove dummy volumes
       fslroi ${subject}_ses-brain${coil}${session}_task-tens_run-${run}_bold ${subject}_ses-brain${coil}${session}_task-tens_run-${run}_bold 3 -1
@@ -292,27 +309,38 @@ runs=(1)
 
         mv physio* ./${subject}_ses-brain${coil}${session}_task-tens_run-${run}_physio
 
+        physio_evlist="${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/${func_data}_physio_evlist.txt"
+        envsubst < "${script_path}/physio_evlist.txt" > "${func_data}_physio_evlist.txt"
+
+
+      elif [[ ! -f ${subject}_ses-brain${coil}${session}_task-tens_run-${run}_physio.physio ]]; then
+
+         echo no physio
+         physio_evlist=""
+
       fi
 
       region=brain
-      export analysis_path subject coil session run func_data region tr number_of_volumes
-	    envsubst < "${script_path}/physio_evlist.txt" > "${func_data}_physio_evlist.txt"
+      export analysis_path subject coil session run func_data region tr number_of_volumes physio_evlist
       envsubst < "${script_path}/brain_pnm.fsf" > "${func_data}_pnm.fsf"
 	    feat ${func_data}_pnm.fsf
 
       fslmaths ${func_data}_pnm.feat/stats/res4d.nii.gz -add ${func_data}_pnm.feat/mean_func.nii.gz ${func_data}_pnm
       func_data=${func_data}_pnm
 
-      #Run slicetime correction
-      slicetimer -i ${func_data} -o ${func_data}_stc --odd
+      #Run slicetime correction --> figure out the slicetiming, commenting for now
+      #slicetimer -i ${func_data} -o ${func_data}_stc --odd
+      #for now copy func_data o func_data stc till you figure out slice timing
+      cp ${func_data}.nii.gz ${func_data}_stc.nii.gz
 
       applywarp -i ${func_data}_stc -o ${func_data}_stc2standard -w ${func_data}.feat/reg/example_func2standard_warp -r ${FSLDIR}/data/standard/MNI152_T1_2mm_brain
       func_data=${func_data}_stc2standard
     
       PATH_VECTORS="${analysis_path}/ses-brain${coil}${session}/func/run-${run}/"
       echo ${PATH_VECTORS}
-     # Ensure the directory exists or create it
-     mkdir -p "${PATH_VECTORS}"
+      # Ensure the directory exists or create it
+      mkdir -p "${PATH_VECTORS}"
+       #cp -rf ${stim} ./
 
      # Sync the files
      if [[ -d ${PATH_VECTORS} ]]; then

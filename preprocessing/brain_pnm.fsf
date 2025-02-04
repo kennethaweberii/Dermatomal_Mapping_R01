@@ -136,7 +136,7 @@ set fmri(prewhiten_yn) 0
 # 0 : No
 # 1 : Yes
 set fmri(motionevs) 0
-set fmri(motionevsbeta) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/${func_data}_physio_evlist.txt"
+set fmri(motionevsbeta) ${physio_evlist}
 set fmri(scriptevsbeta) ""
 
 # Robust outlier detection in FLAME?
@@ -257,7 +257,7 @@ set fmri(regstandard_search) 90
 set fmri(regstandard_dof) 12
 
 # Do nonlinear registration from structural to standard space?
-set fmri(regstandard_nonlinear_yn) 1
+set fmri(regstandard_nonlinear_yn) 0
 
 # Control nonlinear warp field resolution
 set fmri(regstandard_nonlinear_warpres) 10

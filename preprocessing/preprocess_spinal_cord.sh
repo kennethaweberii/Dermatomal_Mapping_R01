@@ -465,7 +465,7 @@ if [[ $SES == *"spinalcord"* ]];then
 
       # Create variable with filename to  min max of amp and export to feat
       if [[ -d ${PATH_VECTORS} ]]; then
-        rsync -av $PATH_VECTORS/ ./
+        cp -r ${PATH_VECTORS} ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}
         # todo rsync
       else
         echo "fsl_stim_vectors not found."

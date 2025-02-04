@@ -113,7 +113,7 @@ mkdir -p ${output_path}/ses-brain${session}/fmap
 
 mkdir -p ${output_path}/ses-spinalcord${session}
 mkdir -p ${output_path}/ses-spinalcord${session}/anat
-mkdir -p ${output_path}/ses-spinalcord${session}/dwi
+#mkdir -p ${output_path}/ses-spinalcord${session}/dwi
 mkdir -p ${output_path}/ses-spinalcord${session}/func
 #mkdir -p ${output_path}/ses-spinalcord${session}/fmap
 
@@ -132,19 +132,31 @@ rsync -avz --exclude="*.h5" ${data_path}/* ${analysis_path}/
 
 #Convert anat files
 cd ${analysis_path}
+exec > "${analysis_path}/dcm2niix.log" 2>&1
+
 
 anat_folder=${folder:1}_*-*-*
 if [ -d ${analysis_path}/${anat_folder} ]; then
-  cd ${analysis_path}/${anat_folder}
-  echo Converting ${analysis_path}/${anat_folder} to NIFTI
-  for dir in */ ; do
-    echo Converting ${dir} to NIFTI
-    rm -rf ../nii_${dir}
-    mkdir ../nii_${dir}
-    dcm2niix -b y  -f %s -z y -x n -v y -o ../nii_${dir} ./${dir}
-  done
+    cd ${analysis_path}/${anat_folder}
+    echo Converting ${analysis_path}/${anat_folder} to NIFTI
+    for dir in */ ; do
+      echo Converting ${dir} to NIFTI
+      rm -rf ../nii_${dir}
+      mkdir ../nii_${dir}
+      dcm2niix -b y  -f %s -z y -x n -v y -o ../nii_${dir} ./${dir}
+    done
+elif [ -d ${analysis_path}/anat ]; then
+      cd ${analysis_path}/anat
+      echo Converting ${analysis_path}/anat to NIFTI
+      for dir in */ ; do
+        echo Converting ${dir} to NIFTI
+        rm -rf ../nii_${dir}
+        mkdir ../nii_${dir}
+        dcm2niix -b y  -f %s -z y -x n -v y -o ../nii_${dir} ./${dir}
+      done
+
 else
-  echo Skipping ${analysis_path}/${anat_folder}. Folder does not exist.
+  echo Skipping ${analysis_path}/${anat_folder} or ${analysis_path}/anat. Folder does not exist.
 fi
 
 #Convert func files
@@ -158,8 +170,18 @@ if [ -d ${analysis_path}/data ]; then
     mkdir ../nii_${dir}
     dcm2niix -b y -f %s -z y -x n -v y -o ../nii_${dir} ./${dir}/matlabDicoms
   done
+elif [ -d ${analysis_path} ]; then
+  cd ${analysis_path}
+  echo Converting ${analysis_path} to NIFTI
+  echo ${analysis_path}
+  for dir in e${folder:1}*/ ; do
+    echo Converting ${dir} to NIFTI
+    rm -rf ../nii_${dir}
+    mkdir ../nii_${dir}
+    dcm2niix -b y -f %s -z y -x n -v y -o ../nii_${dir} ./${dir}/matlabDicoms
+  done
 else
-  echo Skipping ${analysis_path}/data. Folder does not exist.
+  echo Skipping ${analysis_path}/data or ${analysis_path}. Folder does not exist.
 fi
 
 cd ${analysis_path}
@@ -211,6 +233,16 @@ for dir in nii_*/ ; do
     elif [[ ${series} == *"T2w"* ]] && [[ ${series} != *"ORIG"* ]]; then
       cp ${filename}.json ${output_path}/ses-spinalcord${coil}${session}/anat/${subject}_ses-spinalcord${coil}${session}_T2w.json
       cp ${filename}.nii.gz ${output_path}/ses-spinalcord${coil}${session}/anat/${subject}_ses-spinalcord${coil}${session}_T2w.nii.gz
+
+
+    ###########################################################################################
+    #Brachial Plexus STIR
+    ###########################################################################################
+    
+    elif [[ ${series} == *"Brachial_Plexus"* ]] && [[ ${series} = *"STIR"* ]]; then
+      cp ${filename}.json ${output_path}/ses-spinalcord${coil}${session}/anat/${subject}_ses-spinalcord${coil}${session}_acq-STIR_T2w.json
+      cp ${filename}.nii.gz ${output_path}/ses-spinalcord${coil}${session}/anat/${subject}_ses-spinalcord${coil}${session}_acq-STIR_T2w.nii.gz
+
 
     ###########################################################################################
     #Functional Scans
@@ -281,7 +313,11 @@ for dir in nii_*/ ; do
       fi
 
       series_folder=`echo ${dir} | cut -d "_" -f2`
-      recon_json_file=${analysis_path}/data/${series_folder}/*.json
+      if [ -e "${analysis_path}/data/${series_folder}" ]; then
+        recon_json_file="${analysis_path}/data/${series_folder}/*.json"
+      else
+        recon_json_file="${analysis_path}/${series_folder}/*.json"
+      fi
       pfile=`grep 'Pfile_name' ${recon_json_file} | cut -d ' ' -f3 | cut -d ',' -f1`
       #Add leading zeros to pfile
       pfile=$(printf "%05d" ${pfile})
