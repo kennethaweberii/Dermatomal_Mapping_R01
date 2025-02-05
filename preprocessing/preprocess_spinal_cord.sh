@@ -252,7 +252,7 @@ if [[ $SES == *"spinalcord"* ]];then
     # -------------------------------------------------------------------------
     cd ../func
 
-    runs=(1)
+    runs=(1 2 3)
 
     for run in "${runs[@]}";do
 
@@ -506,6 +506,7 @@ if [[ $SES == *"spinalcord"* ]];then
       # Create false registration 
       ################################
       cd ${func_data}_first_level.feat
+      
       mkdir -p reg
       cp /usr/local/fsl/etc/flirtsch/ident.mat reg/example_func2standard.mat
       cp example_func.nii.gz reg/example_func.nii.gz
@@ -519,28 +520,24 @@ if [[ $SES == *"spinalcord"* ]];then
 
       #Run first-level trialwise analysis
       export analysis_path subject coil session run func_data region tr number_of_volumes stim_parameters smoothing confoundevs
-      envsubst < "${script_path}/first_level_trialwise.fsf" > "${func_data}_first_level_trialwise.fsf"
+      envsubst < "${PATH_SCRIPTS}/first_level_trialwise.fsf" > "${func_data}_first_level_trialwise.fsf"
 	    feat ${func_data}_first_level_trialwise.fsf
 
       #Run registration for first level trialwise analysis
-      cd ${analysis_path}/ses-brain${coil}${session}/func/run-${run}/${func_data}_first_level_trialwise.feat
-      mkdir reg
-      fslmaths mean_func -bin mask
-      imcp mean_func ./reg/example_func
-      cd reg
-      cp ${FSLDIR}/etc/flirtsch/ident.mat example_func2highres.mat
-      cp ${FSLDIR}/etc/flirtsch/ident.mat highres2standard.mat
-      imcp ../mean_func highres
-      imcp ../mean_func standard
-      cd ..
-      updatefeatreg .
+      cd ${func_data}_trialwise.feat
+      mkdir -p reg
+      cp /usr/local/fsl/etc/flirtsch/ident.mat reg/example_func2standard.mat
+      cp example_func.nii.gz reg/example_func.nii.gz
+      cp $SCT_DIR/data/PAM50/template/PAM50_t2s.nii.gz reg/standard.nii.gz
+      fslmaths reg/standard.nii.gz -mas $SCT_DIR/data/PAM50/template/PAM50_cord.nii.gz reg/standard_masked.nii.gz
+      fslroi reg/standard_masked.nii.gz reg/standard.nii.gz 32 75 34 75 691 263
 
-      cd ${analysis_path}/ses-brain${coil}${session}/func/run-${run}
+      cd ..
+
 
       #Run second-level trialwise analysis
-      region=brain
       export analysis_path subject coil session run func_data region tr number_of_volumes stim_parameters smoothing
-      envsubst < "${script_path}/second_level_trialwise.fsf" > "${func_data}_second_level_trialwise.fsf"
+      envsubst < "${PATH_SCRIPTS}/second_level_trialwise.fsf" > "${func_data}_second_level_trialwise.fsf"
 	    feat ${func_data}_second_level_trialwise.fsf
       
 
