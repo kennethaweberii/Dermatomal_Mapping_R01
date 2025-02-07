@@ -26,3 +26,9 @@ conda activate Dermatomal_Mapping_R01
 ~~~
 pip install -r requirements.txt
 ~~~
+
+## 3. Peak detection
+
+~~~
+sct_run_batch -script detect_peak_batch.sh -script-arg Sandrine Bedard -path-data /Volumes/Projects/Dermatomal_Mapping_R01/data/BIDS/sourcedata -path-out /Users/sandrinebedard/processed_data/DM_peakdetection -jobs 1 -exclude ses-brain21Ch
+~~~
