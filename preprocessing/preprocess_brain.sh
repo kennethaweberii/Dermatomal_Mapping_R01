@@ -26,7 +26,11 @@ MANDATORY ARGUMENTS
   -f <folder>               Path to BIDS sourcedata folder (BIDS/sourcedata)
   -s <subject>              Subject Study ID (sub-DMAim1HC###, or sub-DMAim2HC###)
   -v <stim_vectors>         Path to FSL stim vectors folder
-  -x <session>              Optional argument to specify a session (Default=Blank)
+
+  OPTIONAL ARGUMENTS
+  -x <session>              Specify a session (Default=Blank)
+  -c <coilXX>               Specify a coil (Default=None)
+  
 
 EOF
 }
@@ -43,8 +47,9 @@ folder=
 subject=
 stim=
 session=
+coil=
 
-while getopts “hf:s:v:x:” OPTION
+while getopts “hf:s:v:x:c:” OPTION
 do
   case $OPTION in
   h)
@@ -62,6 +67,9 @@ do
     ;;
   x)
     session=$OPTARG
+    ;;
+  c)
+    coil=$OPTARG
     ;;
   ?)
      usage
@@ -88,6 +96,21 @@ if [[ -z ${stim} ]]; then
      echo "ERROR: FSL stim vector folder not specified. Exit program."
      exit 1
 fi
+
+if [[ -n $coil ]]; then
+    echo "Coil specified: $coil"
+else
+    echo "No coil specified."
+fi
+
+if [[ -n $session ]]; then
+    echo "Session specified: $session"
+else
+    echo "No session specified."
+fi
+
+
+
 
 folder=`readlink -f ${folder}`
 stim=`readlink -f ${stim}`
@@ -130,16 +153,29 @@ cp -rf ${folder}/${subject}/ses-brain* ${analysis_path}
 
 cd ${analysis_path}
 
-coils=(21Ch)
-for coil in ${coils[@]}; do
+exec > "${analysis_path}/brain_preprocess.log" 2>&1
 
-  ###########################################################################################
-  #T1w
-  ###########################################################################################
+###########################################################################################
+#T1w
+###########################################################################################
 
-  if [[ -f ${analysis_path}/ses-brain${coil}${session}/anat/${subject}_ses-brain${coil}${session}_T1w.nii.gz ]]; then
+if [[ -f ${analysis_path}/ses-brain${coil}${session}/anat/${subject}_ses-brain${coil}${session}_T1w.nii.gz ]]; then
 
     cd ${analysis_path}/ses-brain${coil}${session}/anat
+
+    # not sure whether ANTs works really well here as data is combined 
+
+    #segment spinal cord 
+    sct_deepseg -i ${subject}_ses-brain${coil}${session}_T1w.nii.gz -task seg_sc_contrast_agnostic
+
+    # get where the mask ends 
+    zmask=$(fslstats ${subject}_ses-brain${coil}${session}_T1w_seg.nii.gz -w | awk '{print $6}')
+
+    #crop the brain image
+    fslroi ${subject}_ses-brain${coil}${session}_T1w.nii.gz ${subject}_ses-brain${coil}${session}_T1w.nii.gz 0 -1 0 -1 ${zmask} -1
+
+    #remove the spinal cord segmentation related things
+    rm *${subject}_ses-brain${coil}${session}_T1w_seg*
 
     antsBrainExtraction.sh -d 3 -a ${subject}_ses-brain${coil}${session}_T1w.nii.gz -m ${FSLDIR}/data/standard/MNI152_T1_2mm_brain_mask.nii.gz  -e ${FSLDIR}/data/standard/MNI152_T1_2mm.nii.gz -o T1w_brain
     immv T1w_brainBrainExtractionBrain ${subject}_ses-brain${coil}${session}_T1w_brain
@@ -159,19 +195,35 @@ for coil in ${coils[@]}; do
     fast ${subject}_ses-brain${coil}${session}_T1w_brain
     fslmaths ${subject}_ses-brain${coil}${session}_T1w_brain_pve_0 -thr 0.5 -bin ${subject}_ses-brain${coil}${session}_T1w_brain_csf_seg
     fslmaths ${subject}_ses-brain${coil}${session}_T1w_brain_pve_2 -thr 0.5 -bin ${subject}_ses-brain${coil}${session}_T1w_brain_wm_seg
-    
-  fi
+else 
 
-  ###########################################################################################
-  #Functional Run 1
-  ###########################################################################################
-  runs=(1)
+    echo ${analysis_path}/ses-brain${coil}${session}/anat/${subject}_ses-brain${coil}${session}_T1w.nii.gz DOES NOT EXIST 
+    
+fi
+
+###########################################################################################
+#Functional Run 1
+###########################################################################################
+runs=(1)
   for run in ${runs[@]}; do
     if [[ -f ${analysis_path}/ses-brain${coil}${session}/anat/${subject}_ses-brain${coil}${session}_T1w_brain.nii.gz ]] && [[ -f ${analysis_path}/ses-brain${coil}${session}/func/${subject}_ses-brain${coil}${session}_task-tens_run-${run}_bold.nii.gz ]]; then
 
       cd ${analysis_path}/ses-brain${coil}${session}/func
 
-      cp -rf ${stim} ./
+      mkdir run-${run}
+
+      cp ${subject}_ses-brain${coil}${session}_task-tens_run-${run}_bold.nii.gz run-${run}/${subject}_ses-brain${coil}${session}_task-tens_run-${run}_bold.nii.gz
+      cp ${subject}_ses-brain${coil}${session}_task-tens_run-${run}_bold.json run-${run}/${subject}_ses-brain${coil}${session}_task-tens_run-${run}_bold.json
+      
+      if [[ -f ${subject}_ses-brain${coil}${session}_task-tens_run-${run}_physio.physio ]]; then
+        cp ${subject}_ses-brain${coil}${session}_task-tens_run-${run}_physio.physio run-${run}/
+      fi
+
+      #cp ${subject}_ses-brain${coil}${session}_task-tens_run-${run}_physio.physio run-${run}/${subject}_ses-brain${coil}${session}_task-tens_run-${run}_physio.physio
+
+      cd ${analysis_path}/ses-brain${coil}${session}/func/run-${run}
+
+     
       
       #Remove dummy volumes
       fslroi ${subject}_ses-brain${coil}${session}_task-tens_run-${run}_bold ${subject}_ses-brain${coil}${session}_task-tens_run-${run}_bold 3 -1
@@ -195,6 +247,12 @@ for coil in ${coils[@]}; do
       fslmaths ${subject}_ses-brain${coil}${session}_task-tens_run-${run}_bold_moco_brain_seg -bin ${subject}_ses-brain${coil}${session}_task-tens_run-${run}_bold_moco_brain_seg
 
       fsl_motion_outliers -i ${subject}_ses-brain${coil}${session}_task-tens_run-${run}_bold_moco -m ${subject}_ses-brain${coil}${session}_task-tens_run-${run}_bold_moco_brain_seg --dvars --nomoco -o ${subject}_ses-brain${coil}${session}_task-tens_run-${run}_bold_motion_outliers.txt
+
+      if [[ ! -f "${subject}_ses-brain${coil}${session}_task-tens_run-${run}_bold_motion_outliers.txt" ]]; then
+          confoundevs=0
+      else
+          confoundevs=1
+      fi
 
       if [[ -f ${analysis_path}/ses-brain${coil}${session}/fmap/${subject}_ses-brain${coil}${session}_task-tens_run-${run}_dir-AP_bold.nii.gz ]]; then
 
@@ -231,6 +289,10 @@ for coil in ${coils[@]}; do
       fslmeants -i ${func_data} --eig -m ${func_data}_wm_seg -o ${func_data}_wm.txt
 
       #Process physio
+
+      echo ${subject}_ses-brain${coil}${session}_task-tens_run-${run}_physio.physio
+      echo ${script_path}/create_FSL_physio_text_file.py
+
       if [[ -f ${subject}_ses-brain${coil}${session}_task-tens_run-${run}_physio.physio ]] && [[ -f ${script_path}/create_FSL_physio_text_file.py ]]; then
         
         echo starting physio
@@ -247,31 +309,67 @@ for coil in ${coils[@]}; do
 
         mv physio* ./${subject}_ses-brain${coil}${session}_task-tens_run-${run}_physio
 
+        region=brain
+        export analysis_path subject coil session run func_data region tr number_of_volumes physio_evlist
+        physio_evlist="${analysis_path}/ses-brain${coil}${session}/func/run-${run}/${func_data}_physio_evlist.txt"
+        envsubst < "${script_path}/physio_evlist.txt" > "${func_data}_physio_evlist.txt"
+
+
+      elif [[ ! -f ${subject}_ses-brain${coil}${session}_task-tens_run-${run}_physio.physio ]]; then
+
+         echo no physio
+         physio_evlist=""
+
       fi
 
       region=brain
-      export analysis_path subject coil session run func_data region tr number_of_volumes
-	    envsubst < "${script_path}/physio_evlist.txt" > "${func_data}_physio_evlist.txt"
+      export analysis_path subject coil session run func_data region tr number_of_volumes physio_evlist
       envsubst < "${script_path}/brain_pnm.fsf" > "${func_data}_pnm.fsf"
 	    feat ${func_data}_pnm.fsf
 
       fslmaths ${func_data}_pnm.feat/stats/res4d.nii.gz -add ${func_data}_pnm.feat/mean_func.nii.gz ${func_data}_pnm
       func_data=${func_data}_pnm
 
-      #Run slicetime correction
-      slicetimer -i ${func_data} -o ${func_data}_stc --odd
+      #Run slicetime correction --> figure out the slicetiming, commenting for now
+      #slicetimer -i ${func_data} -o ${func_data}_stc --odd
+      #for now copy func_data o func_data stc till you figure out slice timing
+      cp ${func_data}.nii.gz ${func_data}_stc.nii.gz
 
-      applywarp -i ${func_data}_stc -o ${func_data}_stc2standard -w ${func_data}.feat/reg/example_func2standard_warp -r ${FSLDIR}/data/standard/MNI152_T1_2mm_brain
+      #applywarp -i ${func_data}_stc -o ${func_data}_stc2standard -w ${func_data}.feat/reg/example_func2standard_warp -r ${FSLDIR}/data/standard/MNI152_T1_2mm_brain
+      #non-linear does not work well, that is why switched to linear which does not produce warp
+      flirt -in ${func_data}_stc -ref ${FSLDIR}/data/standard/MNI152_T1_2mm_brain -applyxfm -init ${func_data}.feat/reg/example_func2standard.mat -out ${func_data}_stc2standard
+
       func_data=${func_data}_stc2standard
+    
+      PATH_VECTORS="${analysis_path}/ses-brain${coil}${session}/func/run-${run}/"
+      echo ${PATH_VECTORS}
+      # Ensure the directory exists or create it
+      mkdir -p "${PATH_VECTORS}"
+       #cp -rf ${stim} ./
+
+     # Sync the files
+     if [[ -d ${PATH_VECTORS} ]]; then
+      rsync -av "${stim}" "${PATH_VECTORS}"
+     else
+      echo "Error: Could not create or locate ${PATH_VECTORS}."
+     fi
+
+      cd ${PATH_VECTORS}/fsl_stim_vectors
+      stim_file=*_stim_amp_1.txt
+      stim_parameters=`echo ${stim_file} | awk -F 'fsl_stim_vector_' '{print $2}' | awk -F '_stim_amp' '{print $1}'`
+      echo ${stim_parameters}
+
+      cd  ${analysis_path}/ses-brain${coil}${session}/func/run-${run}
 
       #Run first-level analysis
       region=brain
-      export analysis_path subject coil session run func_data region tr number_of_volumes
+      smoothing=5
+      export analysis_path subject smoothing coil session run func_data region tr number_of_volumes stim_parameters confoundevs
       envsubst < "${script_path}/first_level.fsf" > "${func_data}_first_level.fsf"
 	    feat ${func_data}_first_level.fsf
 
       #Run registration for first level analysis
-      cd ${analysis_path}/ses-brain${coil}${session}/func/${func_data}_first_level.feat
+      cd ${analysis_path}/ses-brain${coil}${session}/func/run-${run}/${func_data}_first_level.feat
       mkdir reg
       fslmaths mean_func -bin mask
       imcp mean_func ./reg/example_func
@@ -283,16 +381,18 @@ for coil in ${coils[@]}; do
       cd ..
       updatefeatreg .
 
-      cd ${analysis_path}/ses-brain${coil}${session}/func
+      cd ${analysis_path}/ses-brain${coil}${session}/func/run-${run}
 
+     
       #Run first-level trialwise analysis
       region=brain
-      export analysis_path subject coil session run func_data region tr number_of_volumes
+      smoothing=5
+      export analysis_path subject coil session run func_data region tr number_of_volumes stim_parameters smoothing confoundevs
       envsubst < "${script_path}/first_level_trialwise.fsf" > "${func_data}_first_level_trialwise.fsf"
 	    feat ${func_data}_first_level_trialwise.fsf
 
       #Run registration for first level trialwise analysis
-      cd ${analysis_path}/ses-brain${coil}${session}/func/${func_data}_trialwise.feat
+      cd ${analysis_path}/ses-brain${coil}${session}/func/run-${run}/${func_data}_trialwise.feat
       mkdir reg
       fslmaths mean_func -bin mask
       imcp mean_func ./reg/example_func
@@ -304,7 +404,7 @@ for coil in ${coils[@]}; do
       cd ..
       updatefeatreg .
 
-      cd ${analysis_path}/ses-brain${coil}${session}/func
+      cd ${analysis_path}/ses-brain${coil}${session}/func/run-${run}
 
       #Run second-level trialwise analysis
       region=brain
@@ -320,8 +420,16 @@ for coil in ${coils[@]}; do
     fi
 
   done
-done
 
+base_path=$(dirname "$folder")
+derivatives_dir="$base_path/derivatives/${subject}/ses-brain${session}"
+echo "copying output to...... ${derivatives_dir}"
+# Create the directory it does not exist
+mkdir -p "$derivatives_dir"
 
+#rsync -av --remove-source-files ${analysis_path}/ses-brain/ ${derivatives_dir}/
+#cp ${analysis_path}/brain_preprocess.log $base_path/derivatives/log_brain/brain_prepreprocess_${subject}_$(date +%Y%m%d_%H%M%S).log
+
+echo "copying log to...... $base_path/derivatives/log_brain/brain_prepreprocess_${subject}_$(date +%Y%m%d_%H%M%S).log"
 
 exit 0

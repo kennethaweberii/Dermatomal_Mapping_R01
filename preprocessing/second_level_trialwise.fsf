@@ -30,7 +30,7 @@ set fmri(featwatcher_yn) 1
 set fmri(sscleanup_yn) 0
 
 # Output directory
-set fmri(outputdir) "${analysis_path}/ses-${region}${coil}${session}/func/${func_data}_trialwise.gfeat"
+set fmri(outputdir) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/${func_data}_trialwise.gfeat"
 
 # TR(s)
 set fmri(tr) 3
@@ -118,7 +118,7 @@ set fmri(norm_yn) 0
 set fmri(perfsub_yn) 0
 
 # Highpass temporal filtering
-set fmri(temphp_yn) 1
+set fmri(temphp_yn) 0
 
 # Lowpass temporal filtering
 set fmri(templp_yn) 0
@@ -273,79 +273,79 @@ set fmri(totalVoxels) 280717619
 set fmri(ncopeinputs) 0
 
 # 4D AVW data or FEAT directory (1)
-set feat_files(1) "${analysis_path}/ses-${region}${coil}${session}/func/${func_data}_trialwise.feat/stats/cope1.nii.gz"
+set feat_files(1) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/${func_data}_trialwise.feat/stats/cope1.nii.gz"
 
 # 4D AVW data or FEAT directory (2)
-set feat_files(2) "${analysis_path}/ses-${region}${coil}${session}/func/${func_data}_trialwise.feat/stats/cope2.nii.gz"
+set feat_files(2) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/${func_data}_trialwise.feat/stats/cope2.nii.gz"
 
 # 4D AVW data or FEAT directory (3)
-set feat_files(3) "${analysis_path}/ses-${region}${coil}${session}/func/${func_data}_trialwise.feat/stats/cope3.nii.gz"
+set feat_files(3) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/${func_data}_trialwise.feat/stats/cope3.nii.gz"
 
 # 4D AVW data or FEAT directory (4)
-set feat_files(4) "${analysis_path}/ses-${region}${coil}${session}/func/${func_data}_trialwise.feat/stats/cope4.nii.gz"
+set feat_files(4) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/${func_data}_trialwise.feat/stats/cope4.nii.gz"
 
 # 4D AVW data or FEAT directory (5)
-set feat_files(5) "${analysis_path}/ses-${region}${coil}${session}/func/${func_data}_trialwise.feat/stats/cope5.nii.gz"
+set feat_files(5) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/${func_data}_trialwise.feat/stats/cope5.nii.gz"
 
 # 4D AVW data or FEAT directory (6)
-set feat_files(6) "${analysis_path}/ses-${region}${coil}${session}/func/${func_data}_trialwise.feat/stats/cope6.nii.gz"
+set feat_files(6) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/${func_data}_trialwise.feat/stats/cope6.nii.gz"
 
 # 4D AVW data or FEAT directory (7)
-set feat_files(7) "${analysis_path}/ses-${region}${coil}${session}/func/${func_data}_trialwise.feat/stats/cope7.nii.gz"
+set feat_files(7) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/${func_data}_trialwise.feat/stats/cope7.nii.gz"
 
 # 4D AVW data or FEAT directory (8)
-set feat_files(8) "${analysis_path}/ses-${region}${coil}${session}/func/${func_data}_trialwise.feat/stats/cope8.nii.gz"
+set feat_files(8) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/${func_data}_trialwise.feat/stats/cope8.nii.gz"
 
 # 4D AVW data or FEAT directory (9)
-set feat_files(9) "${analysis_path}/ses-${region}${coil}${session}/func/${func_data}_trialwise.feat/stats/cope9.nii.gz"
+set feat_files(9) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/${func_data}_trialwise.feat/stats/cope9.nii.gz"
 
 # 4D AVW data or FEAT directory (10)
-set feat_files(10) "${analysis_path}/ses-${region}${coil}${session}/func/${func_data}_trialwise.feat/stats/cope10.nii.gz"
+set feat_files(10) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/${func_data}_trialwise.feat/stats/cope10.nii.gz"
 
 # 4D AVW data or FEAT directory (11)
-set feat_files(11) "${analysis_path}/ses-${region}${coil}${session}/func/${func_data}_trialwise.feat/stats/cope11.nii.gz"
+set feat_files(11) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/${func_data}_trialwise.feat/stats/cope11.nii.gz"
 
 # 4D AVW data or FEAT directory (12)
-set feat_files(12) "${analysis_path}/ses-${region}${coil}${session}/func/${func_data}_trialwise.feat/stats/cope12.nii.gz"
+set feat_files(12) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/${func_data}_trialwise.feat/stats/cope12.nii.gz"
 
 # 4D AVW data or FEAT directory (13)
-set feat_files(13) "${analysis_path}/ses-${region}${coil}${session}/func/${func_data}_trialwise.feat/stats/cope13.nii.gz"
+set feat_files(13) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/${func_data}_trialwise.feat/stats/cope13.nii.gz"
 
 # 4D AVW data or FEAT directory (14)
-set feat_files(14) "${analysis_path}/ses-${region}${coil}${session}/func/${func_data}_trialwise.feat/stats/cope14.nii.gz"
+set feat_files(14) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/${func_data}_trialwise.feat/stats/cope14.nii.gz"
 
 # 4D AVW data or FEAT directory (15)
-set feat_files(15) "${analysis_path}/ses-${region}${coil}${session}/func/${func_data}_trialwise.feat/stats/cope15.nii.gz"
+set feat_files(15) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/${func_data}_trialwise.feat/stats/cope15.nii.gz"
 
 # 4D AVW data or FEAT directory (16)
-set feat_files(16) "${analysis_path}/ses-${region}${coil}${session}/func/${func_data}_trialwise.feat/stats/cope16.nii.gz"
+set feat_files(16) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/${func_data}_trialwise.feat/stats/cope16.nii.gz"
 
 # 4D AVW data or FEAT directory (17)
-set feat_files(17) "${analysis_path}/ses-${region}${coil}${session}/func/${func_data}_trialwise.feat/stats/cope17.nii.gz"
+set feat_files(17) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/${func_data}_trialwise.feat/stats/cope17.nii.gz"
 
 # 4D AVW data or FEAT directory (18)
-set feat_files(18) "${analysis_path}/ses-${region}${coil}${session}/func/${func_data}_trialwise.feat/stats/cope18.nii.gz"
+set feat_files(18) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/${func_data}_trialwise.feat/stats/cope18.nii.gz"
 
 # 4D AVW data or FEAT directory (19)
-set feat_files(19) "${analysis_path}/ses-${region}${coil}${session}/func/${func_data}_trialwise.feat/stats/cope19.nii.gz"
+set feat_files(19) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/${func_data}_trialwise.feat/stats/cope19.nii.gz"
 
 # 4D AVW data or FEAT directory (20)
-set feat_files(20) "${analysis_path}/ses-${region}${coil}${session}/func/${func_data}_trialwise.feat/stats/cope20.nii.gz"
+set feat_files(20) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/${func_data}_trialwise.feat/stats/cope20.nii.gz"
 
 # 4D AVW data or FEAT directory (21)
-set feat_files(21) "${analysis_path}/ses-${region}${coil}${session}/func/${func_data}_trialwise.feat/stats/cope21.nii.gz"
+set feat_files(21) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/${func_data}_trialwise.feat/stats/cope21.nii.gz"
 
 # 4D AVW data or FEAT directory (22)
-set feat_files(22) "${analysis_path}/ses-${region}${coil}${session}/func/${func_data}_trialwise.feat/stats/cope22.nii.gz"
+set feat_files(22) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/${func_data}_trialwise.feat/stats/cope22.nii.gz"
 
 # 4D AVW data or FEAT directory (23)
-set feat_files(23) "${analysis_path}/ses-${region}${coil}${session}/func/${func_data}_trialwise.feat/stats/cope23.nii.gz"
+set feat_files(23) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/${func_data}_trialwise.feat/stats/cope23.nii.gz"
 
 # 4D AVW data or FEAT directory (24)
-set feat_files(24) "${analysis_path}/ses-${region}${coil}${session}/func/${func_data}_trialwise.feat/stats/cope24.nii.gz"
+set feat_files(24) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/${func_data}_trialwise.feat/stats/cope24.nii.gz"
 
 # 4D AVW data or FEAT directory (25)
-set feat_files(25) "${analysis_path}/ses-${region}${coil}${session}/func/${func_data}_trialwise.feat/stats/cope25.nii.gz"
+set feat_files(25) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/${func_data}_trialwise.feat/stats/cope25.nii.gz"
 
 # Add confound EVs text file
 set fmri(confoundevs) 0

@@ -26,7 +26,7 @@
 set -x
 
 # Immediately exit if error
-set -e -o pipefail  # comment to not skip
+#set -e -o pipefail  # comment to not skip
 
 # Exit if user presses CTRL+C (Linux) or CMD+C (OSX)
 trap "echo Caught Keyboard Interrupt within script. Exiting now.; exit" INT
@@ -212,46 +212,47 @@ if [[ $SES == *"spinalcord"* ]];then
     file_t2w=${file}_T2w
     # Check if T2w image exists
     if [[ -f ${file_t2w}.nii.gz ]];then
-        # Create directory for T2w results
-        mkdir -p ${PATH_DATA_PROCESSED}/${SUBJECT}/anat/T2w
-        cp ${file_t2w}.nii.gz ${PATH_DATA_PROCESSED}/${SUBJECT}/anat/T2w
-        cd T2w
-        
-        # Spinal cord segmentation
-        # Note: For T2w images, we use sct_deepseg_sc with 2 kernel. Generally, it works better than sct_propseg and sct_deepseg_sc with 3d kernel.
-        segment_if_does_not_exist ${file_t2w} 't2' 'deepseg' 'anat'
-        file_t2_seg="${file_t2w}_label-SC_seg"
+          # Create directory for T2w results
+          mkdir -p ${PATH_DATA_PROCESSED}/${SUBJECT}/anat/T2w
+          cp ${file_t2w}.nii.gz ${PATH_DATA_PROCESSED}/${SUBJECT}/anat/T2w
+          cd T2w
+          
+          # Spinal cord segmentation
+          # Note: For T2w images, we use sct_deepseg_sc with 2 kernel. Generally, it works better than sct_propseg and sct_deepseg_sc with 3d kernel.
+          segment_if_does_not_exist ${file_t2w} 't2' 'deepseg' 'anat'
+          file_t2_seg="${file_t2w}_label-SC_seg"
 
-        # Vertebral labeling 
-        label_if_does_not_exist ${file_t2w} ${file_t2_seg}
-        file_t2_labels="${file_t2w}_label-SC_seg_labeled"
-        file_t2_labels_discs="${file_t2w}_label-SC_seg_labeled_discs"
+          # Vertebral labeling 
+          label_if_does_not_exist ${file_t2w} ${file_t2_seg}
+          file_t2_labels="${file_t2w}_label-SC_seg_labeled"
+          file_t2_labels_discs="${file_t2w}_label-SC_seg_labeled_discs"
 
-        # Extract dics 1 to 10 for registration to template (C1 to T2-T3)
-        sct_label_utils -i ${file_t2_labels_discs}.nii.gz -keep 1,2,3,4,5,6,7,8,9,10 -o ${file_t2_labels_discs}_1to10.nii.gz
-        file_t2_labels_discs="${file_t2w}_label-SC_seg_labeled_discs_1to10"
-        
-        # Label spinal nerve rootlets
-        segment_rootlets_if_does_not_exist ${file_t2w} ${file_t2_seg}
-        file_t2_rootlets="${file_t2w}_label-rootlets_dseg"
+          # Extract dics 1 to 10 for registration to template (C1 to T2-T3)
+          sct_label_utils -i ${file_t2_labels_discs}.nii.gz -keep 1,2,3,4,5,6,7,8,9,10 -o ${file_t2_labels_discs}_1to10.nii.gz
+          file_t2_labels_discs="${file_t2w}_label-SC_seg_labeled_discs_1to10"
+          
+          # Label spinal nerve rootlets
+          segment_rootlets_if_does_not_exist ${file_t2w} ${file_t2_seg}
+          file_t2_rootlets="${file_t2w}_label-rootlets_dseg"
 
-        # Register to template using disc labels
-        sct_register_to_template -i ${file_t2w}.nii.gz -s ${file_t2_seg}.nii.gz -ldisc ${file_t2_labels_discs}.nii.gz -c t2 -qc ${PATH_QC} -qc-subject ${SUBJECT}
+          # Register to template using disc labels
+          sct_register_to_template -i ${file_t2w}.nii.gz -s ${file_t2_seg}.nii.gz -ldisc ${file_t2_labels_discs}.nii.gz -c t2 -qc ${PATH_QC} -qc-subject ${SUBJECT}
 
-        # TODO: Register to template using nerve rootlets
+          # TODO: Register to template using nerve rootlets
 
 
-        cd ..
+          cd ..
     else
-        echo Skipping T2w
+          echo Skipping T2w
     fi
+ 
 
     # -------------------------------------------------------------------------
     # FUNC
     # -------------------------------------------------------------------------
     cd ../func
 
-    runs=(1 2)
+    runs=(1 2 3)
 
     for run in "${runs[@]}";do
 
@@ -426,7 +427,19 @@ if [[ $SES == *"spinalcord"* ]];then
       rm $v
 
       # Find motion outliers
-      fsl_motion_outliers -i ${file_task_mc2} -m ${file_task_mc2_mean_seg} --dvars --nomoco -o ${file_task}_dvars_motion_outliers.txt
+      fsl_motion_outliers -i ${file_task_mc2} -m ${file_task_mc2_mean_seg} --dvars --nomoco -o ${file_task}_motion_outliers.txt #removed the term dvars to make it compatible with brain naming
+
+      # If file does not exist, create an empty file, otherwise FSL crashes
+      file_outliers="${file_task}_motion_outliers.txt"
+      
+      if [[ ! -f "$file_outliers" ]]; then
+            confoundevs=0
+      else
+            confoundevs=1
+      fi
+
+
+
       # Warp 4D to template
       sct_apply_transfo -i ${file_task_mc2}_pnm.nii.gz -d ${SCT_DIR}/data/PAM50/template/PAM50_t2.nii.gz -w warp_${file_task_mc2_mean}2PAM50_t2.nii.gz -o ${file_task_mc2}_pnm2template.nii.gz -x spline
       fslmaths ${file_task_mc2}_pnm2template.nii.gz -mul ${SCT_DIR}/data/PAM50/template/PAM50_cord.nii.gz ${file_task_mc2}_pnm2template.nii.gz
@@ -446,29 +459,42 @@ if [[ $SES == *"spinalcord"* ]];then
       # Run first-level analysis
       ###############################
       # rsync the folder fsl_stim_vectors:
-      PATH_VECTORS="${PATH_DERIVATIVES}/${SUBJECT}/func/fsl_stim_vectors/"
+      #PATH_VECTORS="${PATH_DERIVATIVES}/${SUBJECT}/func/fsl_stim_vectors/"
+      PATH_VECTORS="${PATH_DERIVATIVES}/${sub_id}/fsl_stim_vectors"
+      echo ${PATH_VECTORS}
+
       # Create variable with filename to  min max of amp and export to feat
       if [[ -d ${PATH_VECTORS} ]]; then
-        mkdir -p fsl_stim_vectors
-        rsync -av $PATH_VECTORS/ ./fsl_stim_vectors/
+        cp -r ${PATH_VECTORS} ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}
         # todo rsync
       else
         echo "fsl_stim_vectors not found."
       fi
 
-      region=spinalcord
+      #cp -r ${PATH_VECTORS} ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}
+
+      cd ${PATH_VECTORS}
+
+      stim_file=*_stim_amp_1.txt
+      stim_parameters=`echo ${stim_file} | awk -F 'fsl_stim_vector_' '{print $2}' | awk -F '_stim_amp' '{print $1}'`
+
+
+      cd ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}
+      echo ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}
+
       func_data="${file_task}_mc2_pnm2template_smooth225" #TODO
-      subject=$(dirname "$SUBJECT")
+      subject=${sub_id}
       analysis_path=$PATH_DATA_PROCESSED/${subject}
       region="spinalcord"
-      coil="21Ch"
-      if [[ $SES == *"$coil"* ]]; then
-        coil="21Ch"
-      else
-        coil="56Ch"
+      coil=""
+      if [[ $SES == *"21Ch"* ]]; then
+        coil="21Ch"  # Set coil to 21Ch if SES contains "21Ch"
+      elif [[ $SES == *"56Ch"* ]]; then
+        coil="56Ch"  # Set coil to 56Ch if SES contains "56Ch"
       fi
       session="" # TODO change if multiple sessions
-      export analysis_path subject coil session run func_data region tr number_of_volumes
+      smoothing=0
+      export analysis_path subject coil session smoothing run func_data region tr number_of_volumes stim_parameters confoundevs
       envsubst < "${PATH_SCRIPTS}/first_level.fsf" > "${func_data}_first_level.fsf"
       
       # Remove existing feat repo if already exists
@@ -480,6 +506,7 @@ if [[ $SES == *"spinalcord"* ]];then
       # Create false registration 
       ################################
       cd ${func_data}_first_level.feat
+      
       mkdir -p reg
       cp /usr/local/fsl/etc/flirtsch/ident.mat reg/example_func2standard.mat
       cp example_func.nii.gz reg/example_func.nii.gz
@@ -488,10 +515,58 @@ if [[ $SES == *"spinalcord"* ]];then
       fslroi reg/standard_masked.nii.gz reg/standard.nii.gz 32 75 34 75 691 263
 
       cd ..
+
+      cd ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}
+
+      #Run first-level trialwise analysis
+      export analysis_path subject coil session run func_data region tr number_of_volumes stim_parameters smoothing confoundevs
+      envsubst < "${PATH_SCRIPTS}/first_level_trialwise.fsf" > "${func_data}_first_level_trialwise.fsf"
+	    feat ${func_data}_first_level_trialwise.fsf
+
+      #Run registration for first level trialwise analysis
+      cd ${func_data}_trialwise.feat
+      mkdir -p reg
+      cp /usr/local/fsl/etc/flirtsch/ident.mat reg/example_func2standard.mat
+      cp example_func.nii.gz reg/example_func.nii.gz
+      cp $SCT_DIR/data/PAM50/template/PAM50_t2s.nii.gz reg/standard.nii.gz
+      fslmaths reg/standard.nii.gz -mas $SCT_DIR/data/PAM50/template/PAM50_cord.nii.gz reg/standard_masked.nii.gz
+      fslroi reg/standard_masked.nii.gz reg/standard.nii.gz 32 75 34 75 691 263
+
+      cd ..
+
+
+      #Run second-level trialwise analysis
+      export analysis_path subject coil session run func_data region tr number_of_volumes stim_parameters smoothing
+      envsubst < "${PATH_SCRIPTS}/second_level_trialwise.fsf" > "${func_data}_second_level_trialwise.fsf"
+	    feat ${func_data}_second_level_trialwise.fsf
+      
+
     fi
   done
-
+  
 fi
+
+#Copy PAM50 template for masking the group level results
+cp $SCT_DIR/data/PAM50/template/PAM50_cord.nii.gz PAM50_cord.nii.gz
+fslroi PAM50_cord.nii.gz PAM50_cord_cropped.nii.gz 32 75 34 75 691 263
+
+
+subject=$(dirname "$SUBJECT")
+analysis_path=$PATH_DATA_PROCESSED/${subject}
+region="spinalcord"
+coil=""  # Initialize coil as empty
+
+if [[ $SES == *"21Ch"* ]]; then
+    coil="21Ch"  # Set coil to 21Ch if SES contains "21Ch"
+elif [[ $SES == *"56Ch"* ]]; then
+    coil="56Ch"  # Set coil to 56Ch if SES contains "56Ch"
+fi
+
+session="" # TODO change if multiple sessions
+export analysis_path subject coil session run func_data region
+envsubst < "${PATH_SCRIPTS}/first_level_average.fsf" > "${subject}_${region}_first_level_average.fsf"
+feat ${subject}_${region}_first_level_average.fsf
+
 
 
 # Verify presence of output files and write log file if error

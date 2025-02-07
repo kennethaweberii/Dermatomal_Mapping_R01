@@ -109,7 +109,7 @@ set fmri(st_file) ""
 set fmri(bet_yn) 0
 
 # Spatial smoothing FWHM (mm)
-set fmri(smooth) 5
+set fmri(smooth) ${smoothing}
 
 # Intensity normalization
 set fmri(norm_yn) 0
@@ -118,7 +118,7 @@ set fmri(norm_yn) 0
 set fmri(perfsub_yn) 0
 
 # Highpass temporal filtering
-set fmri(temphp_yn) 1
+set fmri(temphp_yn) 0
 
 # Lowpass temporal filtering
 set fmri(templp_yn) 0
@@ -154,7 +154,7 @@ set fmri(randomisePermutations) 5000
 
 # Number of EVs
 set fmri(evs_orig) 5
-set fmri(evs_real) 10
+set fmri(evs_real) 5
 set fmri(evs_vox) 0
 
 # Number of contrasts
@@ -276,10 +276,10 @@ set fmri(ncopeinputs) 0
 set feat_files(1) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/${func_data}"
 
 # Add confound EVs text file
-set fmri(confoundevs) 1
+set fmri(confoundevs) ${confoundevs}
 
 # Confound EVs text file for analysis 1
-set confoundev_files(1) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/${subject}_ses-${region}${coil}${session}_task-tens_run-1_bold_motion_outliers.txt"
+set confoundev_files(1) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/${subject}_ses-${region}${coil}${session}_task-tens_run-${run}_bold_motion_outliers.txt"
 
 # EV 1 title
 set fmri(evtitle1) "amp_1"
@@ -311,10 +311,10 @@ set fmri(convolve_phase1) 0
 set fmri(tempfilt_yn1) 1
 
 # Add temporal derivative (EV 1)
-set fmri(deriv_yn1) 1
+set fmri(deriv_yn1) 0
 
 # Custom EV file (EV 1)
-set fmri(custom1) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/fsl_stim_vectors/${subject}_fsl_stim_vector_monophasic_f_100hz_pw_0.0002s_stim_15s_no_stim_0s_low_1.2ma_high_10.0ma_samp_f_5000hz_stim_amp_1.txt"
+set fmri(custom1) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/fsl_stim_vectors/${subject}_fsl_stim_vector_${stim_parameters}_stim_amp_1.txt"
 
 # Gamma sigma (EV 1)
 set fmri(gammasigma1) 3
@@ -370,10 +370,10 @@ set fmri(convolve_phase2) 0
 set fmri(tempfilt_yn2) 1
 
 # Add temporal derivative (EV 2)
-set fmri(deriv_yn2) 1
+set fmri(deriv_yn2) 0
 
 # Custom EV file (EV 2)
-set fmri(custom2) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/fsl_stim_vectors/${subject}_fsl_stim_vector_monophasic_f_100hz_pw_0.0002s_stim_15s_no_stim_0s_low_1.2ma_high_10.0ma_samp_f_5000hz_stim_amp_2.txt"
+set fmri(custom2) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/fsl_stim_vectors/${subject}_fsl_stim_vector_${stim_parameters}_stim_amp_2.txt"
 
 # Gamma sigma (EV 2)
 set fmri(gammasigma2) 3
@@ -429,10 +429,10 @@ set fmri(convolve_phase3) 0
 set fmri(tempfilt_yn3) 1
 
 # Add temporal derivative (EV 3)
-set fmri(deriv_yn3) 1
+set fmri(deriv_yn3) 0
 
 # Custom EV file (EV 3)
-set fmri(custom3) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/fsl_stim_vectors/${subject}_fsl_stim_vector_monophasic_f_100hz_pw_0.0002s_stim_15s_no_stim_0s_low_1.2ma_high_10.0ma_samp_f_5000hz_stim_amp_3.txt"
+set fmri(custom3) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/fsl_stim_vectors/${subject}_fsl_stim_vector_${stim_parameters}_stim_amp_3.txt"
 
 # Gamma sigma (EV 3)
 set fmri(gammasigma3) 3
@@ -488,10 +488,10 @@ set fmri(convolve_phase4) 0
 set fmri(tempfilt_yn4) 1
 
 # Add temporal derivative (EV 4)
-set fmri(deriv_yn4) 1
+set fmri(deriv_yn4) 0
 
 # Custom EV file (EV 4)
-set fmri(custom4) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/fsl_stim_vectors/${subject}_fsl_stim_vector_monophasic_f_100hz_pw_0.0002s_stim_15s_no_stim_0s_low_1.2ma_high_10.0ma_samp_f_5000hz_stim_amp_4.txt"
+set fmri(custom4) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/fsl_stim_vectors/${subject}_fsl_stim_vector_${stim_parameters}_stim_amp_4.txt"
 
 # Gamma sigma (EV 4)
 set fmri(gammasigma4) 3
@@ -547,11 +547,10 @@ set fmri(convolve_phase5) 0
 set fmri(tempfilt_yn5) 1
 
 # Add temporal derivative (EV 5)
-set fmri(deriv_yn5) 1
+set fmri(deriv_yn5) 0
 
 # Custom EV file (EV 5)
-set fmri(custom5) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/fsl_stim_vectors/${subject}_fsl_stim_vector_monophasic_f_100hz_pw_0.0002s_stim_15s_no_stim_0s_low_1.2ma_high_10.0ma_samp_f_5000hz_stim_amp_5.txt"
-
+set fmri(custom5) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/fsl_stim_vectors/${subject}_fsl_stim_vector_${stim_parameters}_stim_amp_5.txt"
 # Gamma sigma (EV 5)
 set fmri(gammasigma5) 3
 
@@ -603,21 +602,6 @@ set fmri(con_real1.4) 0
 # Real contrast_real vector 1 element 5
 set fmri(con_real1.5) 0
 
-# Real contrast_real vector 1 element 6
-set fmri(con_real1.6) 0
-
-# Real contrast_real vector 1 element 7
-set fmri(con_real1.7) 0
-
-# Real contrast_real vector 1 element 8
-set fmri(con_real1.8) 0
-
-# Real contrast_real vector 1 element 9
-set fmri(con_real1.9) 0
-
-# Real contrast_real vector 1 element 10
-set fmri(con_real1.10) 0
-
 # F-test 1 element 1
 set fmri(ftest_real1.1) 1
 
@@ -631,31 +615,16 @@ set fmri(conname_real.2) "amp_2"
 set fmri(con_real2.1) 0
 
 # Real contrast_real vector 2 element 2
-set fmri(con_real2.2) 0
+set fmri(con_real2.2) 1.0
 
 # Real contrast_real vector 2 element 3
-set fmri(con_real2.3) 1.0
+set fmri(con_real2.3) 0
 
 # Real contrast_real vector 2 element 4
 set fmri(con_real2.4) 0
 
 # Real contrast_real vector 2 element 5
 set fmri(con_real2.5) 0
-
-# Real contrast_real vector 2 element 6
-set fmri(con_real2.6) 0
-
-# Real contrast_real vector 2 element 7
-set fmri(con_real2.7) 0
-
-# Real contrast_real vector 2 element 8
-set fmri(con_real2.8) 0
-
-# Real contrast_real vector 2 element 9
-set fmri(con_real2.9) 0
-
-# Real contrast_real vector 2 element 10
-set fmri(con_real2.10) 0
 
 # F-test 1 element 2
 set fmri(ftest_real1.2) 1
@@ -673,28 +642,13 @@ set fmri(con_real3.1) 0
 set fmri(con_real3.2) 0
 
 # Real contrast_real vector 3 element 3
-set fmri(con_real3.3) 0
+set fmri(con_real3.3) 1.0
 
 # Real contrast_real vector 3 element 4
 set fmri(con_real3.4) 0
 
 # Real contrast_real vector 3 element 5
-set fmri(con_real3.5) 1.0
-
-# Real contrast_real vector 3 element 6
-set fmri(con_real3.6) 0
-
-# Real contrast_real vector 3 element 7
-set fmri(con_real3.7) 0
-
-# Real contrast_real vector 3 element 8
-set fmri(con_real3.8) 0
-
-# Real contrast_real vector 3 element 9
-set fmri(con_real3.9) 0
-
-# Real contrast_real vector 3 element 10
-set fmri(con_real3.10) 0
+set fmri(con_real3.5) 0
 
 # F-test 1 element 3
 set fmri(ftest_real1.3) 1
@@ -715,25 +669,10 @@ set fmri(con_real4.2) 0
 set fmri(con_real4.3) 0
 
 # Real contrast_real vector 4 element 4
-set fmri(con_real4.4) 0
+set fmri(con_real4.4) 1.0
 
 # Real contrast_real vector 4 element 5
 set fmri(con_real4.5) 0
-
-# Real contrast_real vector 4 element 6
-set fmri(con_real4.6) 0
-
-# Real contrast_real vector 4 element 7
-set fmri(con_real4.7) 1.0
-
-# Real contrast_real vector 4 element 8
-set fmri(con_real4.8) 0
-
-# Real contrast_real vector 4 element 9
-set fmri(con_real4.9) 0
-
-# Real contrast_real vector 4 element 10
-set fmri(con_real4.10) 0
 
 # F-test 1 element 4
 set fmri(ftest_real1.4) 1
@@ -757,22 +696,7 @@ set fmri(con_real5.3) 0
 set fmri(con_real5.4) 0
 
 # Real contrast_real vector 5 element 5
-set fmri(con_real5.5) 0
-
-# Real contrast_real vector 5 element 6
-set fmri(con_real5.6) 0
-
-# Real contrast_real vector 5 element 7
-set fmri(con_real5.7) 0
-
-# Real contrast_real vector 5 element 8
-set fmri(con_real5.8) 0
-
-# Real contrast_real vector 5 element 9
-set fmri(con_real5.9) 1.0
-
-# Real contrast_real vector 5 element 10
-set fmri(con_real5.10) 0
+set fmri(con_real5.5) 1.0
 
 # F-test 1 element 5
 set fmri(ftest_real1.5) 1
@@ -787,31 +711,16 @@ set fmri(conname_real.6) "linear +"
 set fmri(con_real6.1) -2.0
 
 # Real contrast_real vector 6 element 2
-set fmri(con_real6.2) 0
+set fmri(con_real6.2) -1.0
 
 # Real contrast_real vector 6 element 3
-set fmri(con_real6.3) -1.0
+set fmri(con_real6.3) 0
 
 # Real contrast_real vector 6 element 4
-set fmri(con_real6.4) 0
+set fmri(con_real6.4) 1.0
 
 # Real contrast_real vector 6 element 5
-set fmri(con_real6.5) 0
-
-# Real contrast_real vector 6 element 6
-set fmri(con_real6.6) 0
-
-# Real contrast_real vector 6 element 7
-set fmri(con_real6.7) 1.0
-
-# Real contrast_real vector 6 element 8
-set fmri(con_real6.8) 0
-
-# Real contrast_real vector 6 element 9
-set fmri(con_real6.9) 2.0
-
-# Real contrast_real vector 6 element 10
-set fmri(con_real6.10) 0
+set fmri(con_real6.5) 2.0
 
 # F-test 1 element 6
 set fmri(ftest_real1.6) 0
@@ -826,31 +735,16 @@ set fmri(conname_real.7) "linear -"
 set fmri(con_real7.1) 2.0
 
 # Real contrast_real vector 7 element 2
-set fmri(con_real7.2) 0
+set fmri(con_real7.2) 1.0
 
 # Real contrast_real vector 7 element 3
-set fmri(con_real7.3) 1.0
+set fmri(con_real7.3) 0
 
 # Real contrast_real vector 7 element 4
-set fmri(con_real7.4) 0
+set fmri(con_real7.4) -1.0
 
 # Real contrast_real vector 7 element 5
-set fmri(con_real7.5) 0
-
-# Real contrast_real vector 7 element 6
-set fmri(con_real7.6) 0
-
-# Real contrast_real vector 7 element 7
-set fmri(con_real7.7) -1.0
-
-# Real contrast_real vector 7 element 8
-set fmri(con_real7.8) 0
-
-# Real contrast_real vector 7 element 9
-set fmri(con_real7.9) -2.0
-
-# Real contrast_real vector 7 element 10
-set fmri(con_real7.10) 0
+set fmri(con_real7.5) -2.0
 
 # F-test 1 element 7
 set fmri(ftest_real1.7) 0
@@ -865,31 +759,16 @@ set fmri(conname_real.8) "quadratic +"
 set fmri(con_real8.1) 2.0
 
 # Real contrast_real vector 8 element 2
-set fmri(con_real8.2) 0
+set fmri(con_real8.2) -1.0
 
 # Real contrast_real vector 8 element 3
-set fmri(con_real8.3) -1.0
+set fmri(con_real8.3) -2.0
 
 # Real contrast_real vector 8 element 4
-set fmri(con_real8.4) 0
+set fmri(con_real8.4) -1.0
 
 # Real contrast_real vector 8 element 5
-set fmri(con_real8.5) -2.0
-
-# Real contrast_real vector 8 element 6
-set fmri(con_real8.6) 0
-
-# Real contrast_real vector 8 element 7
-set fmri(con_real8.7) -1.0
-
-# Real contrast_real vector 8 element 8
-set fmri(con_real8.8) 0
-
-# Real contrast_real vector 8 element 9
-set fmri(con_real8.9) 2.0
-
-# Real contrast_real vector 8 element 10
-set fmri(con_real8.10) 0
+set fmri(con_real8.5) 2.0
 
 # F-test 1 element 8
 set fmri(ftest_real1.8) 0
@@ -904,31 +783,16 @@ set fmri(conname_real.9) "quadratic -"
 set fmri(con_real9.1) -2.0
 
 # Real contrast_real vector 9 element 2
-set fmri(con_real9.2) 0
+set fmri(con_real9.2) 1.0
 
 # Real contrast_real vector 9 element 3
-set fmri(con_real9.3) 1.0
+set fmri(con_real9.3) 2.0
 
 # Real contrast_real vector 9 element 4
-set fmri(con_real9.4) 0
+set fmri(con_real9.4) 1.0
 
 # Real contrast_real vector 9 element 5
-set fmri(con_real9.5) 2.0
-
-# Real contrast_real vector 9 element 6
-set fmri(con_real9.6) 0
-
-# Real contrast_real vector 9 element 7
-set fmri(con_real9.7) 1.0
-
-# Real contrast_real vector 9 element 8
-set fmri(con_real9.8) 0
-
-# Real contrast_real vector 9 element 9
-set fmri(con_real9.9) -2.0
-
-# Real contrast_real vector 9 element 10
-set fmri(con_real9.10) 0
+set fmri(con_real9.5) -2.0
 
 # F-test 1 element 9
 set fmri(ftest_real1.9) 0
@@ -943,31 +807,16 @@ set fmri(conname_real.10) "right sigmoid +"
 set fmri(con_real10.1) -309.0
 
 # Real contrast_real vector 10 element 2
-set fmri(con_real10.2) 0
+set fmri(con_real10.2) -78.0
 
 # Real contrast_real vector 10 element 3
-set fmri(con_real10.3) -78.0
+set fmri(con_real10.3) 71.0
 
 # Real contrast_real vector 10 element 4
-set fmri(con_real10.4) 0
+set fmri(con_real10.4) 143.0
 
 # Real contrast_real vector 10 element 5
-set fmri(con_real10.5) 71.0
-
-# Real contrast_real vector 10 element 6
-set fmri(con_real10.6) 0
-
-# Real contrast_real vector 10 element 7
-set fmri(con_real10.7) 143.0
-
-# Real contrast_real vector 10 element 8
-set fmri(con_real10.8) 0
-
-# Real contrast_real vector 10 element 9
-set fmri(con_real10.9) 173.0
-
-# Real contrast_real vector 10 element 10
-set fmri(con_real10.10) 0
+set fmri(con_real10.5) 173.0
 
 # F-test 1 element 10
 set fmri(ftest_real1.10) 0
@@ -982,31 +831,16 @@ set fmri(conname_real.11) "right sigmoid -"
 set fmri(con_real11.1) 309.0
 
 # Real contrast_real vector 11 element 2
-set fmri(con_real11.2) 0
+set fmri(con_real11.2) 78.0
 
 # Real contrast_real vector 11 element 3
-set fmri(con_real11.3) 78.0
+set fmri(con_real11.3) -71.0
 
 # Real contrast_real vector 11 element 4
-set fmri(con_real11.4) 0
+set fmri(con_real11.4) -143.0
 
 # Real contrast_real vector 11 element 5
-set fmri(con_real11.5) -71.0
-
-# Real contrast_real vector 11 element 6
-set fmri(con_real11.6) 0
-
-# Real contrast_real vector 11 element 7
-set fmri(con_real11.7) -143.0
-
-# Real contrast_real vector 11 element 8
-set fmri(con_real11.8) 0
-
-# Real contrast_real vector 11 element 9
-set fmri(con_real11.9) -173.0
-
-# Real contrast_real vector 11 element 10
-set fmri(con_real11.10) 0
+set fmri(con_real11.5) -173.0
 
 # F-test 1 element 11
 set fmri(ftest_real1.11) 0
@@ -1021,31 +855,16 @@ set fmri(conname_real.12) "left sigmoid +"
 set fmri(con_real12.1) -173.0
 
 # Real contrast_real vector 12 element 2
-set fmri(con_real12.2) 0
+set fmri(con_real12.2) -143.0
 
 # Real contrast_real vector 12 element 3
-set fmri(con_real12.3) -143.0
+set fmri(con_real12.3) -71.0
 
 # Real contrast_real vector 12 element 4
-set fmri(con_real12.4) 0
+set fmri(con_real12.4) 78.0
 
 # Real contrast_real vector 12 element 5
-set fmri(con_real12.5) -71.0
-
-# Real contrast_real vector 12 element 6
-set fmri(con_real12.6) 0
-
-# Real contrast_real vector 12 element 7
-set fmri(con_real12.7) 78.0
-
-# Real contrast_real vector 12 element 8
-set fmri(con_real12.8) 0
-
-# Real contrast_real vector 12 element 9
-set fmri(con_real12.9) 309.0
-
-# Real contrast_real vector 12 element 10
-set fmri(con_real12.10) 0
+set fmri(con_real12.5) 309.0
 
 # F-test 1 element 12
 set fmri(ftest_real1.12) 0
@@ -1060,31 +879,16 @@ set fmri(conname_real.13) "left sigmoid -"
 set fmri(con_real13.1) 173.0
 
 # Real contrast_real vector 13 element 2
-set fmri(con_real13.2) 0
+set fmri(con_real13.2) 143.0
 
 # Real contrast_real vector 13 element 3
-set fmri(con_real13.3) 143.0
+set fmri(con_real13.3) 71.0
 
 # Real contrast_real vector 13 element 4
-set fmri(con_real13.4) 0
+set fmri(con_real13.4) -78.0
 
 # Real contrast_real vector 13 element 5
-set fmri(con_real13.5) 71.0
-
-# Real contrast_real vector 13 element 6
-set fmri(con_real13.6) 0
-
-# Real contrast_real vector 13 element 7
-set fmri(con_real13.7) -78.0
-
-# Real contrast_real vector 13 element 8
-set fmri(con_real13.8) 0
-
-# Real contrast_real vector 13 element 9
-set fmri(con_real13.9) -309.0
-
-# Real contrast_real vector 13 element 10
-set fmri(con_real13.10) 0
+set fmri(con_real13.5) -309.0
 
 # F-test 1 element 13
 set fmri(ftest_real1.13) 0
