@@ -19,7 +19,7 @@
 #
 #
 #
-# Authors: Sandrine Bédard and Kenneth Weber
+# Authors: Sandrine Bédard, Kenneth Weber and Merve Kaptan
 #
 
 # Uncomment for full verbose
@@ -71,11 +71,12 @@ segment_if_does_not_exist() {
     echo "Not found. Proceeding with automatic segmentation."
     # Segment spinal cord
     if [[ $segmentation_method == 'deepseg' ]];then
-        #sct_deepseg_sc -i ${file}.nii.gz -c ${contrast} -qc ${PATH_QC} -qc-subject ${SUBJECT}
-        sct_deepseg -i ${file}.nii.gz -task seg_sc_contrast_agnostic -o ${file}_label-SC_seg.nii.gz
-        sct_qc -i ${file}.nii.gz -s ${file}_label-SC_seg.nii.gz -p sct_deepseg_sc -qc ${PATH_QC} -qc-subject ${SUBJECT}
+        sct_deepseg -i ${file}.nii.gz -task seg_sc_contrast_agnostic -o ${file}_label-SC_seg.nii.gz -qc ${PATH_QC} -qc-subject ${SUBJECT}
     elif [[ $segmentation_method == 'propseg' ]]; then
         sct_propseg -i ${file}.nii.gz -c ${contrast} -qc ${PATH_QC} -qc-subject ${SUBJECT} -CSF
+      elif [[ $segmentation_method == 'epi' ]]; then
+        sct_deepseg -i ${file}.nii.gz -task seg_sc_epi -o ${file}_label-SC_seg.nii.gz -qc ${PATH_QC} -qc-subject ${SUBJECT} -CSF
+
     fi
   fi
 }
@@ -142,18 +143,17 @@ segment_rootlets_if_does_not_exist() {
   if [[ -e $FILESEGMANUAL ]]; then
     echo "Found! Using manual segmentation."
     rsync -avzh $FILESEGMANUAL ${FILEROOTLET}.nii.gz
-    sct_qc -i ${file}.nii.gz -s ${file_seg}.nii.gz -d ${FILEROOTLET}.nii.gz -p sct_deepseg_lesion -plane axial -qc ${PATH_QC} -qc-subject ${SUBJECT}
   else
     echo "Not found. Proceeding with automatic segmentation."
     # Segment spinal nerve rootlets
-    sct_deepseg -i ${file}.nii.gz -task seg_spinal_rootlets_t2w -o ${FILEROOTLET}.nii.gz
-    sct_qc -i ${file}.nii.gz -s ${file_seg}.nii.gz -d ${FILEROOTLET}.nii.gz -p sct_deepseg_lesion -plane axial -qc ${PATH_QC} -qc-subject ${SUBJECT}
+    sct_deepseg -i ${file}.nii.gz -task seg_spinal_rootlets_t2w -o ${FILEROOTLET}.nii.gz -qc ${PATH_QC} -qc-subject ${SUBJECT}
   fi
 }
 
 
 # Retrieve input params and other params
 SUBJECT=$1
+REG=$2
 #tasks="${@:2}"
 # echo "Tasks:"
 # echo $tasks
@@ -234,12 +234,17 @@ if [[ $SES == *"spinalcord"* ]];then
           # Label spinal nerve rootlets
           segment_rootlets_if_does_not_exist ${file_t2w} ${file_t2_seg}
           file_t2_rootlets="${file_t2w}_label-rootlets_dseg"
+          # Create center-of-mass for QC purpose
+          sct_label_utils -i ${file_t2_rootlets}.nii.gz -cubic-to-point -o ${file_t2_rootlets}_mid.nii.gz
+          sct_label_utils -i ${file_t2w}_seg.nii.gz -project-centerline ${file_t2_rootlets}_mid.nii.gz  -o ${file_t2_rootlets}_mid_center.nii.gz
+          sct_qc -i ${file_t2w}.nii.gz  -s ${file_t2_rootlets}_mid_center.nii.gz -p sct_label_utils -qc $PATH_QC -qc-subject ${SUBJECT}
 
-          # Register to template using disc labels
-          sct_register_to_template -i ${file_t2w}.nii.gz -s ${file_t2_seg}.nii.gz -ldisc ${file_t2_labels_discs}.nii.gz -c t2 -qc ${PATH_QC} -qc-subject ${SUBJECT}
 
-          # TODO: Register to template using nerve rootlets
-
+          # Register to template using disc labels or spinal rootlets
+          if [[ $REG == *"disc"* ]]; then
+            sct_register_to_template -i ${file_t2w}.nii.gz -s ${file_t2_seg}.nii.gz -ldisc ${file_t2_labels_discs}.nii.gz -c t2 -qc ${PATH_QC} -qc-subject ${SUBJECT}
+          else
+            sct_register_to_template -i ${file_t2w}.nii.gz -s ${file_t2_seg}.nii.gz -lrootlet ${file_t2_rootlets}.nii.gz -c t2 -qc ${PATH_QC} -qc-subject ${SUBJECT}
 
           cd ..
     else
@@ -295,7 +300,7 @@ if [[ $SES == *"spinalcord"* ]];then
           fi
           # Qc of mask
           sct_qc -i ${file_task_mean}.nii.gz -p sct_deepseg_sc -qc ${PATH_QC} -s ${file_task_mean}_mask.nii.gz -qc-subject ${SUBJECT}
-
+          sct_fmri_compute_tsnr -i ${file_task}.nii.gz -o ${file_task}_tsnr.nii.gz
           if [[ ! -f ${file_task}_mc2.nii.gz ]]; then
             # --------------------
             # 2D Motion correction
@@ -335,6 +340,9 @@ if [[ $SES == *"spinalcord"* ]];then
             mv Rz.nii.gz ./PNM_run-${run}
             mv Tx.nii.gz ./PNM_run-${run}
             mv Ty.nii.gz ./PNM_run-${run}
+
+            # Create QC report for TSNR:
+            sct_qc -i ${file_task}_tsnr.nii.gz -d ${file_task}_mc2_tsnr.nii.gz -s ${file_task_mean}.nii.gz -p sct_fmri_compute_tsnr -qc ${PATH_QC} -qc-subject ${SUBJECT}
           fi
           # Create spinal cord mask and spinal canal mask
           file_task_mc2=${file_task}_mc2
@@ -361,6 +369,9 @@ if [[ $SES == *"spinalcord"* ]];then
 
       # Segment spinal cord after motion correction
       segment_if_does_not_exist ${file_task_mc2_mean} 't2' 'deepseg' 'func'
+      # Test EPI seg --> select the best
+      segment_if_does_not_exist ${file_task_mc2_mean} 't2' 'epi' 'func'
+
       file_task_mc2_mean_seg="${file_task_mc2_mean}_label-SC_seg"
 
       # QC for motion correction
@@ -456,89 +467,89 @@ if [[ $SES == *"spinalcord"* ]];then
       #sigma= 2mm/2.354 = | sigma = 5m/2.354 for 2mm and 5 mm of full width at half maximum (FWHM)
       fslmaths ${file_task_mc2}_pnm2template.nii.gz -s 0.85,0.84,2.124 ${file_task_mc2}_pnm2template_smooth225.nii.gz
       
-      # Run first-level analysis
-      ###############################
-      # rsync the folder fsl_stim_vectors:
-      #PATH_VECTORS="${PATH_DERIVATIVES}/${SUBJECT}/func/fsl_stim_vectors/"
-      PATH_VECTORS="${PATH_DERIVATIVES}/${sub_id}/fsl_stim_vectors"
-      echo ${PATH_VECTORS}
+      # # Run first-level analysis
+      # ###############################
+      # # rsync the folder fsl_stim_vectors:
+      # #PATH_VECTORS="${PATH_DERIVATIVES}/${SUBJECT}/func/fsl_stim_vectors/"
+      # PATH_VECTORS="${PATH_DERIVATIVES}/${sub_id}/fsl_stim_vectors"
+      # echo ${PATH_VECTORS}
 
-      # Create variable with filename to  min max of amp and export to feat
-      if [[ -d ${PATH_VECTORS} ]]; then
-        cp -r ${PATH_VECTORS} ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}
-        # todo rsync
-      else
-        echo "fsl_stim_vectors not found."
-      fi
+      # # Create variable with filename to  min max of amp and export to feat
+      # if [[ -d ${PATH_VECTORS} ]]; then
+      #   cp -r ${PATH_VECTORS} ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}
+      #   # todo rsync
+      # else
+      #   echo "fsl_stim_vectors not found."
+      # fi
 
-      #cp -r ${PATH_VECTORS} ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}
+      # #cp -r ${PATH_VECTORS} ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}
 
-      cd ${PATH_VECTORS}
+      # cd ${PATH_VECTORS}
 
-      stim_file=*_stim_amp_1.txt
-      stim_parameters=`echo ${stim_file} | awk -F 'fsl_stim_vector_' '{print $2}' | awk -F '_stim_amp' '{print $1}'`
+      # stim_file=*_stim_amp_1.txt
+      # stim_parameters=`echo ${stim_file} | awk -F 'fsl_stim_vector_' '{print $2}' | awk -F '_stim_amp' '{print $1}'`
 
 
-      cd ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}
-      echo ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}
+      # cd ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}
+      # echo ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}
 
-      func_data="${file_task}_mc2_pnm2template_smooth225" #TODO
-      subject=${sub_id}
-      analysis_path=$PATH_DATA_PROCESSED/${subject}
-      region="spinalcord"
-      coil=""
-      if [[ $SES == *"21Ch"* ]]; then
-        coil="21Ch"  # Set coil to 21Ch if SES contains "21Ch"
-      elif [[ $SES == *"56Ch"* ]]; then
-        coil="56Ch"  # Set coil to 56Ch if SES contains "56Ch"
-      fi
-      session="" # TODO change if multiple sessions
-      smoothing=0
-      export analysis_path subject coil session smoothing run func_data region tr number_of_volumes stim_parameters confoundevs
-      envsubst < "${PATH_SCRIPTS}/first_level.fsf" > "${func_data}_first_level.fsf"
+      # func_data="${file_task}_mc2_pnm2template_smooth225" #TODO
+      # subject=${sub_id}
+      # analysis_path=$PATH_DATA_PROCESSED/${subject}
+      # region="spinalcord"
+      # coil=""
+      # if [[ $SES == *"21Ch"* ]]; then
+      #   coil="21Ch"  # Set coil to 21Ch if SES contains "21Ch"
+      # elif [[ $SES == *"56Ch"* ]]; then
+      #   coil="56Ch"  # Set coil to 56Ch if SES contains "56Ch"
+      # fi
+      # session="" # TODO change if multiple sessions
+      # smoothing=0
+      # export analysis_path subject coil session smoothing run func_data region tr number_of_volumes stim_parameters confoundevs
+      # envsubst < "${PATH_SCRIPTS}/first_level.fsf" > "${func_data}_first_level.fsf"
       
-      # Remove existing feat repo if already exists
-      if [[ -d "${func_data}_first_level.feat" ]]; then
-        rm -r "${func_data}_first_level.feat"
-      fi
-      feat ${func_data}_first_level.fsf
+      # # Remove existing feat repo if already exists
+      # if [[ -d "${func_data}_first_level.feat" ]]; then
+      #   rm -r "${func_data}_first_level.feat"
+      # fi
+      # feat ${func_data}_first_level.fsf
 
-      # Create false registration 
-      ################################
-      cd ${func_data}_first_level.feat
+      # # Create false registration 
+      # ################################
+      # cd ${func_data}_first_level.feat
       
-      mkdir -p reg
-      cp /usr/local/fsl/etc/flirtsch/ident.mat reg/example_func2standard.mat
-      cp example_func.nii.gz reg/example_func.nii.gz
-      cp $SCT_DIR/data/PAM50/template/PAM50_t2s.nii.gz reg/standard.nii.gz
-      fslmaths reg/standard.nii.gz -mas $SCT_DIR/data/PAM50/template/PAM50_cord.nii.gz reg/standard_masked.nii.gz
-      fslroi reg/standard_masked.nii.gz reg/standard.nii.gz 32 75 34 75 691 263
+      # mkdir -p reg
+      # cp /usr/local/fsl/etc/flirtsch/ident.mat reg/example_func2standard.mat
+      # cp example_func.nii.gz reg/example_func.nii.gz
+      # cp $SCT_DIR/data/PAM50/template/PAM50_t2s.nii.gz reg/standard.nii.gz
+      # fslmaths reg/standard.nii.gz -mas $SCT_DIR/data/PAM50/template/PAM50_cord.nii.gz reg/standard_masked.nii.gz
+      # fslroi reg/standard_masked.nii.gz reg/standard.nii.gz 32 75 34 75 691 263
 
-      cd ..
+      # cd ..
 
-      cd ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}
+      # cd ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}
 
-      #Run first-level trialwise analysis
-      export analysis_path subject coil session run func_data region tr number_of_volumes stim_parameters smoothing confoundevs
-      envsubst < "${PATH_SCRIPTS}/first_level_trialwise.fsf" > "${func_data}_first_level_trialwise.fsf"
-	    feat ${func_data}_first_level_trialwise.fsf
+      # #Run first-level trialwise analysis
+      # export analysis_path subject coil session run func_data region tr number_of_volumes stim_parameters smoothing confoundevs
+      # envsubst < "${PATH_SCRIPTS}/first_level_trialwise.fsf" > "${func_data}_first_level_trialwise.fsf"
+	    # feat ${func_data}_first_level_trialwise.fsf
 
-      #Run registration for first level trialwise analysis
-      cd ${func_data}_trialwise.feat
-      mkdir -p reg
-      cp /usr/local/fsl/etc/flirtsch/ident.mat reg/example_func2standard.mat
-      cp example_func.nii.gz reg/example_func.nii.gz
-      cp $SCT_DIR/data/PAM50/template/PAM50_t2s.nii.gz reg/standard.nii.gz
-      fslmaths reg/standard.nii.gz -mas $SCT_DIR/data/PAM50/template/PAM50_cord.nii.gz reg/standard_masked.nii.gz
-      fslroi reg/standard_masked.nii.gz reg/standard.nii.gz 32 75 34 75 691 263
+      # #Run registration for first level trialwise analysis
+      # cd ${func_data}_trialwise.feat
+      # mkdir -p reg
+      # cp /usr/local/fsl/etc/flirtsch/ident.mat reg/example_func2standard.mat
+      # cp example_func.nii.gz reg/example_func.nii.gz
+      # cp $SCT_DIR/data/PAM50/template/PAM50_t2s.nii.gz reg/standard.nii.gz
+      # fslmaths reg/standard.nii.gz -mas $SCT_DIR/data/PAM50/template/PAM50_cord.nii.gz reg/standard_masked.nii.gz
+      # fslroi reg/standard_masked.nii.gz reg/standard.nii.gz 32 75 34 75 691 263
 
-      cd ..
+      # cd ..
 
 
-      #Run second-level trialwise analysis
-      export analysis_path subject coil session run func_data region tr number_of_volumes stim_parameters smoothing
-      envsubst < "${PATH_SCRIPTS}/second_level_trialwise.fsf" > "${func_data}_second_level_trialwise.fsf"
-	    feat ${func_data}_second_level_trialwise.fsf
+      # #Run second-level trialwise analysis
+      # export analysis_path subject coil session run func_data region tr number_of_volumes stim_parameters smoothing
+      # envsubst < "${PATH_SCRIPTS}/second_level_trialwise.fsf" > "${func_data}_second_level_trialwise.fsf"
+	    # feat ${func_data}_second_level_trialwise.fsf
       
 
     fi
