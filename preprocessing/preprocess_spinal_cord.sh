@@ -75,7 +75,7 @@ segment_if_does_not_exist() {
     elif [[ $segmentation_method == 'propseg' ]]; then
         sct_propseg -i ${file}.nii.gz -c ${contrast} -qc ${PATH_QC} -qc-subject ${SUBJECT} -CSF
       elif [[ $segmentation_method == 'epi' ]]; then
-        sct_deepseg -i ${file}.nii.gz -task seg_sc_epi -o ${file}_label-SC_seg.nii.gz -qc ${PATH_QC} -qc-subject ${SUBJECT} -CSF
+        sct_deepseg -i ${file}.nii.gz -task seg_sc_epi -o ${file}_label-SC_seg.nii.gz -qc ${PATH_QC} -qc-subject ${SUBJECT}
 
     fi
   fi
@@ -236,7 +236,7 @@ if [[ $SES == *"spinalcord"* ]];then
           file_t2_rootlets="${file_t2w}_label-rootlets_dseg"
           # Create center-of-mass for QC purpose
           sct_label_utils -i ${file_t2_rootlets}.nii.gz -cubic-to-point -o ${file_t2_rootlets}_mid.nii.gz
-          sct_label_utils -i ${file_t2w}_seg.nii.gz -project-centerline ${file_t2_rootlets}_mid.nii.gz  -o ${file_t2_rootlets}_mid_center.nii.gz
+          sct_label_utils -i ${file_t2_seg}.nii.gz -project-centerline ${file_t2_rootlets}_mid.nii.gz  -o ${file_t2_rootlets}_mid_center.nii.gz
           sct_qc -i ${file_t2w}.nii.gz  -s ${file_t2_rootlets}_mid_center.nii.gz -p sct_label_utils -qc $PATH_QC -qc-subject ${SUBJECT}
 
 
@@ -245,7 +245,7 @@ if [[ $SES == *"spinalcord"* ]];then
             sct_register_to_template -i ${file_t2w}.nii.gz -s ${file_t2_seg}.nii.gz -ldisc ${file_t2_labels_discs}.nii.gz -c t2 -qc ${PATH_QC} -qc-subject ${SUBJECT}
           else
             sct_register_to_template -i ${file_t2w}.nii.gz -s ${file_t2_seg}.nii.gz -lrootlet ${file_t2_rootlets}.nii.gz -c t2 -qc ${PATH_QC} -qc-subject ${SUBJECT}
-
+          fi
           cd ..
     else
           echo Skipping T2w
