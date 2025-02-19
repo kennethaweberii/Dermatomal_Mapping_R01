@@ -92,7 +92,7 @@ label_if_does_not_exist(){
   local file_seg="$2"
   # Update global variable with segmentation file name
   FILELABEL="${file}_labels-disc"
-  FILELABELMANUAL="${PATH_DERIVATIVES}/${SUBJECT}/anat/${FILELABEL}-manual.nii.gz"
+  FILELABELMANUAL="${PATH_DERIVATIVES}/${SUBJECT}/anat/${FILELABEL}.nii.gz"
   echo "Looking for manual label: $FILELABELMANUAL"
   if [[ -e $FILELABELMANUAL ]]; then
     echo "Found! Using manual labels."
@@ -342,7 +342,7 @@ if [[ $SES == *"spinalcord"* ]];then
             mv Ty.nii.gz ./PNM_run-${run}
 
             # Create QC report for TSNR:
-            sct_qc -i ${file_task}_tsnr.nii.gz -d ${file_task}_mc2_tsnr.nii.gz -s ${file_task_mean}.nii.gz -p sct_fmri_compute_tsnr -qc ${PATH_QC} -qc-subject ${SUBJECT}
+            sct_qc -i ${file_task}_tsnr.nii.gz -d ${file_task}_mc2_tsnr.nii.gz -s ${file_task_mean}_label-SC_seg.nii.gz -p sct_fmri_compute_tsnr -qc ${PATH_QC} -qc-subject ${SUBJECT}
           fi
           # Create spinal cord mask and spinal canal mask
           file_task_mc2=${file_task}_mc2
@@ -367,10 +367,10 @@ if [[ $SES == *"spinalcord"* ]];then
 
       # Create segmentation using sct_deepseg
 
-      # Segment spinal cord after motion correction
-      segment_if_does_not_exist ${file_task_mc2_mean} 't2' 'deepseg' 'func'
       # Test EPI seg --> select the best
       segment_if_does_not_exist ${file_task_mc2_mean} 't2' 'epi' 'func'
+      # Segment spinal cord after motion correction
+      #segment_if_does_not_exist ${file_task_mc2_mean} 't2' 'deepseg' 'func'
 
       file_task_mc2_mean_seg="${file_task_mc2_mean}_label-SC_seg"
 
@@ -467,91 +467,91 @@ if [[ $SES == *"spinalcord"* ]];then
       #sigma= 2mm/2.354 = | sigma = 5m/2.354 for 2mm and 5 mm of full width at half maximum (FWHM)
       fslmaths ${file_task_mc2}_pnm2template.nii.gz -s 0.85,0.84,2.124 ${file_task_mc2}_pnm2template_smooth225.nii.gz
       
-      # # Run first-level analysis
-      # ###############################
-      # # rsync the folder fsl_stim_vectors:
-      # #PATH_VECTORS="${PATH_DERIVATIVES}/${SUBJECT}/func/fsl_stim_vectors/"
-      # PATH_VECTORS="${PATH_DERIVATIVES}/${sub_id}/fsl_stim_vectors"
-      # echo ${PATH_VECTORS}
+      # Run first-level analysis
+      ###############################
+      # rsync the folder fsl_stim_vectors:
+      #PATH_VECTORS="${PATH_DERIVATIVES}/${SUBJECT}/func/fsl_stim_vectors/"
+      PATH_VECTORS="${PATH_DERIVATIVES}/${sub_id}/fsl_stim_vectors"
+      echo ${PATH_VECTORS}
 
-      # # Create variable with filename to  min max of amp and export to feat
-      # if [[ -d ${PATH_VECTORS} ]]; then
-      #   cp -r ${PATH_VECTORS} ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}
-      #   # todo rsync
-      # else
-      #   echo "fsl_stim_vectors not found."
-      # fi
+      # Create variable with filename to  min max of amp and export to feat
+      if [[ -d ${PATH_VECTORS} ]]; then
+        cp -r ${PATH_VECTORS} ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}
+        # todo rsync
+      else
+        echo "fsl_stim_vectors not found."
+      fi
 
-      # #cp -r ${PATH_VECTORS} ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}
+      #cp -r ${PATH_VECTORS} ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}
 
-      # cd ${PATH_VECTORS}
+      cd ${PATH_VECTORS}
 
-      # stim_file=*_stim_amp_1.txt
-      # stim_parameters=`echo ${stim_file} | awk -F 'fsl_stim_vector_' '{print $2}' | awk -F '_stim_amp' '{print $1}'`
+      stim_file=*_stim_amp_1.txt
+      stim_parameters=`echo ${stim_file} | awk -F 'fsl_stim_vector_' '{print $2}' | awk -F '_stim_amp' '{print $1}'`
 
 
-      # cd ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}
-      # echo ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}
+      cd ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}
+      echo ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}
 
-      # func_data="${file_task}_mc2_pnm2template_smooth225" #TODO
-      # subject=${sub_id}
-      # analysis_path=$PATH_DATA_PROCESSED/${subject}
-      # region="spinalcord"
-      # coil=""
-      # if [[ $SES == *"21Ch"* ]]; then
-      #   coil="21Ch"  # Set coil to 21Ch if SES contains "21Ch"
-      # elif [[ $SES == *"56Ch"* ]]; then
-      #   coil="56Ch"  # Set coil to 56Ch if SES contains "56Ch"
-      # fi
-      # session="" # TODO change if multiple sessions
-      # smoothing=0
-      # export analysis_path subject coil session smoothing run func_data region tr number_of_volumes stim_parameters confoundevs
-      # envsubst < "${PATH_SCRIPTS}/first_level.fsf" > "${func_data}_first_level.fsf"
+      func_data="${file_task}_mc2_pnm2template_smooth225" #TODO
+      subject=${sub_id}
+      analysis_path=$PATH_DATA_PROCESSED/${subject}
+      region="spinalcord"
+      coil=""
+      if [[ $SES == *"21Ch"* ]]; then
+        coil="21Ch"  # Set coil to 21Ch if SES contains "21Ch"
+      elif [[ $SES == *"56Ch"* ]]; then
+        coil="56Ch"  # Set coil to 56Ch if SES contains "56Ch"
+      fi
+      session="" # TODO change if multiple sessions
+      smoothing=0
+      export analysis_path subject coil session smoothing run func_data region tr number_of_volumes stim_parameters confoundevs
+      envsubst < "${PATH_SCRIPTS}/first_level.fsf" > "${func_data}_first_level.fsf"
       
-      # # Remove existing feat repo if already exists
-      # if [[ -d "${func_data}_first_level.feat" ]]; then
-      #   rm -r "${func_data}_first_level.feat"
-      # fi
-      # feat ${func_data}_first_level.fsf
+      # Remove existing feat repo if already exists
+      if [[ -d "${func_data}_first_level.feat" ]]; then
+        rm -r "${func_data}_first_level.feat"
+      fi
+      feat ${func_data}_first_level.fsf
 
-      # # Create false registration 
-      # ################################
-      # cd ${func_data}_first_level.feat
+      # Create false registration 
+      ################################
+      cd ${func_data}_first_level.feat
       
-      # mkdir -p reg
-      # cp /usr/local/fsl/etc/flirtsch/ident.mat reg/example_func2standard.mat
-      # cp example_func.nii.gz reg/example_func.nii.gz
-      # cp $SCT_DIR/data/PAM50/template/PAM50_t2s.nii.gz reg/standard.nii.gz
-      # fslmaths reg/standard.nii.gz -mas $SCT_DIR/data/PAM50/template/PAM50_cord.nii.gz reg/standard_masked.nii.gz
-      # fslroi reg/standard_masked.nii.gz reg/standard.nii.gz 32 75 34 75 691 263
+      mkdir -p reg
+      cp /usr/local/fsl/etc/flirtsch/ident.mat reg/example_func2standard.mat
+      cp example_func.nii.gz reg/example_func.nii.gz
+      cp $SCT_DIR/data/PAM50/template/PAM50_t2s.nii.gz reg/standard.nii.gz
+      fslmaths reg/standard.nii.gz -mas $SCT_DIR/data/PAM50/template/PAM50_cord.nii.gz reg/standard_masked.nii.gz
+      fslroi reg/standard_masked.nii.gz reg/standard.nii.gz 32 75 34 75 691 263
 
-      # cd ..
+      cd ..
 
-      # cd ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}
+      cd ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}
 
-      # #Run first-level trialwise analysis
-      # export analysis_path subject coil session run func_data region tr number_of_volumes stim_parameters smoothing confoundevs
-      # envsubst < "${PATH_SCRIPTS}/first_level_trialwise.fsf" > "${func_data}_first_level_trialwise.fsf"
-	    # feat ${func_data}_first_level_trialwise.fsf
+      #Run first-level trialwise analysis
+      export analysis_path subject coil session run func_data region tr number_of_volumes stim_parameters smoothing confoundevs
+      envsubst < "${PATH_SCRIPTS}/first_level_trialwise.fsf" > "${func_data}_first_level_trialwise.fsf"
+	    feat ${func_data}_first_level_trialwise.fsf
 
-      # #Run registration for first level trialwise analysis
-      # cd ${func_data}_trialwise.feat
-      # mkdir -p reg
-      # cp /usr/local/fsl/etc/flirtsch/ident.mat reg/example_func2standard.mat
-      # cp example_func.nii.gz reg/example_func.nii.gz
-      # cp $SCT_DIR/data/PAM50/template/PAM50_t2s.nii.gz reg/standard.nii.gz
-      # fslmaths reg/standard.nii.gz -mas $SCT_DIR/data/PAM50/template/PAM50_cord.nii.gz reg/standard_masked.nii.gz
-      # fslroi reg/standard_masked.nii.gz reg/standard.nii.gz 32 75 34 75 691 263
+      #Run registration for first level trialwise analysis
+      cd ${func_data}_trialwise.feat
+      mkdir -p reg
+      cp /usr/local/fsl/etc/flirtsch/ident.mat reg/example_func2standard.mat
+      cp example_func.nii.gz reg/example_func.nii.gz
+      cp $SCT_DIR/data/PAM50/template/PAM50_t2s.nii.gz reg/standard.nii.gz
+      fslmaths reg/standard.nii.gz -mas $SCT_DIR/data/PAM50/template/PAM50_cord.nii.gz reg/standard_masked.nii.gz
+      fslroi reg/standard_masked.nii.gz reg/standard.nii.gz 32 75 34 75 691 263
 
-      # cd ..
+      cd ..
 
 
-      # #Run second-level trialwise analysis
-      # export analysis_path subject coil session run func_data region tr number_of_volumes stim_parameters smoothing
-      # envsubst < "${PATH_SCRIPTS}/second_level_trialwise.fsf" > "${func_data}_second_level_trialwise.fsf"
-	    # feat ${func_data}_second_level_trialwise.fsf
-      
-
+      #Run second-level trialwise analysis
+      export analysis_path subject coil session run func_data region tr number_of_volumes stim_parameters smoothing
+      envsubst < "${PATH_SCRIPTS}/second_level_trialwise.fsf" > "${func_data}_second_level_trialwise.fsf"
+	    feat ${func_data}_second_level_trialwise.fsf
+      echo $PWD
+      cd ..
     fi
   done
   
@@ -583,12 +583,11 @@ feat ${subject}_${region}_first_level_average.fsf
 # Verify presence of output files and write log file if error
 # ------------------------------------------------------------------------------
 FILES_TO_CHECK=(
-  #"FingerTap/${file_task_finger}_mc2_pnm2template_smooth.nii.gz"
-  #"ForcePercent/${file_task_percent}_mc2_pnm2template_smooth.nii.gz"
-  #"ForceAbs/${file_task_abs}_mc2_pnm2template_smooth.nii.gz"
-  #"rest/${file_task_rest}_mc2_pnm2template_smooth.nii.gz" # To uncomment
+  "run-1/${file}_task-tens_run-1_bold_mc2_pnm2template_smooth.nii.gz"
+  "run-2/${file}_task-tens_run-2_bold_mc2_pnm2template_smooth.nii.gz"
+  "run-3/${file}_task-tens_run-3_bold_mc2_pnm2template_smooth.nii.gz"
 )
-pwd
+
 for file in ${FILES_TO_CHECK[@]}; do
   if [[ ! -e $file ]]; then
     echo "${SUBJECT}/func/${file} does not exist" >> $PATH_LOG/_error_check_output_files.log
