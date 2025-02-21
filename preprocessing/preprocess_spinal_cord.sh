@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Analayses spinal cord data for the Neuromuscular signature R01 project.
+# Analyses spinal cord data for the Dermatomal Mapping R01 project.
 #
 # Usage:
 #     sct_run_batch -c <PATH_TO_REPO>/etc/config_process_data.json  # TODO
@@ -19,7 +19,7 @@
 #
 #
 #
-# Authors: Sandrine Bédard and Kenneth Weber
+# Authors: Sandrine Bédard, Kenneth Weber and Merve Kaptan
 #
 
 # Uncomment for full verbose
@@ -71,11 +71,12 @@ segment_if_does_not_exist() {
     echo "Not found. Proceeding with automatic segmentation."
     # Segment spinal cord
     if [[ $segmentation_method == 'deepseg' ]];then
-        #sct_deepseg_sc -i ${file}.nii.gz -c ${contrast} -qc ${PATH_QC} -qc-subject ${SUBJECT}
-        sct_deepseg -i ${file}.nii.gz -task seg_sc_contrast_agnostic -o ${file}_label-SC_seg.nii.gz
-        sct_qc -i ${file}.nii.gz -s ${file}_label-SC_seg.nii.gz -p sct_deepseg_sc -qc ${PATH_QC} -qc-subject ${SUBJECT}
+        sct_deepseg -i ${file}.nii.gz -task seg_sc_contrast_agnostic -largest 1 -o ${file}_label-SC_seg.nii.gz -qc ${PATH_QC} -qc-subject ${SUBJECT}
     elif [[ $segmentation_method == 'propseg' ]]; then
         sct_propseg -i ${file}.nii.gz -c ${contrast} -qc ${PATH_QC} -qc-subject ${SUBJECT} -CSF
+    elif [[ $segmentation_method == 'epi' ]]; then
+        sct_deepseg -i ${file}.nii.gz -task seg_sc_epi -o ${file}_label-SC_seg.nii.gz -qc ${PATH_QC} -qc-subject ${SUBJECT}
+
     fi
   fi
 }
@@ -91,7 +92,7 @@ label_if_does_not_exist(){
   local file_seg="$2"
   # Update global variable with segmentation file name
   FILELABEL="${file}_labels-disc"
-  FILELABELMANUAL="${PATH_DERIVATIVES}/${SUBJECT}/anat/${FILELABEL}-manual.nii.gz"
+  FILELABELMANUAL="${PATH_DERIVATIVES}/${SUBJECT}/anat/${FILELABEL}.nii.gz"
   echo "Looking for manual label: $FILELABELMANUAL"
   if [[ -e $FILELABELMANUAL ]]; then
     echo "Found! Using manual labels."
@@ -142,18 +143,17 @@ segment_rootlets_if_does_not_exist() {
   if [[ -e $FILESEGMANUAL ]]; then
     echo "Found! Using manual segmentation."
     rsync -avzh $FILESEGMANUAL ${FILEROOTLET}.nii.gz
-    sct_qc -i ${file}.nii.gz -s ${file_seg}.nii.gz -d ${FILEROOTLET}.nii.gz -p sct_deepseg_lesion -plane axial -qc ${PATH_QC} -qc-subject ${SUBJECT}
   else
     echo "Not found. Proceeding with automatic segmentation."
     # Segment spinal nerve rootlets
-    sct_deepseg -i ${file}.nii.gz -task seg_spinal_rootlets_t2w -o ${FILEROOTLET}.nii.gz
-    sct_qc -i ${file}.nii.gz -s ${file_seg}.nii.gz -d ${FILEROOTLET}.nii.gz -p sct_deepseg_lesion -plane axial -qc ${PATH_QC} -qc-subject ${SUBJECT}
+    sct_deepseg -i ${file}.nii.gz -task seg_spinal_rootlets_t2w -o ${FILEROOTLET}.nii.gz -qc ${PATH_QC} -qc-subject ${SUBJECT}
   fi
 }
 
 
 # Retrieve input params and other params
 SUBJECT=$1
+REG=$2
 #tasks="${@:2}"
 # echo "Tasks:"
 # echo $tasks
@@ -234,13 +234,18 @@ if [[ $SES == *"spinalcord"* ]];then
           # Label spinal nerve rootlets
           segment_rootlets_if_does_not_exist ${file_t2w} ${file_t2_seg}
           file_t2_rootlets="${file_t2w}_label-rootlets_dseg"
+          # Create center-of-mass for QC purpose
+          sct_label_utils -i ${file_t2_rootlets}.nii.gz -cubic-to-point -o ${file_t2_rootlets}_mid.nii.gz
+          sct_label_utils -i ${file_t2_seg}.nii.gz -project-centerline ${file_t2_rootlets}_mid.nii.gz  -o ${file_t2_rootlets}_mid_center.nii.gz
+          sct_qc -i ${file_t2w}.nii.gz  -s ${file_t2_rootlets}_mid_center.nii.gz -p sct_label_utils -qc $PATH_QC -qc-subject ${SUBJECT}
+        
 
-          # Register to template using disc labels
-          sct_register_to_template -i ${file_t2w}.nii.gz -s ${file_t2_seg}.nii.gz -ldisc ${file_t2_labels_discs}.nii.gz -c t2 -qc ${PATH_QC} -qc-subject ${SUBJECT}
-
-          # TODO: Register to template using nerve rootlets
-
-
+          # Register to template using disc labels or spinal rootlets
+          if [[ $REG == *"disc"* ]]; then
+            sct_register_to_template -i ${file_t2w}.nii.gz -s ${file_t2_seg}.nii.gz -ldisc ${file_t2_labels_discs}.nii.gz -c t2 -qc ${PATH_QC} -qc-subject ${SUBJECT}
+          else
+            sct_register_to_template -i ${file_t2w}.nii.gz -s ${file_t2_seg}.nii.gz -lrootlet ${file_t2_rootlets}.nii.gz -c t2 -qc ${PATH_QC} -qc-subject ${SUBJECT}
+          fi
           cd ..
     else
           echo Skipping T2w
@@ -256,6 +261,7 @@ if [[ $SES == *"spinalcord"* ]];then
 
     for run in "${runs[@]}";do
 
+      cd ${PATH_DATA_PROCESSED}/${SUBJECT}/func/
       file_task=${file}_task-tens_run-${run}_bold
       file_physio=${file}_task-tens_run-${run}_physio
       if [[ -f ${file_task}.nii.gz ]];then
@@ -295,7 +301,7 @@ if [[ $SES == *"spinalcord"* ]];then
           fi
           # Qc of mask
           sct_qc -i ${file_task_mean}.nii.gz -p sct_deepseg_sc -qc ${PATH_QC} -s ${file_task_mean}_mask.nii.gz -qc-subject ${SUBJECT}
-
+          sct_fmri_compute_tsnr -i ${file_task}.nii.gz -o ${file_task}_tsnr.nii.gz
           if [[ ! -f ${file_task}_mc2.nii.gz ]]; then
             # --------------------
             # 2D Motion correction
@@ -335,6 +341,8 @@ if [[ $SES == *"spinalcord"* ]];then
             mv Rz.nii.gz ./PNM_run-${run}
             mv Tx.nii.gz ./PNM_run-${run}
             mv Ty.nii.gz ./PNM_run-${run}
+          # Create QC report for TSNR:
+            sct_qc -i ${file_task}_tsnr.nii.gz -d ${file_task}_mc2_tsnr.nii.gz -s ${file_task_mean}_label-SC_seg.nii.gz -p sct_fmri_compute_tsnr -qc ${PATH_QC} -qc-subject ${SUBJECT}
           fi
           # Create spinal cord mask and spinal canal mask
           file_task_mc2=${file_task}_mc2
@@ -359,8 +367,11 @@ if [[ $SES == *"spinalcord"* ]];then
 
       # Create segmentation using sct_deepseg
 
+      # Test EPI seg --> select the best
+      segment_if_does_not_exist ${file_task_mc2_mean} 't2' 'epi' 'func'
       # Segment spinal cord after motion correction
-      segment_if_does_not_exist ${file_task_mc2_mean} 't2' 'deepseg' 'func'
+      #segment_if_does_not_exist ${file_task_mc2_mean} 't2' 'deepseg' 'func'
+
       file_task_mc2_mean_seg="${file_task_mc2_mean}_label-SC_seg"
 
       # QC for motion correction
@@ -404,7 +415,7 @@ if [[ $SES == *"spinalcord"* ]];then
         fi
     	  popp -i ${file_physio}_peak.txt -o physio -s 100 --tr=${tr} --smoothcard=0.1 --smoothresp=0.1 --resp=2 --cardiac=5 --trigger=3 -v --pulseox_trigger
         # Run PNM using manual peak detections in derivatives
-        pnm_evs -i ${file_task}.nii.gz -c physio_card.txt -r physio_resp.txt -o physio_ --tr=${tr} --oc=4 --or=4 --multc=2 --multr=2 --sliceorder=interleaved_up --slicedir=z
+        pnm_evs -i ${file_task}.nii.gz -c physio_card.txt -r physio_resp.txt -o physio_ --tr=${tr} --oc=4 --or=4 --multc=2 --multr=2 --slicetiming=${PATH_SCRIPTS}/spinal_cord_slice_timing.txt
 
       fi
       mv physio* ./PNM_run-${run}
@@ -506,7 +517,7 @@ if [[ $SES == *"spinalcord"* ]];then
       # Create false registration 
       ################################
       cd ${func_data}_first_level.feat
-      
+
       mkdir -p reg
       cp /usr/local/fsl/etc/flirtsch/ident.mat reg/example_func2standard.mat
       cp example_func.nii.gz reg/example_func.nii.gz
@@ -514,10 +525,7 @@ if [[ $SES == *"spinalcord"* ]];then
       fslmaths reg/standard.nii.gz -mas $SCT_DIR/data/PAM50/template/PAM50_cord.nii.gz reg/standard_masked.nii.gz
       fslroi reg/standard_masked.nii.gz reg/standard.nii.gz 32 75 34 75 691 263
 
-      cd ..
-
       cd ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}
-
       #Run first-level trialwise analysis
       export analysis_path subject coil session run func_data region tr number_of_volumes stim_parameters smoothing confoundevs
       envsubst < "${PATH_SCRIPTS}/first_level_trialwise.fsf" > "${func_data}_first_level_trialwise.fsf"
@@ -532,14 +540,13 @@ if [[ $SES == *"spinalcord"* ]];then
       fslmaths reg/standard.nii.gz -mas $SCT_DIR/data/PAM50/template/PAM50_cord.nii.gz reg/standard_masked.nii.gz
       fslroi reg/standard_masked.nii.gz reg/standard.nii.gz 32 75 34 75 691 263
 
-      cd ..
-
+      cd ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}
 
       #Run second-level trialwise analysis
       export analysis_path subject coil session run func_data region tr number_of_volumes stim_parameters smoothing
       envsubst < "${PATH_SCRIPTS}/second_level_trialwise.fsf" > "${func_data}_second_level_trialwise.fsf"
 	    feat ${func_data}_second_level_trialwise.fsf
-      
+      echo $PWD
 
     fi
   done
@@ -572,12 +579,11 @@ feat ${subject}_${region}_first_level_average.fsf
 # Verify presence of output files and write log file if error
 # ------------------------------------------------------------------------------
 FILES_TO_CHECK=(
-  #"FingerTap/${file_task_finger}_mc2_pnm2template_smooth.nii.gz"
-  #"ForcePercent/${file_task_percent}_mc2_pnm2template_smooth.nii.gz"
-  #"ForceAbs/${file_task_abs}_mc2_pnm2template_smooth.nii.gz"
-  #"rest/${file_task_rest}_mc2_pnm2template_smooth.nii.gz" # To uncomment
+  "run-1/${file}_task-tens_run-1_bold_mc2_pnm2template_smooth.nii.gz"
+  "run-2/${file}_task-tens_run-2_bold_mc2_pnm2template_smooth.nii.gz"
+  "run-3/${file}_task-tens_run-3_bold_mc2_pnm2template_smooth.nii.gz"
 )
-pwd
+
 for file in ${FILES_TO_CHECK[@]}; do
   if [[ ! -e $file ]]; then
     echo "${SUBJECT}/func/${file} does not exist" >> $PATH_LOG/_error_check_output_files.log

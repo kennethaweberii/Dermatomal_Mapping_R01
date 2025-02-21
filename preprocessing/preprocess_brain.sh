@@ -302,7 +302,7 @@ runs=(1)
 
         # Run PNM using manual peak detections in derivatives
         popp -i ${subject}_ses-brain${coil}${session}_task-tens_run-${run}_physio_peak.txt -o physio -s 100 --tr=${tr} --smoothcard=0.1 --smoothresp=0.1 --resp=2 --cardiac=5 --trigger=3 -v --pulseox_trigger
-        pnm_evs -i ${func_data} -c physio_card.txt -r physio_resp.txt -o physio --tr=${tr} --oc=4 --or=4 --multc=2 --multr=2 --sliceorder=interleaved_up --slicedir=z
+        pnm_evs -i ${func_data} -c physio_card.txt -r physio_resp.txt -o physio --tr=${tr} --oc=4 --or=4 --multc=2 --multr=2 --slicetiming=${script_path}/brain_slice_timing.txt
 
         rm -rf ${subject}_ses-brain${coil}${session}_task-tens_run-${run}_physio
         mkdir ${subject}_ses-brain${coil}${session}_task-tens_run-${run}_physio
@@ -331,9 +331,9 @@ runs=(1)
       func_data=${func_data}_pnm
 
       #Run slicetime correction --> figure out the slicetiming, commenting for now
-      #slicetimer -i ${func_data} -o ${func_data}_stc --odd
+      slicetimer -i ${func_data} -o ${func_data}_stc --tcustom=${script_path}/brain_slice_timing.txt
       #for now copy func_data o func_data stc till you figure out slice timing
-      cp ${func_data}.nii.gz ${func_data}_stc.nii.gz
+      #cp ${func_data}.nii.gz ${func_data}_stc.nii.gz
 
       #applywarp -i ${func_data}_stc -o ${func_data}_stc2standard -w ${func_data}.feat/reg/example_func2standard_warp -r ${FSLDIR}/data/standard/MNI152_T1_2mm_brain
       #non-linear does not work well, that is why switched to linear which does not produce warp
