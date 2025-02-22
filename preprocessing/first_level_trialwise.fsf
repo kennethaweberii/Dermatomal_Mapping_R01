@@ -30,7 +30,7 @@ set fmri(featwatcher_yn) 1
 set fmri(sscleanup_yn) 0
 
 # Output directory
-set fmri(outputdir) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/${func_data}_trialwise.feat"
+set fmri(outputdir) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/${func_data}_trialwise_first_level.feat"
 
 # TR(s)
 set fmri(tr) ${tr}

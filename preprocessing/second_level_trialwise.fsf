@@ -30,7 +30,7 @@ set fmri(featwatcher_yn) 1
 set fmri(sscleanup_yn) 0
 
 # Output directory
-set fmri(outputdir) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/${func_data}_trialwise.gfeat"
+set fmri(outputdir) "${analysis_path}/ses-${region}${coil}${session}/func/run-${run}/${func_data}_trialwise_second_level.gfeat"
 
 # TR(s)
 set fmri(tr) 3
@@ -1897,7 +1897,7 @@ set fmri(con_real6.2) 0.5
 set fmri(con_real6.3) -0.5
 
 # Real contrast_real vector 6 element 4
-set fmri(con_real6.4) 1
+set fmri(con_real6.4) -1
 
 # F-test 1 element 6
 set fmri(ftest_real1.6) 0

@@ -632,7 +632,7 @@ set fmri(con_real6.2) 0.5
 set fmri(con_real6.3) -0.5
 
 # Real contrast_real vector 6 element 4
-set fmri(con_real6.4) 1
+set fmri(con_real6.4) -1
 
 # F-test 1 element 6
 set fmri(ftest_real1.6) 0

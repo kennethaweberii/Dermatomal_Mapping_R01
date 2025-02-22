@@ -449,23 +449,25 @@ if [[ $SES == *"spinalcord"* ]];then
             confoundevs=1
       fi
 
-
+     #slice_timing after PNM
+     slicetimer -i ${file_task_mc2}_pnm -o ${file_task_mc2}_pnm_stc --tcustom=${PATH_SCRIPTS}/spinal_cord_slice_timing.txt
+  
 
       # Warp 4D to template
-      sct_apply_transfo -i ${file_task_mc2}_pnm.nii.gz -d ${SCT_DIR}/data/PAM50/template/PAM50_t2.nii.gz -w warp_${file_task_mc2_mean}2PAM50_t2.nii.gz -o ${file_task_mc2}_pnm2template.nii.gz -x spline
-      fslmaths ${file_task_mc2}_pnm2template.nii.gz -mul ${SCT_DIR}/data/PAM50/template/PAM50_cord.nii.gz ${file_task_mc2}_pnm2template.nii.gz
-      fslroi ${file_task_mc2}_pnm2template.nii.gz ${file_task_mc2}_pnm2template.nii.gz 32 75 34 75 691 263
+      sct_apply_transfo -i ${file_task_mc2}_pnm_stc.nii.gz -d ${SCT_DIR}/data/PAM50/template/PAM50_t2.nii.gz -w warp_${file_task_mc2_mean}2PAM50_t2.nii.gz -o ${file_task_mc2}_pnm_stc2template.nii.gz -x spline
+      fslmaths ${file_task_mc2}_pnm_stc2template.nii.gz -mul ${SCT_DIR}/data/PAM50/template/PAM50_cord.nii.gz ${file_task_mc2}_pnm_stc2template.nii.gz
+      fslroi ${file_task_mc2}_pnm_stc2template.nii.gz ${file_task_mc2}_pnm_stc2template.nii.gz 32 75 34 75 691 263
 
 
       # Remove outside voxels based on spinal cord mask z limits
       sct_apply_transfo -i ${file_task_mc2_mean_seg}.nii.gz -d ${SCT_DIR}/data/PAM50/template/PAM50_t2.nii.gz -w warp_${file_task_mc2_mean}2PAM50_t2.nii.gz -o ${file_task_mc2_mean_seg}2template.nii.gz -x nn
       fslroi ${file_task_mc2_mean_seg}2template.nii.gz ${file_task_mc2_mean_seg}2template.nii.gz 32 75 34 75 691 263
       fslmaths ${file_task_mc2_mean_seg}2template.nii.gz -kernel 2 -dilD -dilD -dilD -dilD -dilD temp_mask
-      fslmaths ${file_task_mc2}_pnm2template -mul temp_mask ${file_task_mc2}_pnm2template
+      fslmaths ${file_task_mc2}_pnm_stc2template -mul temp_mask ${file_task_mc2}_pnm_stc2template
       rm temp_mask.nii.gz
       # Smoothing 2x2x5 mm
       #sigma= 2mm/2.354 = | sigma = 5m/2.354 for 2mm and 5 mm of full width at half maximum (FWHM)
-      fslmaths ${file_task_mc2}_pnm2template.nii.gz -s 0.85,0.84,2.124 ${file_task_mc2}_pnm2template_smooth225.nii.gz
+      fslmaths ${file_task_mc2}_pnm_stc2template.nii.gz -s 0.85,0.84,2.124 ${file_task_mc2}_pnm_stc2template_smooth225.nii.gz
       
       # Run first-level analysis
       ###############################
@@ -493,7 +495,7 @@ if [[ $SES == *"spinalcord"* ]];then
       cd ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}
       echo ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}
 
-      func_data="${file_task}_mc2_pnm2template_smooth225" #TODO
+      func_data="${file_task}_mc2_pnmstc2template_smooth225" #TODO
       subject=${sub_id}
       analysis_path=$PATH_DATA_PROCESSED/${subject}
       region="spinalcord"
