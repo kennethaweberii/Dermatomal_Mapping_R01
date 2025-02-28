@@ -377,7 +377,7 @@ runs=(1)
       cp ${FSLDIR}/etc/flirtsch/ident.mat example_func2highres.mat
       cp ${FSLDIR}/etc/flirtsch/ident.mat highres2standard.mat
       imcp ../mean_func highres
-      imcp ../mean_func standard
+      imcp ${FSLDIR}/data/standard/MNI152_T1_2mm_brain.nii.gz standard
       cd ..
       updatefeatreg .
 
@@ -400,7 +400,7 @@ runs=(1)
       cp ${FSLDIR}/etc/flirtsch/ident.mat example_func2highres.mat
       cp ${FSLDIR}/etc/flirtsch/ident.mat highres2standard.mat
       imcp ../mean_func highres
-      imcp ../mean_func standard
+      imcp ${FSLDIR}/data/standard/MNI152_T1_2mm_brain.nii.gz standard
       cd ..
       updatefeatreg .
 
