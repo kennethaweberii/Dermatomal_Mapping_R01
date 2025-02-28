@@ -392,7 +392,7 @@ runs=(1)
 	    feat ${func_data}_first_level_trialwise.fsf
 
       #Run registration for first level trialwise analysis
-      cd ${analysis_path}/ses-brain${coil}${session}/func/run-${run}/${func_data}_trialwise.feat
+      cd ${analysis_path}/ses-brain${coil}${session}/func/run-${run}/${func_data}_trialwise_first_level.feat
       mkdir reg
       fslmaths mean_func -bin mask
       imcp mean_func ./reg/example_func
@@ -427,8 +427,8 @@ echo "copying output to...... ${derivatives_dir}"
 # Create the directory it does not exist
 mkdir -p "$derivatives_dir"
 
-#rsync -av --remove-source-files ${analysis_path}/ses-brain/ ${derivatives_dir}/
-#cp ${analysis_path}/brain_preprocess.log $base_path/derivatives/log_brain/brain_prepreprocess_${subject}_$(date +%Y%m%d_%H%M%S).log
+rsync -av --remove-source-files ${analysis_path}/ses-brain/ ${derivatives_dir}/
+cp ${analysis_path}/brain_preprocess.log $base_path/derivatives/log_brain/brain_prepreprocess_${subject}_$(date +%Y%m%d_%H%M%S).log
 
 echo "copying log to...... $base_path/derivatives/log_brain/brain_prepreprocess_${subject}_$(date +%Y%m%d_%H%M%S).log"
 
