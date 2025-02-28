@@ -26,3 +26,15 @@ conda activate Dermatomal_Mapping_R01
 ~~~
 pip install -r requirements.txt
 ~~~
+
+## 3. Peak detection
+
+~~~
+sct_run_batch -script detect_peak_batch.sh -script-arg Sandrine Bedard -path-data /Volumes/Projects/Dermatomal_Mapping_R01/data/BIDS/sourcedata -path-out /Users/sandrinebedard/processed_data/DM_peakdetection -jobs 1 -exclude ses-brain
+~~~
+
+## 4. Spinal cord preprocessing
+
+~~~
+sct_run_batch -script preprocess_spinal_cord.sh -path-data ~/Projects/Dermatomal_Mapping_R01/data/BIDS/sourcedata/ -exclude ses-brain -include-list ses-spinalcord sub-DMAim1HC001 -path-out ~/dermatomal_mapping_proprocessing_2025-02-07
+~~~

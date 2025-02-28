@@ -74,6 +74,9 @@ segment_if_does_not_exist() {
         sct_deepseg -i ${file}.nii.gz -task seg_sc_contrast_agnostic -largest 1 -o ${file}_label-SC_seg.nii.gz -qc ${PATH_QC} -qc-subject ${SUBJECT}
     elif [[ $segmentation_method == 'propseg' ]]; then
         sct_propseg -i ${file}.nii.gz -c ${contrast} -qc ${PATH_QC} -qc-subject ${SUBJECT} -CSF
+      elif [[ $segmentation_method == 'epi' ]]; then
+        sct_deepseg -i ${file}.nii.gz -task seg_sc_epi -o ${file}_label-SC_seg.nii.gz -qc ${PATH_QC} -qc-subject ${SUBJECT}
+
     elif [[ $segmentation_method == 'epi' ]]; then
         sct_deepseg -i ${file}.nii.gz -task seg_sc_epi -o ${file}_label-SC_seg.nii.gz -qc ${PATH_QC} -qc-subject ${SUBJECT}
 
@@ -153,6 +156,7 @@ segment_rootlets_if_does_not_exist() {
 
 # Retrieve input params and other params
 SUBJECT=$1
+REG=$2
 REG=$2
 #tasks="${@:2}"
 # echo "Tasks:"
@@ -238,7 +242,7 @@ if [[ $SES == *"spinalcord"* ]];then
           sct_label_utils -i ${file_t2_rootlets}.nii.gz -cubic-to-point -o ${file_t2_rootlets}_mid.nii.gz
           sct_label_utils -i ${file_t2_seg}.nii.gz -project-centerline ${file_t2_rootlets}_mid.nii.gz  -o ${file_t2_rootlets}_mid_center.nii.gz
           sct_qc -i ${file_t2w}.nii.gz  -s ${file_t2_rootlets}_mid_center.nii.gz -p sct_label_utils -qc $PATH_QC -qc-subject ${SUBJECT}
-        
+
 
           # Register to template using disc labels or spinal rootlets
           if [[ $REG == *"disc"* ]]; then
@@ -302,6 +306,7 @@ if [[ $SES == *"spinalcord"* ]];then
           # Qc of mask
           sct_qc -i ${file_task_mean}.nii.gz -p sct_deepseg_sc -qc ${PATH_QC} -s ${file_task_mean}_mask.nii.gz -qc-subject ${SUBJECT}
           sct_fmri_compute_tsnr -i ${file_task}.nii.gz -o ${file_task}_tsnr.nii.gz
+          sct_fmri_compute_tsnr -i ${file_task}.nii.gz -o ${file_task}_tsnr.nii.gz
           if [[ ! -f ${file_task}_mc2.nii.gz ]]; then
             # --------------------
             # 2D Motion correction
@@ -341,6 +346,9 @@ if [[ $SES == *"spinalcord"* ]];then
             mv Rz.nii.gz ./PNM_run-${run}
             mv Tx.nii.gz ./PNM_run-${run}
             mv Ty.nii.gz ./PNM_run-${run}
+
+            # Create QC report for TSNR:
+            sct_qc -i ${file_task}_tsnr.nii.gz -d ${file_task}_mc2_tsnr.nii.gz -s ${file_task_mean}_label-SC_seg.nii.gz -p sct_fmri_compute_tsnr -qc ${PATH_QC} -qc-subject ${SUBJECT}
           # Create QC report for TSNR:
             sct_qc -i ${file_task}_tsnr.nii.gz -d ${file_task}_mc2_tsnr.nii.gz -s ${file_task_mean}_label-SC_seg.nii.gz -p sct_fmri_compute_tsnr -qc ${PATH_QC} -qc-subject ${SUBJECT}
           fi
@@ -369,7 +377,11 @@ if [[ $SES == *"spinalcord"* ]];then
 
       # Test EPI seg --> select the best
       segment_if_does_not_exist ${file_task_mc2_mean} 't2' 'epi' 'func'
+      # Test EPI seg --> select the best
+      segment_if_does_not_exist ${file_task_mc2_mean} 't2' 'epi' 'func'
       # Segment spinal cord after motion correction
+      #segment_if_does_not_exist ${file_task_mc2_mean} 't2' 'deepseg' 'func'
+
       #segment_if_does_not_exist ${file_task_mc2_mean} 't2' 'deepseg' 'func'
 
       file_task_mc2_mean_seg="${file_task_mc2_mean}_label-SC_seg"
@@ -548,8 +560,8 @@ if [[ $SES == *"spinalcord"* ]];then
       export analysis_path subject coil session run func_data region tr number_of_volumes stim_parameters smoothing
       envsubst < "${PATH_SCRIPTS}/second_level_trialwise.fsf" > "${func_data}_second_level_trialwise.fsf"
 	    feat ${func_data}_second_level_trialwise.fsf
-      echo $PWD
-
+      echo $PWDecho $PWD
+      cd ..
     fi
   done
   
@@ -581,6 +593,11 @@ feat ${subject}_${region}_first_level_average.fsf
 # Verify presence of output files and write log file if error
 # ------------------------------------------------------------------------------
 FILES_TO_CHECK=(
+  "run-1/${file}_task-tens_run-1_bold_mc2_pnm2template_smooth.nii.gz"
+  "run-2/${file}_task-tens_run-2_bold_mc2_pnm2template_smooth.nii.gz"
+  "run-3/${file}_task-tens_run-3_bold_mc2_pnm2template_smooth.nii.gz"
+)
+
   "run-1/${file}_task-tens_run-1_bold_mc2_pnm2template_smooth.nii.gz"
   "run-2/${file}_task-tens_run-2_bold_mc2_pnm2template_smooth.nii.gz"
   "run-3/${file}_task-tens_run-3_bold_mc2_pnm2template_smooth.nii.gz"
