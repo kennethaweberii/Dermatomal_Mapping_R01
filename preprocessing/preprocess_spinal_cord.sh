@@ -495,7 +495,7 @@ if [[ $SES == *"spinalcord"* ]];then
       cd ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}
       echo ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}
 
-      func_data="${file_task}_mc2_pnmstc2template_smooth225" #TODO
+      func_data="${file_task}_mc2_pnm_stc2template_smooth225" #TODO
       subject=${sub_id}
       analysis_path=$PATH_DATA_PROCESSED/${subject}
       region="spinalcord"
