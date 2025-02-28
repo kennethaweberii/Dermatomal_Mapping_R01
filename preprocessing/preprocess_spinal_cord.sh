@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Analayses spinal cord data for the Neuromuscular signature R01 project.
+# Analyses spinal cord data for the Dermatomal Mapping R01 project.
 #
 # Usage:
 #     sct_run_batch -c <PATH_TO_REPO>/etc/config_process_data.json  # TODO
@@ -75,6 +75,9 @@ segment_if_does_not_exist() {
     elif [[ $segmentation_method == 'propseg' ]]; then
         sct_propseg -i ${file}.nii.gz -c ${contrast} -qc ${PATH_QC} -qc-subject ${SUBJECT} -CSF
       elif [[ $segmentation_method == 'epi' ]]; then
+        sct_deepseg -i ${file}.nii.gz -task seg_sc_epi -o ${file}_label-SC_seg.nii.gz -qc ${PATH_QC} -qc-subject ${SUBJECT}
+
+    elif [[ $segmentation_method == 'epi' ]]; then
         sct_deepseg -i ${file}.nii.gz -task seg_sc_epi -o ${file}_label-SC_seg.nii.gz -qc ${PATH_QC} -qc-subject ${SUBJECT}
 
     fi
@@ -153,6 +156,7 @@ segment_rootlets_if_does_not_exist() {
 
 # Retrieve input params and other params
 SUBJECT=$1
+REG=$2
 REG=$2
 #tasks="${@:2}"
 # echo "Tasks:"
@@ -261,6 +265,7 @@ if [[ $SES == *"spinalcord"* ]];then
 
     for run in "${runs[@]}";do
 
+      cd ${PATH_DATA_PROCESSED}/${SUBJECT}/func/
       file_task=${file}_task-tens_run-${run}_bold
       file_physio=${file}_task-tens_run-${run}_physio
       if [[ -f ${file_task}.nii.gz ]];then
@@ -300,6 +305,7 @@ if [[ $SES == *"spinalcord"* ]];then
           fi
           # Qc of mask
           sct_qc -i ${file_task_mean}.nii.gz -p sct_deepseg_sc -qc ${PATH_QC} -s ${file_task_mean}_mask.nii.gz -qc-subject ${SUBJECT}
+          sct_fmri_compute_tsnr -i ${file_task}.nii.gz -o ${file_task}_tsnr.nii.gz
           sct_fmri_compute_tsnr -i ${file_task}.nii.gz -o ${file_task}_tsnr.nii.gz
           if [[ ! -f ${file_task}_mc2.nii.gz ]]; then
             # --------------------
@@ -343,6 +349,8 @@ if [[ $SES == *"spinalcord"* ]];then
 
             # Create QC report for TSNR:
             sct_qc -i ${file_task}_tsnr.nii.gz -d ${file_task}_mc2_tsnr.nii.gz -s ${file_task_mean}_label-SC_seg.nii.gz -p sct_fmri_compute_tsnr -qc ${PATH_QC} -qc-subject ${SUBJECT}
+          # Create QC report for TSNR:
+            sct_qc -i ${file_task}_tsnr.nii.gz -d ${file_task}_mc2_tsnr.nii.gz -s ${file_task_mean}_label-SC_seg.nii.gz -p sct_fmri_compute_tsnr -qc ${PATH_QC} -qc-subject ${SUBJECT}
           fi
           # Create spinal cord mask and spinal canal mask
           file_task_mc2=${file_task}_mc2
@@ -369,7 +377,11 @@ if [[ $SES == *"spinalcord"* ]];then
 
       # Test EPI seg --> select the best
       segment_if_does_not_exist ${file_task_mc2_mean} 't2' 'epi' 'func'
+      # Test EPI seg --> select the best
+      segment_if_does_not_exist ${file_task_mc2_mean} 't2' 'epi' 'func'
       # Segment spinal cord after motion correction
+      #segment_if_does_not_exist ${file_task_mc2_mean} 't2' 'deepseg' 'func'
+
       #segment_if_does_not_exist ${file_task_mc2_mean} 't2' 'deepseg' 'func'
 
       file_task_mc2_mean_seg="${file_task_mc2_mean}_label-SC_seg"
@@ -415,7 +427,7 @@ if [[ $SES == *"spinalcord"* ]];then
         fi
     	  popp -i ${file_physio}_peak.txt -o physio -s 100 --tr=${tr} --smoothcard=0.1 --smoothresp=0.1 --resp=2 --cardiac=5 --trigger=3 -v --pulseox_trigger
         # Run PNM using manual peak detections in derivatives
-        pnm_evs -i ${file_task}.nii.gz -c physio_card.txt -r physio_resp.txt -o physio_ --tr=${tr} --oc=4 --or=4 --multc=2 --multr=2 --sliceorder=interleaved_up --slicedir=z
+        pnm_evs -i ${file_task}.nii.gz -c physio_card.txt -r physio_resp.txt -o physio_ --tr=${tr} --oc=4 --or=4 --multc=2 --multr=2 --slicetiming=${PATH_SCRIPTS}/spinal_cord_slice_timing.txt
 
       fi
       mv physio* ./PNM_run-${run}
@@ -449,23 +461,25 @@ if [[ $SES == *"spinalcord"* ]];then
             confoundevs=1
       fi
 
-
+     #slice_timing after PNM
+     slicetimer -i ${file_task_mc2}_pnm -o ${file_task_mc2}_pnm_stc --tcustom=${PATH_SCRIPTS}/spinal_cord_slice_timing.txt
+  
 
       # Warp 4D to template
-      sct_apply_transfo -i ${file_task_mc2}_pnm.nii.gz -d ${SCT_DIR}/data/PAM50/template/PAM50_t2.nii.gz -w warp_${file_task_mc2_mean}2PAM50_t2.nii.gz -o ${file_task_mc2}_pnm2template.nii.gz -x spline
-      fslmaths ${file_task_mc2}_pnm2template.nii.gz -mul ${SCT_DIR}/data/PAM50/template/PAM50_cord.nii.gz ${file_task_mc2}_pnm2template.nii.gz
-      fslroi ${file_task_mc2}_pnm2template.nii.gz ${file_task_mc2}_pnm2template.nii.gz 32 75 34 75 691 263
+      sct_apply_transfo -i ${file_task_mc2}_pnm_stc.nii.gz -d ${SCT_DIR}/data/PAM50/template/PAM50_t2.nii.gz -w warp_${file_task_mc2_mean}2PAM50_t2.nii.gz -o ${file_task_mc2}_pnm_stc2template.nii.gz -x spline
+      fslmaths ${file_task_mc2}_pnm_stc2template.nii.gz -mul ${SCT_DIR}/data/PAM50/template/PAM50_cord.nii.gz ${file_task_mc2}_pnm_stc2template.nii.gz
+      fslroi ${file_task_mc2}_pnm_stc2template.nii.gz ${file_task_mc2}_pnm_stc2template.nii.gz 32 75 34 75 691 263
 
 
       # Remove outside voxels based on spinal cord mask z limits
       sct_apply_transfo -i ${file_task_mc2_mean_seg}.nii.gz -d ${SCT_DIR}/data/PAM50/template/PAM50_t2.nii.gz -w warp_${file_task_mc2_mean}2PAM50_t2.nii.gz -o ${file_task_mc2_mean_seg}2template.nii.gz -x nn
       fslroi ${file_task_mc2_mean_seg}2template.nii.gz ${file_task_mc2_mean_seg}2template.nii.gz 32 75 34 75 691 263
       fslmaths ${file_task_mc2_mean_seg}2template.nii.gz -kernel 2 -dilD -dilD -dilD -dilD -dilD temp_mask
-      fslmaths ${file_task_mc2}_pnm2template -mul temp_mask ${file_task_mc2}_pnm2template
+      fslmaths ${file_task_mc2}_pnm_stc2template -mul temp_mask ${file_task_mc2}_pnm_stc2template
       rm temp_mask.nii.gz
       # Smoothing 2x2x5 mm
       #sigma= 2mm/2.354 = | sigma = 5m/2.354 for 2mm and 5 mm of full width at half maximum (FWHM)
-      fslmaths ${file_task_mc2}_pnm2template.nii.gz -s 0.85,0.84,2.124 ${file_task_mc2}_pnm2template_smooth225.nii.gz
+      fslmaths ${file_task_mc2}_pnm_stc2template.nii.gz -s 0.85,0.84,2.124 ${file_task_mc2}_pnm_stc2template_smooth225.nii.gz
       
       # Run first-level analysis
       ###############################
@@ -493,7 +507,7 @@ if [[ $SES == *"spinalcord"* ]];then
       cd ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}
       echo ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}
 
-      func_data="${file_task}_mc2_pnm2template_smooth225" #TODO
+      func_data="${file_task}_mc2_pnm_stc2template_smooth225" #TODO
       subject=${sub_id}
       analysis_path=$PATH_DATA_PROCESSED/${subject}
       region="spinalcord"
@@ -517,7 +531,7 @@ if [[ $SES == *"spinalcord"* ]];then
       # Create false registration 
       ################################
       cd ${func_data}_first_level.feat
-      
+
       mkdir -p reg
       cp /usr/local/fsl/etc/flirtsch/ident.mat reg/example_func2standard.mat
       cp example_func.nii.gz reg/example_func.nii.gz
@@ -525,17 +539,14 @@ if [[ $SES == *"spinalcord"* ]];then
       fslmaths reg/standard.nii.gz -mas $SCT_DIR/data/PAM50/template/PAM50_cord.nii.gz reg/standard_masked.nii.gz
       fslroi reg/standard_masked.nii.gz reg/standard.nii.gz 32 75 34 75 691 263
 
-      cd ..
-
       cd ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}
-
       #Run first-level trialwise analysis
       export analysis_path subject coil session run func_data region tr number_of_volumes stim_parameters smoothing confoundevs
       envsubst < "${PATH_SCRIPTS}/first_level_trialwise.fsf" > "${func_data}_first_level_trialwise.fsf"
 	    feat ${func_data}_first_level_trialwise.fsf
 
       #Run registration for first level trialwise analysis
-      cd ${func_data}_trialwise.feat
+      cd ${func_data}_trialwise_first_level.feat
       mkdir -p reg
       cp /usr/local/fsl/etc/flirtsch/ident.mat reg/example_func2standard.mat
       cp example_func.nii.gz reg/example_func.nii.gz
@@ -543,14 +554,13 @@ if [[ $SES == *"spinalcord"* ]];then
       fslmaths reg/standard.nii.gz -mas $SCT_DIR/data/PAM50/template/PAM50_cord.nii.gz reg/standard_masked.nii.gz
       fslroi reg/standard_masked.nii.gz reg/standard.nii.gz 32 75 34 75 691 263
 
-      cd ..
-
+      cd ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}
 
       #Run second-level trialwise analysis
       export analysis_path subject coil session run func_data region tr number_of_volumes stim_parameters smoothing
       envsubst < "${PATH_SCRIPTS}/second_level_trialwise.fsf" > "${func_data}_second_level_trialwise.fsf"
 	    feat ${func_data}_second_level_trialwise.fsf
-      echo $PWD
+      echo $PWDecho $PWD
       cd ..
     fi
   done
@@ -583,6 +593,11 @@ feat ${subject}_${region}_first_level_average.fsf
 # Verify presence of output files and write log file if error
 # ------------------------------------------------------------------------------
 FILES_TO_CHECK=(
+  "run-1/${file}_task-tens_run-1_bold_mc2_pnm2template_smooth.nii.gz"
+  "run-2/${file}_task-tens_run-2_bold_mc2_pnm2template_smooth.nii.gz"
+  "run-3/${file}_task-tens_run-3_bold_mc2_pnm2template_smooth.nii.gz"
+)
+
   "run-1/${file}_task-tens_run-1_bold_mc2_pnm2template_smooth.nii.gz"
   "run-2/${file}_task-tens_run-2_bold_mc2_pnm2template_smooth.nii.gz"
   "run-3/${file}_task-tens_run-3_bold_mc2_pnm2template_smooth.nii.gz"
