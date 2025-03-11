@@ -74,9 +74,6 @@ segment_if_does_not_exist() {
         sct_deepseg -i ${file}.nii.gz -task seg_sc_contrast_agnostic -largest 1 -o ${file}_label-SC_seg.nii.gz -qc ${PATH_QC} -qc-subject ${SUBJECT}
     elif [[ $segmentation_method == 'propseg' ]]; then
         sct_propseg -i ${file}.nii.gz -c ${contrast} -qc ${PATH_QC} -qc-subject ${SUBJECT} -CSF
-      elif [[ $segmentation_method == 'epi' ]]; then
-        sct_deepseg -i ${file}.nii.gz -task seg_sc_epi -o ${file}_label-SC_seg.nii.gz -qc ${PATH_QC} -qc-subject ${SUBJECT}
-
     elif [[ $segmentation_method == 'epi' ]]; then
         sct_deepseg -i ${file}.nii.gz -task seg_sc_epi -o ${file}_label-SC_seg.nii.gz -qc ${PATH_QC} -qc-subject ${SUBJECT}
 
@@ -306,7 +303,6 @@ if [[ $SES == *"spinalcord"* ]];then
           # Qc of mask
           sct_qc -i ${file_task_mean}.nii.gz -p sct_deepseg_sc -qc ${PATH_QC} -s ${file_task_mean}_mask.nii.gz -qc-subject ${SUBJECT}
           sct_fmri_compute_tsnr -i ${file_task}.nii.gz -o ${file_task}_tsnr.nii.gz
-          sct_fmri_compute_tsnr -i ${file_task}.nii.gz -o ${file_task}_tsnr.nii.gz
           if [[ ! -f ${file_task}_mc2.nii.gz ]]; then
             # --------------------
             # 2D Motion correction
@@ -483,8 +479,8 @@ if [[ $SES == *"spinalcord"* ]];then
       
       # Run first-level analysis
       ###############################
-      # rsync the folder fsl_stim_vectors:
-      #PATH_VECTORS="${PATH_DERIVATIVES}/${SUBJECT}/func/fsl_stim_vectors/"
+      rsync the folder fsl_stim_vectors:
+      PATH_VECTORS="${PATH_DERIVATIVES}/${SUBJECT}/func/fsl_stim_vectors/"
       PATH_VECTORS="${PATH_DERIVATIVES}/${sub_id}/fsl_stim_vectors"
       echo ${PATH_VECTORS}
 
@@ -560,7 +556,7 @@ if [[ $SES == *"spinalcord"* ]];then
       export analysis_path subject coil session run func_data region tr number_of_volumes stim_parameters smoothing
       envsubst < "${PATH_SCRIPTS}/second_level_trialwise.fsf" > "${func_data}_second_level_trialwise.fsf"
 	    feat ${func_data}_second_level_trialwise.fsf
-      echo $PWDecho $PWD
+      echo $PWD
       cd ..
     fi
   done
@@ -593,15 +589,15 @@ feat ${subject}_${region}_first_level_average.fsf
 # Verify presence of output files and write log file if error
 # ------------------------------------------------------------------------------
 FILES_TO_CHECK=(
-  "run-1/${file}_task-tens_run-1_bold_mc2_pnm2template_smooth.nii.gz"
-  "run-2/${file}_task-tens_run-2_bold_mc2_pnm2template_smooth.nii.gz"
-  "run-3/${file}_task-tens_run-3_bold_mc2_pnm2template_smooth.nii.gz"
+  "run-1/${file}_task-tens_run-1_bold_mc2_pnm2template_smooth225.nii.gz"
+  "run-2/${file}_task-tens_run-2_bold_mc2_pnm2template_smooth225.nii.gz"
+  "run-3/${file}_task-tens_run-3_bold_mc2_pnm2template_smooth225.nii.gz"
 )
 
-  "run-1/${file}_task-tens_run-1_bold_mc2_pnm2template_smooth.nii.gz"
-  "run-2/${file}_task-tens_run-2_bold_mc2_pnm2template_smooth.nii.gz"
-  "run-3/${file}_task-tens_run-3_bold_mc2_pnm2template_smooth.nii.gz"
-)
+#  "run-1/${file}_task-tens_run-1_bold_mc2_pnm2template_smooth225.nii.gz"
+#  "run-2/${file}_task-tens_run-2_bold_mc2_pnm2template_smooth.nii.gz"
+#  "run-3/${file}_task-tens_run-3_bold_mc2_pnm2template_smooth.nii.gz"
+
 
 for file in ${FILES_TO_CHECK[@]}; do
   if [[ ! -e $file ]]; then
