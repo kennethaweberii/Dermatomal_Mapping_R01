@@ -30,7 +30,7 @@ set fmri(featwatcher_yn) 1
 set fmri(sscleanup_yn) 0
 
 # Output directory
-set fmri(outputdir) "${analysis_path}/ses-${region}${coil}${session}/func/${subject}_ses-${region}${coil}${session}_task-tens_run-average_bold_mc2_pnm2template_smooth225_first_level.gfeat"
+set fmri(outputdir) "${analysis_path}/ses-${region}${coil}${session}/func/${subject}_ses-${region}${coil}${session}_task-tens_run-average_bold_mc2_pnm_stc2template_smooth225_first_level.gfeat"
 
 # TR(s)
 set fmri(tr) 3
@@ -308,13 +308,13 @@ set fmri(copeinput.12) 1
 set fmri(copeinput.13) 1
 
 # 4D AVW data or FEAT directory (1)
-set feat_files(1) "${analysis_path}/ses-${region}${coil}${session}/func/run-1/${subject}_ses-${region}${coil}${session}_task-tens_run-1_bold_mc2_pnm2template_smooth225_first_level.feat"
+set feat_files(1) "${analysis_path}/ses-${region}${coil}${session}/func/run-1/${subject}_ses-${region}${coil}${session}_task-tens_run-1_bold_mc2_pnm_stc2template_smooth225_first_level.feat"
 
 # 4D AVW data or FEAT directory (2)
-set feat_files(2) "${analysis_path}/ses-${region}${coil}${session}/func/run-2/${subject}_ses-${region}${coil}${session}_task-tens_run-2_bold_mc2_pnm2template_smooth225_first_level.feat"
+set feat_files(2) "${analysis_path}/ses-${region}${coil}${session}/func/run-2/${subject}_ses-${region}${coil}${session}_task-tens_run-2_bold_mc2_pnm_stc2template_smooth225_first_level.feat"
 
 # 4D AVW data or FEAT directory (3)
-set feat_files(3) "${analysis_path}/ses-${region}${coil}${session}/func/run-3/${subject}_ses-${region}${coil}${session}_task-tens_run-3_bold_mc2_pnm2template_smooth225_first_level.feat"
+set feat_files(3) "${analysis_path}/ses-${region}${coil}${session}/func/run-3/${subject}_ses-${region}${coil}${session}_task-tens_run-3_bold_mc2_pnm_stc2template_smooth225_first_level.feat"
 
 # Add confound EVs text file
 set fmri(confoundevs) 0
