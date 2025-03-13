@@ -581,12 +581,12 @@ fi
 
 session="" # TODO change if multiple sessions
 #average
-export analysis_path subject coil session run func_data region
+export analysis_path subject coil session run func_data region smoothing
 envsubst < "${PATH_SCRIPTS}/first_level_average.fsf" > "${subject}_${region}_first_level_average.fsf"
 feat ${subject}_${region}_first_level_average.fsf
 
 #trialwise average
-export analysis_path subject coil session run func_data region
+export analysis_path subject coil session run func_data region smoothing
 envsubst < "${PATH_SCRIPTS}/second_level_trialwise_average.fsf" > "${subject}_${region}_second_level_trialwise_average.fsf"
 feat ${subject}_${region}_second_level_trialwise_average.fsf
 

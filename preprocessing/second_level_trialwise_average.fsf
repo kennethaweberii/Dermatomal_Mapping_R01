@@ -109,7 +109,7 @@ set fmri(st_file) ""
 set fmri(bet_yn) 1
 
 # Spatial smoothing FWHM (mm)
-set fmri(smooth) 5
+set fmri(smooth) ${smoothing}
 
 # Intensity normalization
 set fmri(norm_yn) 0
@@ -308,13 +308,13 @@ set fmri(copeinput.12) 1
 set fmri(copeinput.13) 1
 
 # 4D AVW data or FEAT directory (1)
-set feat_files(1) "${analysis_path}/ses-${region}${coil}${session}/func/run-1/${subject}_ses-${region}${coil}${session}_task-tens_run-1_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.feat/cope1.feat"
+set feat_files(1) "${analysis_path}/ses-${region}${coil}${session}/func/run-1/${subject}_ses-${region}${coil}${session}_task-tens_run-1_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope1.feat"
 
 # 4D AVW data or FEAT directory (2)
-set feat_files(2) "${analysis_path}/ses-${region}${coil}${session}/func/run-2/${subject}_ses-${region}${coil}${session}_task-tens_run-2_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.feat/cope1.feat"
+set feat_files(2) "${analysis_path}/ses-${region}${coil}${session}/func/run-2/${subject}_ses-${region}${coil}${session}_task-tens_run-2_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope1.feat"
 
 # 4D AVW data or FEAT directory (3)
-set feat_files(3) "${analysis_path}/ses-${region}${coil}${session}/func/run-3/${subject}_ses-${region}${coil}${session}_task-tens_run-3_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.feat/cope1.feat"
+set feat_files(3) "${analysis_path}/ses-${region}${coil}${session}/func/run-3/${subject}_ses-${region}${coil}${session}_task-tens_run-3_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope1.feat"
 
 # Add confound EVs text file
 set fmri(confoundevs) 0
