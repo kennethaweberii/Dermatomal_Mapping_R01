@@ -67,7 +67,7 @@ file="${SUBJECT//[\/]/_}"
 
 # Get session
 SES=$(basename "$SUBJECT")
-runs=(1 2)
+runs=(1 2 3)
 # Check if physio files exists
 for run in "${runs[@]}";do
   file_physio=${file}_task-tens_run-${run}_physio
@@ -101,8 +101,8 @@ done
 # Verify presence of output files and write log file if error
 # ------------------------------------------------------------------------------
 FILES_TO_CHECK=(
-  "$PATH_DATA_PROCESSED/derivatives/labels/${SUBJECT}/func/${file_task_rest_physio}_peak.json" 
-  "$PATH_DATA_PROCESSED/derivatives/labels/${SUBJECT}/func/${file_task_rest_physio}_peak.txt"
+  "$PATH_DATA_PROCESSED/derivatives/labels/${SUBJECT}/func/${file_physio}_peak.json" 
+  "$PATH_DATA_PROCESSED/derivatives/labels/${SUBJECT}/func/${file_physio}_peak.txt"
 )
 pwd
 for file in ${FILES_TO_CHECK[@]}; do
