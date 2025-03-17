@@ -137,7 +137,7 @@ segment_rootlets_if_does_not_exist() {
   local file_seg="$2"
   # Update global variable with segmentation file name
   FILEROOTLET="${file}_label-rootlets_dseg"
-  FILESEGMANUAL="${PATH_DERIVATIVES}/${SUBJECT}/anat/${FILESEG}.nii.gz"
+  FILESEGMANUAL="${PATH_DERIVATIVES}/${SUBJECT}/anat/${FILEROOTLET}.nii.gz"
   echo
   echo "Looking for manual segmentation: $FILESEGMANUAL"
   if [[ -e $FILESEGMANUAL ]]; then
@@ -277,8 +277,10 @@ if [[ $SES == *"spinalcord"* ]];then
           mkdir -p ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}/PNM_run-${run}/
 
           # Remove dummy volumes
+          echo "Number of volumes before"
+          echo $(fslval ${file_task} dim4)
           fslroi ${file_task} ${file_task} 2 -1
-              
+
           # Get dims
           number_of_volumes=$(fslval ${file_task} dim4)
           tr=$(fslval ${file_task} pixdim4)
@@ -288,7 +290,7 @@ if [[ $SES == *"spinalcord"* ]];then
           file_task_mean="${file_task}_mean"
           
           # Create mask if doesn't exist:
-          FILE_MASK="${PATH_DERIVATIVES}/${SUBJECT}/func/${file_task_mean}_mask"  #${file_task_mean}_mask.nii.gz
+          FILE_MASK="${PATH_DERIVATIVES}/${SUBJECT}/func/${file_task_mean}_mask.nii.gz"
           echo
           echo "Looking for manual spinal mask: $FILE_MASK"
           if [[ -e $FILE_MASK ]]; then
