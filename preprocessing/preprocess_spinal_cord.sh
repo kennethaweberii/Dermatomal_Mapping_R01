@@ -143,6 +143,8 @@ segment_rootlets_if_does_not_exist() {
   if [[ -e $FILESEGMANUAL ]]; then
     echo "Found! Using manual segmentation."
     rsync -avzh $FILESEGMANUAL ${FILEROOTLET}.nii.gz
+    # Add threshold to remove level 9 since not in PAM50 template yet
+    sct_maths -i ${FILEROOTLET}.nii.gz -uthr 8 -o ${FILEROOTLET}.nii.gz
   else
     echo "Not found. Proceeding with automatic segmentation."
     # Segment spinal nerve rootlets
@@ -246,6 +248,7 @@ if [[ $SES == *"spinalcord"* ]];then
             sct_register_to_template -i ${file_t2w}.nii.gz -s ${file_t2_seg}.nii.gz -ldisc ${file_t2_labels_discs}.nii.gz -c t2 -qc ${PATH_QC} -qc-subject ${SUBJECT}
           else
             sct_register_to_template -i ${file_t2w}.nii.gz -s ${file_t2_seg}.nii.gz -lrootlet ${file_t2_rootlets}.nii.gz -c t2 -qc ${PATH_QC} -qc-subject ${SUBJECT}
+            sct_register_to_template -i ${file_t2w}.nii.gz -s ${file_t2_seg}.nii.gz -ldisc ${file_t2_labels_discs}.nii.gz -ofolder reg_discs -c t2 -qc ${PATH_QC} -qc-subject ${SUBJECT}
           fi
           cd ..
     else
@@ -391,8 +394,13 @@ if [[ $SES == *"spinalcord"* ]];then
       sct_register_multimodal -i ${SCT_DIR}/data/PAM50/template/PAM50_t2.nii.gz -iseg ${SCT_DIR}/data/PAM50/template/PAM50_cord.nii.gz -d ${file_task_mc2_mean}.nii.gz -dseg ${file_task_mc2_mean_seg}.nii.gz -param step=1,type=seg,algo=centermass:step=2,type=seg,algo=bsplinesyn,metric=MeanSquares,slicewise=1,iter=3:step=3,type=im,algo=syn,metric=CC,iter=1,slicewise=1 -initwarp ../../anat/T2w/warp_template2anat.nii.gz -initwarpinv ../../anat/T2w/warp_anat2template.nii.gz -qc ${PATH_QC} -qc-subject ${SUBJECT}
       
       # Warp to template (do we want the spinal levels ?? if so add -s 1)
-      sct_warp_template -d ${file_task_mc2_mean}.nii.gz -w warp_PAM50_t22${file_task_mc2_mean}.nii.gz -qc ${PATH_QC} -qc-subject ${SUBJECT}
-
+      if [[ $REG == *"disc"* ]]; then
+        sct_warp_template -d ${file_task_mc2_mean}.nii.gz -w warp_PAM50_t22${file_task_mc2_mean}.nii.gz -qc ${PATH_QC} -qc-subject ${SUBJECT}
+      else
+        # Use discs registration instead to make sure WM covers all slices
+        sct_register_multimodal -i ${SCT_DIR}/data/PAM50/template/PAM50_t2.nii.gz -iseg ${SCT_DIR}/data/PAM50/template/PAM50_cord.nii.gz -d ${file_task_mc2_mean}.nii.gz -dseg ${file_task_mc2_mean_seg}.nii.gz -param step=1,type=seg,algo=centermass:step=2,type=seg,algo=bsplinesyn,metric=MeanSquares,slicewise=1,iter=3:step=3,type=im,algo=syn,metric=CC,iter=1,slicewise=1 -initwarp ../../anat/T2w/reg_discs/warp_template2anat.nii.gz -initwarpinv ../../anat/T2w/reg_discs/warp_anat2template.nii.gz -qc ${PATH_QC} -qc-subject ${SUBJECT}  -ofolder reg_discs
+        sct_warp_template -d ${file_task_mc2_mean}.nii.gz -w reg_discs/warp_PAM50_t22${file_task_mc2_mean}.nii.gz -qc ${PATH_QC} -qc-subject ${SUBJECT}
+      fi
       # Create CSF regressor
       file_task_mc2=${file_task}_mc2  # to remove
       # Create CSF mask form spinal cord seg and spinal canal seg
