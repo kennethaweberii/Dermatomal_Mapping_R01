@@ -321,7 +321,8 @@ if [[ $SES == *"spinalcord"* ]];then
             
             # Step 2 of 2D motion correction using mean of mc1 as ref
             # Create mask if doesn't exist:
-            FILE_MASK="${PATH_DERIVATIVES}/${SUBJECT}/func/mc1_mask.nii.gz"
+            FILE_MASK="${PATH_DERIVATIVES}/${SUBJECT}/func/${file_task}_mc1_mask.nii.gz"
+            # ${file_task}_mc1_mask.nii.gz
             echo
             echo "Looking for manual spinal mask: $FILE_MASK"
             if [[ -e $FILE_MASK ]]; then
