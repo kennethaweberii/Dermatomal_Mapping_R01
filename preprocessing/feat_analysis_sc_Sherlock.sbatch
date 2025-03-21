@@ -24,7 +24,7 @@
 module load biology
 module load fsl/6.0.7.10
 
-echo ${subject} ${region} ${run}
+echo ${subject} ${region} "run" ${run}
 
 analysis_path=${SCRATCH}/${subject}_${region}_${task}
 mkdir -p ${analysis_path}

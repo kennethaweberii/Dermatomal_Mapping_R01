@@ -14,7 +14,7 @@ for run in ${runs[@]}; do  #consider moving this loop to other
     for subject in ${subjects[@]}; do
         for region in ${regions[@]}; do
 
-            echo ${subject} ${region} ${run}
+            echo ${subject} ${region} "run " ${run}
             
             if [ ${region} == brain ]; then
                 time_limit=04:00:00
