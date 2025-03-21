@@ -21,7 +21,7 @@ for run in ${runs[@]}; do  #consider moving this loop to other
                 memory=8000
                 smoothing=5
             else
-                time_limit=06:00:00
+                time_limit=08:00:00
                 memory=16000
                 smoothing=0
             fi
@@ -29,7 +29,7 @@ for run in ${runs[@]}; do  #consider moving this loop to other
             export data_path scripts_path SCRATCH subject region run time_limit memory smoothing
             envsubst '${data_path} ${scripts_path} ${SCRATCH} ${subject} ${region} ${run} ${time_limit} ${memory} ${smoothing}' < ${scripts_path}/preprocessing/feat_analysis_sc_Sherlock.sbatch > feat_analysis_sc_Sherlock_${subject}_${region}_${task}.sbatch
             sbatch feat_analysis_sc_Sherlock_${subject}_${region}_${run}.sbatch
-            rm trialwise_analysis_sc_Sherlock_${subject}_${region}_${run}.sbatch
+            rm feat_analysis_sc_Sherlock_${subject}_${region}_${run}.sbatch
             # TODO: run average
             sleep 10s
 
