@@ -10,6 +10,7 @@ subjects=(sub-DMAim1HCHC004_testing_sherlock)
 
 regions=(spinalcord)
 runs=(1 2 3)
+runs=(2 3)
 
 for run in ${runs[@]}; do  #consider moving this loop to other
     for subject in ${subjects[@]}; do
@@ -28,7 +29,7 @@ for run in ${runs[@]}; do  #consider moving this loop to other
             fi
 
             export data_path scripts_path SCRATCH subject region run time_limit memory smoothing
-            envsubst '${data_path} ${scripts_path} ${SCRATCH} ${subject} ${region} ${run} ${time_limit} ${memory} ${smoothing}' < ${scripts_path}/feat_analysis_sc_Sherlock.sbatch > feat_analysis_sc_Sherlock_${subject}_${region}_${task}.sbatch
+            envsubst '${data_path} ${scripts_path} ${SCRATCH} ${subject} ${region} ${run} ${time_limit} ${memory} ${smoothing}' < ${scripts_path}/feat_analysis_sc_Sherlock.sbatch > feat_analysis_sc_Sherlock_${subject}_${region}_${run}.sbatch
             sbatch feat_analysis_sc_Sherlock_${subject}_${region}_${run}.sbatch
             rm feat_analysis_sc_Sherlock_${subject}_${region}_${run}.sbatch
             # TODO: run average
