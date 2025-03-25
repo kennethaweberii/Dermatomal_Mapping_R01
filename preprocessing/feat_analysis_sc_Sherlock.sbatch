@@ -3,13 +3,13 @@
 #all commands that start with SBATCH contain commands that are just used by SLURM for scheduling  
 #################
 #set a job name  
-#SBATCH --job-name=${subject}_${region}_${task}
+#SBATCH --job-name=${subject}_${region}_${run}
 #################  
 #a file for job output, you can check job progress
-#SBATCH --output=${subject}_${region}_${task}.out
+#SBATCH --output=${subject}_${region}_${run}.out
 #################
 # a file for errors from the job
-#SBATCH --error=${subject}_${region}_${task}.err
+#SBATCH --error=${subject}_${region}_${run}.errƒ
 #################
 #time you think you need; default is one hour
 #in minutes in this case, hh:mm:ss
@@ -96,12 +96,12 @@ feat ${func_data}_second_level_trialwise.fsf
 rm ${func_data}.nii.gz ${func_data}_first_level_trialwise.fsf ${func_data}_first_level.fsf ${func_data}_second_level_trialwise.fsf
 
 cd ${SCRATCH}
-tar -zcvf ${subject}_${region}_${task}.tar.gz ${subject}_${region}_run-${run}
+tar -zcvf ${subject}_${region}_${run}.tar.gz ${subject}_${region}_run-${run}
 
 ret=1
 c=0
 until [  ${ret} = 0 ] || [ ${c} = 5 ]; do
-	scp ${subject}_${region}_${task}.tar.gz sbedard@anes-nil1000.stanford.edu:${data_path}/data/BIDS/derivatives/${subject}/ses-${region}/func/run-${run}/
+	scp ${subject}_${region}_${run}.tar.gz sbedard@anes-nil1000.stanford.edu:${data_path}/data/BIDS/derivatives/${subject}/ses-${region}/func/run-${run}/
 	ret=$?
 	((c++))
 done
