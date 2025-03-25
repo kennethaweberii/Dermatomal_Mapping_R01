@@ -30,19 +30,17 @@ analysis_path=${SCRATCH}/${subject}_${region}_${task}
 mkdir -p ${analysis_path}
 cd ${analysis_path}
 
-if [ ${region} == spinalcord ]; then
-                
-    func_data=${subject}_ses-${region}_task-${run}_bold_mc2_pnm_sct2template_smooth225
-    file_path=${data_path}/data/BIDS/derivatives/${subject}/ses-${region}/func/run-${run}
-    coil=""
-    stim_file=*_stim_amp_1.txt
-    file_outliers=${subject}_ses-${region}_task-tens_run-${run}_bold_motion_outliers.txt
-fi
+func_data=${subject}_ses-${region}_task-${run}_bold_mc2_pnm_sct2template_smooth225
+file_path=${data_path}/data/BIDS/derivatives/${subject}/ses-${region}/func/run-${run}
+coil=""
+stim_file=*_stim_amp_1.txt
+file_outliers=${subject}_ses-${region}_task-tens_run-${run}_bold_motion_outliers.txt
 
 #Copy functional
 ret=1
 c=0
 until [ ${ret} = 0 ] || [ ${c} = 5 ]; do
+    echo "copying ${file_path}/${func_data}.nii.gz"
 	scp sbedard@anes-nil1000.stanford.edu:${file_path}/${func_data}.nii.gz ./
     scp sbedard@anes-nil1000.stanford.edu:${file_path}/fsl_stim_vectros/${stim_file} ./
     scp sbedard@anes-nil1000.stanford.edu:${file_path}/${file_outliers} ./
@@ -50,6 +48,7 @@ until [ ${ret} = 0 ] || [ ${c} = 5 ]; do
 	((c++))
 done 
 stim_parameters=`echo ${stim_file} | awk -F 'fsl_stim_vector_' '{print $2}' | awk -F '_stim_amp' '{print $1}'`
+echo "stim parameter"
 #me
 if [[ ! -f "$file_outliers" ]]; then
     confoundevs=0
