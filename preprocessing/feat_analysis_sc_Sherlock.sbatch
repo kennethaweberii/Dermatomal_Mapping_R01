@@ -30,7 +30,7 @@ analysis_path=${SCRATCH}/${subject}_${region}_run-${run}
 mkdir -p ${analysis_path}
 cd ${analysis_path}
 
-func_data=${subject}_ses-${region}_task-bold_mc2_pnm_sct2template_smooth225
+func_data=${subject}_ses-${region}_task-tens_run-${run}_bold_mc2_pnm_sct2template_smooth225
 file_path=${data_path}/data/BIDS/derivatives/${subject}/ses-${region}/func/run-${run}
 coil=""
 stim_file=*_stim_amp_1.txt
@@ -100,7 +100,7 @@ tar -zcvf ${subject}_${region}_${run}.tar.gz ${subject}_${region}_run-${run}
 ret=1
 c=0
 until [  ${ret} = 0 ] || [ ${c} = 5 ]; do
-	scp ${subject}_${region}_${run}.tar.gz sbedard@anes-nil1000.stanford.edu:${data_path}/data/BIDS/derivatives/${subject}/ses-${region}/func/run-${run}/
+	scp ${subject}_${region}_run-${run}.tar.gz sbedard@anes-nil1000.stanford.edu:${data_path}/data/BIDS/derivatives/${subject}/ses-${region}/func/run-${run}/
 	ret=$?
 	((c++))
 done
