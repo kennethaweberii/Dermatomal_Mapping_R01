@@ -42,7 +42,7 @@ c=0
 until [ ${ret} = 0 ] || [ ${c} = 5 ]; do
     echo "copying ${file_path}/${func_data}.nii.gz"
 	scp sbedard@anes-nil1000.stanford.edu:${file_path}/${func_data}.nii.gz ./
-    scp sbedard@anes-nil1000.stanford.edu:${file_path}/fsl_stim_vectros/${stim_file} ./
+    scp sbedard@anes-nil1000.stanford.edu:${file_path}/fsl_stim_vectors/${stim_file} ./
     scp sbedard@anes-nil1000.stanford.edu:${file_path}/${file_outliers} ./
 	ret=$?
 	((c++))
