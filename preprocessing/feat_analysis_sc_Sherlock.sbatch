@@ -26,11 +26,11 @@ module load fsl/6.0.7.10
 
 echo ${subject} ${region} "run" ${run}
 
-analysis_path=${SCRATCH}/${subject}_${region}_${task}
+analysis_path=${SCRATCH}/${subject}_${region}_run-${run}
 mkdir -p ${analysis_path}
 cd ${analysis_path}
 
-func_data=${subject}_ses-${region}_task-${run}_bold_mc2_pnm_sct2template_smooth225
+func_data=${subject}_ses-${region}_task-bold_mc2_pnm_sct2template_smooth225
 file_path=${data_path}/data/BIDS/derivatives/${subject}/ses-${region}/func/run-${run}
 coil=""
 stim_file=*_stim_amp_1.txt
