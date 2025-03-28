@@ -503,7 +503,7 @@ if [[ $SES == *"spinalcord"* ]];then
 
       stim_file=*_stim_amp_1.txt
       stim_parameters=`echo ${stim_file} | awk -F 'fsl_stim_vector_' '{print $2}' | awk -F '_stim_amp' '{print $1}'`
-
+      cd ..
 
       # Create false registration 
       ################################
