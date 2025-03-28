@@ -95,7 +95,7 @@ feat ${func_data}_second_level_trialwise.fsf
 rm ${func_data}.nii.gz ${func_data}_first_level_trialwise.fsf ${func_data}_first_level.fsf ${func_data}_second_level_trialwise.fsf
 
 cd ${SCRATCH}
-tar -zcvf ${subject}_${region}_${run}.tar.gz ${subject}_${region}_run-${run}
+tar -zcvf ${subject}_${region}_run-${run}.tar.gz ${subject}_${region}_run-${run}
 
 ret=1
 c=0
