@@ -29,6 +29,8 @@ echo ${subject} ${region} "run" ${run}
 analysis_path=${SCRATCH}/${subject}_${region}_run-${run}
 mkdir -p ${analysis_path}
 cd ${analysis_path}
+mkdir -p ./ses-${region}/func/run-${run}/
+cd ./ses-${region}/func/run-${run}/
 
 func_data=${subject}_ses-${region}_task-tens_run-${run}_bold_mc2_pnm_stc2template_smooth225
 file_path=${data_path}/data/BIDS/derivatives/${subject}/ses-${region}/func/run-${run}
@@ -42,8 +44,8 @@ c=0
 until [ ${ret} = 0 ] || [ ${c} = 5 ]; do
     echo "copying ${file_path}/${func_data}.nii.gz"
 	scp sbedard@anes-nil1000.stanford.edu:${file_path}/${func_data}.nii.gz ./
-    scp sbedard@anes-nil1000.stanford.edu:${file_path}/fsl_stim_vectors/${stim_file} ./ses-${region}/func/run-${run}/
-    scp sbedard@anes-nil1000.stanford.edu:${file_path}/${file_outliers} ./ses-${region}/func/run-${run}/
+    scp sbedard@anes-nil1000.stanford.edu:${file_path}/fsl_stim_vectors/${stim_file} ./
+    scp sbedard@anes-nil1000.stanford.edu:${file_path}/${file_outliers} ./
 	ret=$?
 	((c++))
 done 
@@ -57,7 +59,9 @@ else
 fi
 
 number_of_volumes=$(fslval ${func_data} dim4)
+echo "Number of volumes: $number_of_volumes"
 tr=$(fslval ${func_data} pixdim4)
+echo "TR: $tr"
 
 export FSLDIR analysis_path subject coil session smoothing run func_data region tr number_of_volumes stim_parameters confoundevs
 envsubst < "${scripts_path}/first_level.fsf" > "${func_data}_first_level.fsf"
