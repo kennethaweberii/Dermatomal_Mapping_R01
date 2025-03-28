@@ -54,7 +54,7 @@ cd ./fsl_stim_vectors
 stim_parameters=`echo ${stim_file} | awk -F 'fsl_stim_vector_' '{print $2}' | awk -F '_stim_amp' '{print $1}'`
 echo "Stim parameters: $stim_parameters"
 cd ..
-#me
+
 if [[ ! -f "$file_outliers" ]]; then
     confoundevs=0
 else
@@ -77,7 +77,7 @@ cp example_func.nii.gz reg/example_func.nii.gz
 cp example_func.nii.gz reg/standard.nii.gz
 updatefeatreg .
 
-cd ${analysis_path}
+cd ${analysis_path}/ses-${region}/func/run-${run}/
 
 export analysis_path subject coil session run func_data region tr number_of_volumes stim_parameters smoothing confoundevs
 envsubst < "${scripts_path}/first_level_trialwise.fsf" > "${func_data}_first_level_trialwise.fsf"
@@ -91,7 +91,7 @@ cp example_func.nii.gz reg/example_func.nii.gz
 cp example_func.nii.gz reg/standard.nii.gz
 updatefeatreg .
 
-cd ${analysis_path}
+cd ${analysis_path}/ses-${region}/func/run-${run}
 
 #Run second-level trialwise analysis
 export analysis_path subject coil session run func_data region tr number_of_volumes stim_parameters smoothing
@@ -99,7 +99,7 @@ envsubst < "${scripts_path}/second_level_trialwise.fsf" > "${func_data}_second_l
 feat ${func_data}_second_level_trialwise.fsf
 
 
-rm ${func_data}.nii.gz ${func_data}_first_level_trialwise.fsf ${func_data}_first_level.fsf ${func_data}_second_level_trialwise.fsf
+rm ${func_data}.nii.gz
 
 cd ${SCRATCH}
 tar -zcvf ${subject}_${region}_run-${run}.tar.gz ${subject}_${region}_run-${run}
