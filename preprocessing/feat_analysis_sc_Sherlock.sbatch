@@ -49,9 +49,11 @@ until [ ${ret} = 0 ] || [ ${c} = 5 ]; do
     scp sbedard@anes-nil1000.stanford.edu:${file_path}/${file_outliers} ./
 	ret=$?
 	((c++))
-done 
+done
+cd ./fsl_stim_vectors
 stim_parameters=`echo ${stim_file} | awk -F 'fsl_stim_vector_' '{print $2}' | awk -F '_stim_amp' '{print $1}'`
-echo "stim parameter"
+echo "Stim parameters: $stim_parameters"
+cd ..
 #me
 if [[ ! -f "$file_outliers" ]]; then
     confoundevs=0
