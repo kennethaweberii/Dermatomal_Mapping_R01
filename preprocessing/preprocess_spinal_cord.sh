@@ -462,8 +462,8 @@ if [[ $SES == *"spinalcord"* ]];then
             confoundevs=1
       fi
 
-     #slice_timing after PNM
-     slicetimer -i ${file_task_mc2}_pnm -o ${file_task_mc2}_pnm_stc --tcustom=${PATH_SCRIPTS}/spinal_cord_slice_timing.txt
+      #slice_timing after PNM
+      slicetimer -i ${file_task_mc2}_pnm -o ${file_task_mc2}_pnm_stc --tcustom=${PATH_SCRIPTS}/spinal_cord_slice_timing.txt
   
 
       # Warp 4D to template
@@ -482,7 +482,7 @@ if [[ $SES == *"spinalcord"* ]];then
       #sigma= 2mm/2.354 = | sigma = 5m/2.354 for 2mm and 5 mm of full width at half maximum (FWHM)
       fslmaths ${file_task_mc2}_pnm_stc2template.nii.gz -s 0.85,0.84,2.124 ${file_task_mc2}_pnm_stc2template_smooth225.nii.gz
       
-      # Run first-level analysis
+      # Get fslstim folders
       ###############################
      #rsync the folder fsl_stim_vectors:
       #PATH_VECTORS="${PATH_DERIVATIVES}/${SUBJECT}/func/fsl_stim_vectors/"
@@ -505,97 +505,26 @@ if [[ $SES == *"spinalcord"* ]];then
       stim_parameters=`echo ${stim_file} | awk -F 'fsl_stim_vector_' '{print $2}' | awk -F '_stim_amp' '{print $1}'`
 
 
-      cd ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}
-      echo ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}
-
-      func_data="${file_task}_mc2_pnm_stc2template_smooth225" #TODO
-      subject=${sub_id}
-      analysis_path=$PATH_DATA_PROCESSED/${subject}
-      region="spinalcord"
-      coil=""
-      if [[ $SES == *"21Ch"* ]]; then
-        coil="21Ch"  # Set coil to 21Ch if SES contains "21Ch"
-      elif [[ $SES == *"56Ch"* ]]; then
-        coil="56Ch"  # Set coil to 56Ch if SES contains "56Ch"
-      fi
-      session="" # TODO change if multiple sessions
-      smoothing=0
-      export analysis_path subject coil session smoothing run func_data region tr number_of_volumes stim_parameters confoundevs
-      envsubst < "${PATH_SCRIPTS}/first_level.fsf" > "${func_data}_first_level.fsf"
-      
-      # Remove existing feat repo if already exists
-      if [[ -d "${func_data}_first_level.feat" ]]; then
-        rm -r "${func_data}_first_level.feat"
-      fi
-      feat ${func_data}_first_level.fsf
-
       # Create false registration 
       ################################
-      cd ${func_data}_first_level.feat
-
-      mkdir -p reg
-      cp /usr/local/fsl/etc/flirtsch/ident.mat reg/example_func2standard.mat
-      cp example_func.nii.gz reg/example_func.nii.gz
-      cp $SCT_DIR/data/PAM50/template/PAM50_t2s.nii.gz reg/standard.nii.gz
-      fslmaths reg/standard.nii.gz -mas $SCT_DIR/data/PAM50/template/PAM50_cord.nii.gz reg/standard_masked.nii.gz
-      fslroi reg/standard_masked.nii.gz reg/standard.nii.gz 32 75 34 75 691 263
-
-      cd ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}
-      #Run first-level trialwise analysis
-      export analysis_path subject coil session run func_data region tr number_of_volumes stim_parameters smoothing confoundevs
-      envsubst < "${PATH_SCRIPTS}/first_level_trialwise.fsf" > "${func_data}_first_level_trialwise.fsf"
-	    feat ${func_data}_first_level_trialwise.fsf
-
       #Run registration for first level trialwise analysis
-      cd ${func_data}_trialwise_first_level.feat
-      mkdir -p reg
-      cp /usr/local/fsl/etc/flirtsch/ident.mat reg/example_func2standard.mat
-      cp example_func.nii.gz reg/example_func.nii.gz
-      cp $SCT_DIR/data/PAM50/template/PAM50_t2s.nii.gz reg/standard.nii.gz
-      fslmaths reg/standard.nii.gz -mas $SCT_DIR/data/PAM50/template/PAM50_cord.nii.gz reg/standard_masked.nii.gz
-      fslroi reg/standard_masked.nii.gz reg/standard.nii.gz 32 75 34 75 691 263
+      # cd ${func_data}_trialwise_first_level.feat
+      # mkdir -p reg
+      # cp /usr/local/fsl/etc/flirtsch/ident.mat reg/example_func2standard.mat
+      # cp example_func.nii.gz reg/example_func.nii.gz
+      # cp $SCT_DIR/data/PAM50/template/PAM50_t2s.nii.gz reg/standard.nii.gz
+      # fslmaths reg/standard.nii.gz -mas $SCT_DIR/data/PAM50/template/PAM50_cord.nii.gz reg/standard_masked.nii.gz
+      # fslroi reg/standard_masked.nii.gz reg/standard.nii.gz 32 75 34 75 691 263
 
-      cd ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}
-
-      #Run second-level trialwise analysis
-      export analysis_path subject coil session run func_data region tr number_of_volumes stim_parameters smoothing
-      envsubst < "${PATH_SCRIPTS}/second_level_trialwise.fsf" > "${func_data}_second_level_trialwise.fsf"
-	    feat ${func_data}_second_level_trialwise.fsf
-      echo $PWD
       cd ..
     fi
   done
   
 fi
 
-#Copy PAM50 template for masking the group level results
+#Copy PAM50 template for masking the group level results TODO: keep
 cp $SCT_DIR/data/PAM50/template/PAM50_cord.nii.gz PAM50_cord.nii.gz
 fslroi PAM50_cord.nii.gz PAM50_cord_cropped.nii.gz 32 75 34 75 691 263
-
-
-subject=$(dirname "$SUBJECT")
-analysis_path=$PATH_DATA_PROCESSED/${subject}
-region="spinalcord"
-coil=""  # Initialize coil as empty
-
-if [[ $SES == *"21Ch"* ]]; then
-    coil="21Ch"  # Set coil to 21Ch if SES contains "21Ch"
-elif [[ $SES == *"56Ch"* ]]; then
-    coil="56Ch"  # Set coil to 56Ch if SES contains "56Ch"
-fi
-
-session="" # TODO change if multiple sessions
-#average
-export analysis_path subject coil session run func_data region smoothing
-envsubst < "${PATH_SCRIPTS}/first_level_average.fsf" > "${subject}_${region}_first_level_average.fsf"
-feat ${subject}_${region}_first_level_average.fsf
-
-#trialwise average
-export analysis_path subject coil session run func_data region smoothing
-envsubst < "${PATH_SCRIPTS}/second_level_trialwise_average.fsf" > "${subject}_${region}_second_level_trialwise_average.fsf"
-feat ${subject}_${region}_second_level_trialwise_average.fsf
-
-
 
 # Verify presence of output files and write log file if error
 # ------------------------------------------------------------------------------
@@ -604,7 +533,6 @@ FILES_TO_CHECK=(
   "run-2/${file}_task-tens_run-2_bold_mc2_pnm_sct2template_smooth225.nii.gz"
   "run-3/${file}_task-tens_run-3_bold_mc2_pnm_stc2template_smooth225.nii.gz"
 )
-
 
 for file in ${FILES_TO_CHECK[@]}; do
   if [[ ! -e $file ]]; then
