@@ -31,6 +31,7 @@ mkdir -p ${analysis_path}
 cd ${analysis_path}
 mkdir -p ./ses-${region}/func/run-${run}/
 cd ./ses-${region}/func/run-${run}/
+mkdir -p fsl_stim_vectors
 
 func_data=${subject}_ses-${region}_task-tens_run-${run}_bold_mc2_pnm_stc2template_smooth225
 file_path=${data_path}/data/BIDS/derivatives/${subject}/ses-${region}/func/run-${run}
@@ -44,7 +45,7 @@ c=0
 until [ ${ret} = 0 ] || [ ${c} = 5 ]; do
     echo "copying ${file_path}/${func_data}.nii.gz"
 	scp sbedard@anes-nil1000.stanford.edu:${file_path}/${func_data}.nii.gz ./
-    scp sbedard@anes-nil1000.stanford.edu:${file_path}/fsl_stim_vectors/${stim_file} ./
+    scp sbedard@anes-nil1000.stanford.edu:${file_path}/fsl_stim_vectors/${stim_file} ./fsl_stim_vectors/
     scp sbedard@anes-nil1000.stanford.edu:${file_path}/${file_outliers} ./
 	ret=$?
 	((c++))
