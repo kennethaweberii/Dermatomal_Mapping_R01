@@ -529,8 +529,8 @@ fslroi PAM50_cord.nii.gz PAM50_cord_cropped.nii.gz 32 75 34 75 691 263
 # Verify presence of output files and write log file if error
 # ------------------------------------------------------------------------------
 FILES_TO_CHECK=(
-  "run-1/${file}_task-tens_run-1_bold_mc2_pnm_sct2template_smooth225.nii.gz"
-  "run-2/${file}_task-tens_run-2_bold_mc2_pnm_sct2template_smooth225.nii.gz"
+  "run-1/${file}_task-tens_run-1_bold_mc2_pnm_stc2template_smooth225.nii.gz"
+  "run-2/${file}_task-tens_run-2_bold_mc2_pnm_stc2template_smooth225.nii.gz"
   "run-3/${file}_task-tens_run-3_bold_mc2_pnm_stc2template_smooth225.nii.gz"
 )
 
