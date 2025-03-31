@@ -78,6 +78,7 @@ fi
 # get starting time:
 start=`date +%s`
 for subject in $sub;do
+    # TODO: un tar folders, and put in run folder
     echo  "Analysing $subject ..."
     region="spinalcord"
     smoothing=0
