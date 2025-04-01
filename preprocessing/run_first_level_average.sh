@@ -78,12 +78,18 @@ fi
 # get starting time:
 start=`date +%s`
 for subject in $sub;do
-    # TODO: un tar folders, and put in run folder
     echo  "Analysing $subject ..."
     region="spinalcord"
     smoothing=0
     coil=""
     session=""
+    echo "Unziping first level analysis"
+    runs=(1 2 3)
+    for run in $runs;do
+        cd run-${run}
+        tar -xvf ${subject}_${region}_run-${run}.tar.gz
+        mv ${subject}_${region}_run-${run}/ses-${region}/func/run-${run}/*.feat* .
+        cd ..
     analysis_path="${derivatives_path}/${subject}/"
     cd "${derivatives_path}/${subject}/ses-${region}/func/"
     export analysis_path subject coil session region smoothing
