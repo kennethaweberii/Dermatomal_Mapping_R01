@@ -83,7 +83,7 @@ export analysis_path subject coil session run func_data region tr number_of_volu
 envsubst < "${scripts_path}/first_level_trialwise.fsf" > "${func_data}_first_level_trialwise.fsf"
 feat ${func_data}_first_level_trialwise.fsf
 
-cd ${func_data}_first_level_trialwise.feat
+cd ${func_data}_trialwise_first_level.feat
 
 mkdir -p reg
 cp ${FSLDIR}/etc/flirtsch/ident.mat reg/example_func2standard.mat
