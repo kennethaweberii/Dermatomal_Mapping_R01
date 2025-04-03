@@ -301,7 +301,7 @@ if [[ $SES == *"spinalcord"* ]];then
             rsync -avzh $FILE_MASK "${file_task_mean}_mask.nii.gz"
           else
             # Segment the spinal cord
-            segment_if_does_not_exist ${file_task_mean} 't2s' 'deepseg' 'func'
+            segment_if_does_not_exist ${file_task_mean} 't2s' 'epi' 'func'
             # Dilate the spinal cord mask
             sct_maths -i ${file_task_mean}_label-SC_seg.nii.gz -dilate 8 -shape disk -o ${file_task_mean}_mask.nii.gz -dim 2
           fi
@@ -330,7 +330,7 @@ if [[ $SES == *"spinalcord"* ]];then
               rsync -avzh $FILE_MASK "mc1_mask.nii.gz"
             else
             # Segment the spinal cord
-              segment_if_does_not_exist mc1_mean 't2s' 'deepseg' 'func'
+              segment_if_does_not_exist mc1_mean 't2s' 'epi' 'func'
               # check dilating
               sct_maths -i mc1_mean_label-SC_seg.nii.gz -dilate 8 -shape disk -o mc1_mask.nii.gz -dim 2
               # Qc of mask
