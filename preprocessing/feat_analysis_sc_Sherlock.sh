@@ -6,7 +6,7 @@ data_path=/home/sbedard/Projects/Dermatomal_Mapping_R01
 scripts_path=${HOME}/codes/Dermatomal_Mapping_R01/preprocessing
 
 
-subjects=(sub-DMAim1HC004)
+subjects=(sub-DMAim1HC006)
 
 regions=(spinalcord)
 runs=(1 2 3)
