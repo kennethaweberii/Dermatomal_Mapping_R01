@@ -542,6 +542,11 @@ if [[ $SES == *"spinalcord"* ]];then
 
       cd ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}
       #Run first-level trialwise analysis
+      # Remove existing feat repo if already exists
+      if [[ -d "${func_data}_trialwise_first_level.feat" ]]; then
+        rm -r "${func_data}_trialwise_first_level.feat"
+      fi
+
       export analysis_path subject coil session run func_data region tr number_of_volumes stim_parameters smoothing confoundevs
       envsubst < "${PATH_SCRIPTS}/first_level_trialwise.fsf" > "${func_data}_first_level_trialwise.fsf"
 	    feat ${func_data}_first_level_trialwise.fsf
@@ -558,6 +563,10 @@ if [[ $SES == *"spinalcord"* ]];then
       cd ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}
 
       #Run second-level trialwise analysis
+      # Remove existing feat repo if already exists
+      if [[ -d "${func_data}_trialwise_second_level.gfeat" ]]; then
+        rm -r "${func_data}_trialwise_second_level.gfeat"
+      fi
       export analysis_path subject coil session run func_data region tr number_of_volumes stim_parameters smoothing
       envsubst < "${PATH_SCRIPTS}/second_level_trialwise.fsf" > "${func_data}_second_level_trialwise.fsf"
 	    feat ${func_data}_second_level_trialwise.fsf
