@@ -378,7 +378,7 @@ if [[ $SES == *"spinalcord"* ]];then
       # Test EPI seg --> select the best
       segment_if_does_not_exist ${file_task_mc2_mean} 't2' 'epi' 'func'
       # test contrast-agnostic:
-      sct_deepseg -i ${file_task_mc2_mean}.nii.gz -task seg_sc_contrast_agnostic -o ${file_task_mc2_mean}_label-SC_CA.nii.gz
+      sct_deepseg -i ${file_task_mc2_mean}.nii.gz -task seg_sc_contrast_agnostic -o ${file_task_mc2_mean}_label-SC_CA.nii.gz -qc ${PATH_QC} -qc-subject ${SUBJECT}
 
       file_task_mc2_mean_seg="${file_task_mc2_mean}_label-SC_seg"
 
