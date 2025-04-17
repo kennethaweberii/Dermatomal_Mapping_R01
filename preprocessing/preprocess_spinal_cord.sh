@@ -76,6 +76,8 @@ segment_if_does_not_exist() {
         sct_propseg -i ${file}.nii.gz -c ${contrast} -qc ${PATH_QC} -qc-subject ${SUBJECT} -CSF
     elif [[ $segmentation_method == 'epi' ]]; then
         sct_deepseg -i ${file}.nii.gz -task seg_sc_epi -o ${file}_label-SC_seg.nii.gz -qc ${PATH_QC} -qc-subject ${SUBJECT}
+        # Copy header of original image to ensure that pixdim stays the same
+        fslcpgeom ${file}.nii.gz ${file}_label-SC_seg.nii.gz 
 
     fi
   fi
