@@ -144,8 +144,6 @@ segment_rootlets_if_does_not_exist() {
   if [[ -e $FILESEGMANUAL ]]; then
     echo "Found! Using manual segmentation."
     rsync -avzh $FILESEGMANUAL ${FILEROOTLET}.nii.gz
-    # Add threshold to remove level 9 since not in PAM50 template yet
-    sct_maths -i ${FILEROOTLET}.nii.gz -uthr 8 -o ${FILEROOTLET}.nii.gz
   else
     echo "Not found. Proceeding with automatic segmentation."
     # Segment spinal nerve rootlets
