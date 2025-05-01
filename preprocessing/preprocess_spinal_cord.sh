@@ -93,7 +93,7 @@ label_if_does_not_exist(){
   local file="$1"
   local file_seg="$2"
   # Update global variable with segmentation file name
-  FILELABEL="${file}_labels-disc"
+  FILELABEL="${file}_label-disc"
   FILELABELMANUAL="${PATH_DERIVATIVES}/${SUBJECT}/anat/${FILELABEL}.nii.gz"
   echo "Looking for manual label: $FILELABELMANUAL"
   if [[ -e $FILELABELMANUAL ]]; then
