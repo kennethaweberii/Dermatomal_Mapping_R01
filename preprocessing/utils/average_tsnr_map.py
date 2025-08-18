@@ -11,6 +11,7 @@ import logging
 import sys
 import os
 import glob
+import nibabel as nib
 FNAME_LOG = 'log_stats.txt'
 
 # Initialize logging
@@ -73,10 +74,41 @@ def main():
    # logger.info("Found tSNR maps: {}".format(tsnr_maps))
     # Remove subjects not in include list
     if include:
+        list_tsnr_maps = []
         for sub in include:
             tsnr_maps = glob.glob(os.path.join(input_folder, sub, 'ses-spinalcord', 'func', 'run-*', '*mc2_tsnr.nii.gz'))
             logger.info("Found tSNR maps for {}: {}".format(sub, tsnr_maps))
+            list_tsnr_maps.extend(tsnr_maps)
             # Warp tSNR maps to PAM50 template space
             for tsnr_map in tsnr_maps:
+                run = tsnr_map.split('_')[-4].split('-')[-1]  # Extract run number from filename
+                logger.info("Processing subject: {}, run: {}".format(sub, run))
+                # Example: sub-DMAim1HC005_ses-spinalcord_task-tens
+                 # warp_sub-DMAim1HC005_ses-spinalcord_task-tens_run-1_bold_mc2_mean2PAM50_t2.nii.gz
+                logger.info("Warping tSNR map {} to PAM50 template space.".format(tsnr_map))
+                path_PAM50 = os.path.join('$SCT_DIR/data/PAM50/template/', 'PAM50_t2.nii.gz')
+                path_warp = os.path.join(os.path.dirname(tsnr_map), f'warp_{sub}_ses-spinalcord_task-tens_run-{run}_bold_mc2_mean2PAM50_t2.nii.gz')
+                filename_o = os.path.join(output_folder, os.path.basename(tsnr_map))
+                # Check if output file exists, if so, skip command
+                if os.path.exists(filename_o):
+                    logger.info("Output file {} already exists. Skipping command.".format(filename_o))
+                else:
+                # Construct command to warp tSNR map to PAM50 template space
+                    command = f'sct_apply_transfo -i {tsnr_map} -d {path_PAM50}  -w {path_warp} -x linear -o {filename_o}'
+                    logger.info("Running command: {}".format(command))
+                    os.system(command)
+                #warp_sub-DMAim1HC005_ses-spinalcord_task-tens_run-1_bold_mc2_mean2PAM50_t2
+        file_nib = nib.load(list_tsnr_maps[0])
+        file_data = np.array(file_nib.get_fdata())
+        sum_data = np.zeros(shape=file_data.shape)
+        for tsnr_map in list_tsnr_maps:
+            file_nib = nib.load(tsnr_map)
+            sum_data +=np.array(file_nib.get_fdata())
+            logger.info(tsnr_map)
+        mean_data = sum_data / len(list_tsnr_maps)
+        nii_mean= nib.Nifti1Image(mean_data, file_nib.affine)
+        fname_out_levels = 'mean_tsnr_PAM50' + '.nii.gz'
+        print('saving ...', os.path.join(output_folder, fname_out_levels))
+        nib.save(nii_mean, os.path.join(output_folder, fname_out_levels))
 if __name__ == "__main__":
     main()
