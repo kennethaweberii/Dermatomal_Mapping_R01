@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Creates an avreage tSNR map from native space and an include list
+# Example command:  python average_tsnr_map.py -path-in ~/Projects/Dermatomal_Mapping_R01/data/BIDS/derivatives/ -include ~/codes/Dermatomal_Mapping_R01/include_n35.yml -o ~/dermatomal_mapping_proprocessing_2025-04-11_ventral_dorsal_runALL/results/tsnr_maps_n35/
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -78,7 +79,6 @@ def main():
         for sub in include:
             tsnr_maps = glob.glob(os.path.join(input_folder, sub, 'ses-spinalcord', 'func', 'run-*', '*mc2_tsnr.nii.gz'))
             logger.info("Found tSNR maps for {}: {}".format(sub, tsnr_maps))
-            list_tsnr_maps.extend(tsnr_maps)
             # Warp tSNR maps to PAM50 template space
             for tsnr_map in tsnr_maps:
                 run = tsnr_map.split('_')[-4].split('-')[-1]  # Extract run number from filename
@@ -97,6 +97,8 @@ def main():
                     command = f'sct_apply_transfo -i {tsnr_map} -d {path_PAM50}  -w {path_warp} -x linear -o {filename_o}'
                     logger.info("Running command: {}".format(command))
                     os.system(command)
+                list_tsnr_maps.extend([filename_o])
+
                 #warp_sub-DMAim1HC005_ses-spinalcord_task-tens_run-1_bold_mc2_mean2PAM50_t2
         file_nib = nib.load(list_tsnr_maps[0])
         file_data = np.array(file_nib.get_fdata())
