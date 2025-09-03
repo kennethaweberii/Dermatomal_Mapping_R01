@@ -132,6 +132,8 @@ if [[ -f ${HOME}/anaconda3/etc/profile.d/conda.sh ]]; then
   source ${HOME}/anaconda3/etc/profile.d/conda.sh
 elif [[ -f ${HOME}/Miniconda3/etc/profile.d/conda.sh ]]; then
   source ${HOME}/Miniconda3/etc/profile.d/conda.sh
+elif [[ -f ${HOME}/miniconda3/etc/profile.d/conda.sh ]]; then
+  source ${HOME}/miniconda3/etc/profile.d/conda.sh
 else
   echo Python not installed. Exit program.
   exit 1
