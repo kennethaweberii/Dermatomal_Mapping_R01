@@ -24,15 +24,14 @@ logging.root.addHandler(hdlr)
 
 def get_parser():
     parser = argparse.ArgumentParser(
-        description="Path data_processed where the tSNR maps are stored.")
+        description="Computes avreage tSNR map in PAM50 template space from native space tSNR maps.",)
     parser.add_argument('-path-in', required=True, type=str,
-                        help="Input .csv file with CSA computed perslice.")
+                        help="Path data_processed where the tSNR maps are stored.")
     parser.add_argument('-include', required=False, type=str,
                         default='include.yml',
-                        help="Path output results image.")
+                        help="Inlcude list .yml file with subjects to include. If not provided, all subjects found will be included.")
     parser.add_argument('-o', required=False, type=str,
-                        default='csa.png',
-                        help="Path output results image.")
+                        help="Path output to put tsnr maps in PAM50 template space.")
 
     return parser
 
@@ -107,6 +106,19 @@ def main():
             file_nib = nib.load(tsnr_map)
             sum_data +=np.array(file_nib.get_fdata())
             logger.info(tsnr_map)
+        # Compute mean tSNR map for each run (1 to 3)
+        for run_num in range(1, 4):
+            run_maps = [tsnr_map for tsnr_map in list_tsnr_maps if f'run-{run_num}_' in os.path.basename(tsnr_map)]
+            if run_maps:
+                sum_run = np.zeros(shape=file_data.shape)
+                for tsnr_map in run_maps:
+                    file_nib_run = nib.load(tsnr_map)
+                    sum_run += np.array(file_nib_run.get_fdata())
+                mean_run = sum_run / len(run_maps)
+                nii_mean_run = nib.Nifti1Image(mean_run, file_nib.affine)
+                fname_out_run = f'mean_tsnr_PAM50_run-{run_num}.nii.gz'
+                print('saving ...', os.path.join(output_folder, fname_out_run))
+                nib.save(nii_mean_run, os.path.join(output_folder, fname_out_run))
         mean_data = sum_data / len(list_tsnr_maps)
         nii_mean= nib.Nifti1Image(mean_data, file_nib.affine)
         fname_out_levels = 'mean_tsnr_PAM50' + '.nii.gz'
