@@ -6,6 +6,8 @@ from scipy.stats import ttest_rel
 from scipy.stats import linregress
 
 import matplotlib.pyplot as plt
+# Example command:
+#python analysis_plot_subject_level.py -metrics subject_metrics.txt -metrics-roi subject_metrics_rois.txt -path-out ~/Projects/Dermatomal_Mapping_R01/manuscripts/plots_test_2025-10-01 -metrics-roi ~/Projects/Dermatomal_Mapping_R01/manuscripts/results_n40_spinalcord_Sandrine/subject_metrics_rois.txt
 
 def get_parser():
     parser = argparse.ArgumentParser(description='Create subject level plots for analysis.')
@@ -172,14 +174,14 @@ def main():
             print(ydata)
             plt.plot(xlabel, ydata, width, color=color, marker=None)
 
-        # Means and SEs for each amp
+        # Means and SDs for each amp
         means = []
-        ses = []
+        sds = []
         for cope in ['cope1', 'cope2', 'cope3', 'cope4']:
-            vals = dataset_roi[(dataset_roi['cope'] == cope)&(dataset_roi['region']==region)][measure]
+            vals = dataset_roi[(dataset_roi['cope'] == cope) & (dataset_roi['region'] == region)][measure]
             means.append(vals.mean())
-            ses.append(vals.std() / np.sqrt(len(dataset_roi.subject.unique())))
-        plt.errorbar(xlabel, means, yerr=ses, color=(0,0,0), marker=None, linewidth=3, elinewidth=3, capsize=5, markeredgewidth=3)
+            sds.append(vals.std())
+        plt.errorbar(xlabel, means, yerr=sds, color=(0,0,0), marker=None, linewidth=3, elinewidth=3, capsize=5, markeredgewidth=3)
 
         # Linear regression
         
