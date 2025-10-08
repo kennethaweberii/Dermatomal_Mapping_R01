@@ -28,8 +28,8 @@ for cope in ${copes[@]}; do
 
                 #echo ${task} ${cope} ${subject} ${roi} ${run}
 
-                zscore=`fslstats ${data_path}/${subject}/ses-${session}spinalcord/func/run-${run}/${subject}_ses-${session}spinalcord_task-${task}_run-${run}_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope${cope}.feat/thresh_zstat1.nii.gz -k ${data_path}/masks/rois_n40/${roi}.nii.gz -M`
-                voxels=`fslstats ${data_path}/${subject}/ses-${session}spinalcord/func/run-${run}/${subject}_ses-${session}spinalcord_task-${task}_run-${run}_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope${cope}.feat/thresh_zstat1.nii.gz -k ${data_path}/masks/rois_n40/${roi}.nii.gz -V | cut -d " " -f1`
+                zscore=`fslstats ${data_path}/${subject}/ses-${session}spinalcord/func/run-${run}/${subject}_ses-${session}spinalcord_task-${task}_run-${run}_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope1.feat/thresh_zstat${cope}.nii.gz -k ${data_path}/masks/rois_n40/${roi}.nii.gz -M`
+                voxels=`fslstats ${data_path}/${subject}/ses-${session}spinalcord/func/run-${run}/${subject}_ses-${session}spinalcord_task-${task}_run-${run}_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope1.feat/thresh_zstat${cope}.nii.gz -k ${data_path}/masks/rois_n40/${roi}.nii.gz -V | cut -d " " -f1`
 
                 echo ${task} run-${run} cope${cope} ${subject} ${roi} ${zscore}
                 echo ${task} run-${run} cope${cope} ${subject} ${roi} ${zscore} >> subject_metrics_rois_perRun.txt

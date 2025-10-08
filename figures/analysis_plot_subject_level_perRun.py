@@ -157,7 +157,6 @@ def main():
     #                     print(result, file=text_file)
 
     # Create subject level plots for each ROI region for 4 amps
-    measure = 'zscore_sc'
     measures = ['zscore_sc', 'voxels_sc']
     amps = ['cope1', 'cope2', 'cope3', 'cope4']
     for region in regions_rois:
@@ -178,9 +177,12 @@ def main():
                     ylim = [1.5, 4.5]
                     ytickmarks = [1.5, 2.5, 3.5, 4.5]
                 elif measure == 'voxels_sc':
-                    ylim = [0, 4000]
-                    ytickmarks = [0, 1000, 2000, 3000, 4000]
-                print(dataset_roi.head())
+                    if region in ['left_sc_gm_mask', 'right_sc_gm_mask', "left_sc_mask", 'right_sc_mask']:
+                        ylim = [0, 1500]
+                        ytickmarks = [0, 200, 400, 800, 1200, 1400]
+                    else:
+                        ylim = [0, 650]
+                        ytickmarks = [0, 100, 200, 300, 400, 500, 600]
                 for subject in dataset_roi.subject.unique():
                     data = dataset_roi[
                         (dataset_roi['subject'] == subject) &
@@ -188,11 +190,16 @@ def main():
                         (dataset_roi['run'].isin(['run-1', 'run-2', 'run-3'])) &
                         (dataset_roi['region'] == region)
                     ]
-                    data = data.sort_values('run')
                     print(data)
-                    ydata = data[measure].values
-                    print(ydata)
-                    plt.plot(xlabel, ydata, width, color=color, marker=None)
+                    # Ensure ydata is aligned with ['run-1', 'run-2', 'run-3']
+                    ydata = []
+                    for run in ['run-1', 'run-2', 'run-3']:
+                        val = data[data['run'] == run][measure]
+                        if not val.empty:
+                            ydata.append(val.values[0])
+                        else:
+                            ydata.append(np.nan)
+                    plt.plot(xlabel, ydata, color=color, marker=None, linewidth=2)
 
                 # Means and SDs for each amp
                 means = []
@@ -222,8 +229,8 @@ def main():
                     ax.set_ylim(ylim)
                 if ytickmarks is not None:
                     ax.set_yticks(ytickmarks)
-                    ax.set_ylabel(ylabel, fontsize=16, color=(0,0,0))
-                    ax.tick_params(labelsize=12, width=1.5, colors=(0,0,0))
+                ax.set_ylabel(ylabel, fontsize=16, color=(0,0,0))
+                ax.tick_params(labelsize=12, width=1.5, colors=(0,0,0))
                 for axis in ['top','bottom','left','right']:
                     ax.spines[axis].set_linewidth(1.5)
                     ax.spines[axis].set_color((0,0,0))
