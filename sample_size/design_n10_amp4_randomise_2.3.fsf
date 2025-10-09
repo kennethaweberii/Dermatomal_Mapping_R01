@@ -36,7 +36,7 @@ set fmri(outputdir) "${output_path}"
 set fmri(tr) 3
 
 # Total volumes
-set fmri(npts) 30
+set fmri(npts) 10
 
 # Delete volumes
 set fmri(ndelete) 0
@@ -45,7 +45,7 @@ set fmri(ndelete) 0
 set fmri(tagfirst) 1
 
 # Number of first-level analyses
-set fmri(multiple) 30
+set fmri(multiple) 10
 
 # Higher-level input type
 # 1 : Inputs are lower-level FEAT directories
@@ -301,66 +301,6 @@ set feat_files(9) "/home/sbedard/Projects/Dermatomal_Mapping_R01/data/BIDS/deriv
 # 4D AVW data or FEAT directory (10)
 set feat_files(10) "/home/sbedard/Projects/Dermatomal_Mapping_R01/data/BIDS/derivatives/sub-${sub9}/ses-spinalcord/func/sub-${sub9}_ses-spinalcord_task-tens_run-average_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope4.feat"
 
-# 4D AVW data or FEAT directory (11)
-set feat_files(11) "/home/sbedard/Projects/Dermatomal_Mapping_R01/data/BIDS/derivatives/sub-${sub10}/ses-spinalcord/func/sub-${sub10}_ses-spinalcord_task-tens_run-average_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope4.feat"
-
-# 4D AVW data or FEAT directory (12)
-set feat_files(12) "/home/sbedard/Projects/Dermatomal_Mapping_R01/data/BIDS/derivatives/sub-${sub11}/ses-spinalcord/func/sub-${sub11}_ses-spinalcord_task-tens_run-average_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope4.feat"
-
-# 4D AVW data or FEAT directory (13)
-set feat_files(13) "/home/sbedard/Projects/Dermatomal_Mapping_R01/data/BIDS/derivatives/sub-${sub12}/ses-spinalcord/func/sub-${sub12}_ses-spinalcord_task-tens_run-average_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope4.feat"
-
-# 4D AVW data or FEAT directory (14)
-set feat_files(14) "/home/sbedard/Projects/Dermatomal_Mapping_R01/data/BIDS/derivatives/sub-${sub13}/ses-spinalcord/func/sub-${sub13}_ses-spinalcord_task-tens_run-average_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope4.feat"
-
-# 4D AVW data or FEAT directory (15)
-set feat_files(15) "/home/sbedard/Projects/Dermatomal_Mapping_R01/data/BIDS/derivatives/sub-${sub14}/ses-spinalcord/func/sub-${sub14}_ses-spinalcord_task-tens_run-average_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope4.feat"
-
-# 4D AVW data or FEAT directory (16)
-set feat_files(16) "/home/sbedard/Projects/Dermatomal_Mapping_R01/data/BIDS/derivatives/sub-${sub15}/ses-spinalcord/func/sub-${sub15}_ses-spinalcord_task-tens_run-average_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope4.feat"
-
-# 4D AVW data or FEAT directory (17)
-set feat_files(17) "/home/sbedard/Projects/Dermatomal_Mapping_R01/data/BIDS/derivatives/sub-${sub16}/ses-spinalcord/func/sub-${sub16}_ses-spinalcord_task-tens_run-average_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope4.feat"
-
-# 4D AVW data or FEAT directory (18)
-set feat_files(18) "/home/sbedard/Projects/Dermatomal_Mapping_R01/data/BIDS/derivatives/sub-${sub17}/ses-spinalcord/func/sub-${sub17}_ses-spinalcord_task-tens_run-average_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope4.feat"
-
-# 4D AVW data or FEAT directory (19)
-set feat_files(19) "/home/sbedard/Projects/Dermatomal_Mapping_R01/data/BIDS/derivatives/sub-${sub18}/ses-spinalcord/func/sub-${sub18}_ses-spinalcord_task-tens_run-average_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope4.feat"
-
-# 4D AVW data or FEAT directory (20)
-set feat_files(20) "/home/sbedard/Projects/Dermatomal_Mapping_R01/data/BIDS/derivatives/sub-${sub19}/ses-spinalcord/func/sub-${sub19}_ses-spinalcord_task-tens_run-average_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope4.feat"
-
-# 4D AVW data or FEAT directory (21)
-set feat_files(21) "/home/sbedard/Projects/Dermatomal_Mapping_R01/data/BIDS/derivatives/sub-${sub20}/ses-spinalcord/func/sub-${sub20}_ses-spinalcord_task-tens_run-average_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope4.feat"
-
-# 4D AVW data or FEAT directory (22)
-set feat_files(22) "/home/sbedard/Projects/Dermatomal_Mapping_R01/data/BIDS/derivatives/sub-${sub21}/ses-spinalcord/func/sub-${sub21}_ses-spinalcord_task-tens_run-average_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope4.feat"
-
-# 4D AVW data or FEAT directory (23)
-set feat_files(23) "/home/sbedard/Projects/Dermatomal_Mapping_R01/data/BIDS/derivatives/sub-${sub22}/ses-spinalcord/func/sub-${sub22}_ses-spinalcord_task-tens_run-average_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope4.feat"
-
-# 4D AVW data or FEAT directory (24)
-set feat_files(24) "/home/sbedard/Projects/Dermatomal_Mapping_R01/data/BIDS/derivatives/sub-${sub23}/ses-spinalcord/func/sub-${sub23}_ses-spinalcord_task-tens_run-average_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope4.feat"
-
-# 4D AVW data or FEAT directory (25)
-set feat_files(25) "/home/sbedard/Projects/Dermatomal_Mapping_R01/data/BIDS/derivatives/sub-${sub24}/ses-spinalcord/func/sub-${sub24}_ses-spinalcord_task-tens_run-average_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope4.feat"
-
-# 4D AVW data or FEAT directory (26)
-set feat_files(26) "/home/sbedard/Projects/Dermatomal_Mapping_R01/data/BIDS/derivatives/sub-${sub25}/ses-spinalcord/func/sub-${sub25}_ses-spinalcord_task-tens_run-average_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope4.feat"
-
-# 4D AVW data or FEAT directory (27)
-set feat_files(27) "/home/sbedard/Projects/Dermatomal_Mapping_R01/data/BIDS/derivatives/sub-${sub26}/ses-spinalcord/func/sub-${sub26}_ses-spinalcord_task-tens_run-average_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope4.feat"
-
-# 4D AVW data or FEAT directory (28)
-set feat_files(28) "/home/sbedard/Projects/Dermatomal_Mapping_R01/data/BIDS/derivatives/sub-${sub27}/ses-spinalcord/func/sub-${sub27}_ses-spinalcord_task-tens_run-average_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope4.feat"
-
-# 4D AVW data or FEAT directory (29)
-set feat_files(29) "/home/sbedard/Projects/Dermatomal_Mapping_R01/data/BIDS/derivatives/sub-${sub28}/ses-spinalcord/func/sub-${sub28}_ses-spinalcord_task-tens_run-average_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope4.feat"
-
-# 4D AVW data or FEAT directory (30)
-set feat_files(30) "/home/sbedard/Projects/Dermatomal_Mapping_R01/data/BIDS/derivatives/sub-${sub29}/ses-spinalcord/func/sub-${sub29}_ses-spinalcord_task-tens_run-average_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope4.feat"
-
 # Add confound EVs text file
 set fmri(confoundevs) 0
 
@@ -435,66 +375,6 @@ set fmri(evg9.1) 1.0
 # Higher-level EV value for EV 1 and input 10
 set fmri(evg10.1) 1.0
 
-# Higher-level EV value for EV 1 and input 11
-set fmri(evg11.1) 1.0
-
-# Higher-level EV value for EV 1 and input 12
-set fmri(evg12.1) 1.0
-
-# Higher-level EV value for EV 1 and input 13
-set fmri(evg13.1) 1.0
-
-# Higher-level EV value for EV 1 and input 14
-set fmri(evg14.1) 1.0
-
-# Higher-level EV value for EV 1 and input 15
-set fmri(evg15.1) 1.0
-
-# Higher-level EV value for EV 1 and input 16
-set fmri(evg16.1) 1.0
-
-# Higher-level EV value for EV 1 and input 17
-set fmri(evg17.1) 1.0
-
-# Higher-level EV value for EV 1 and input 18
-set fmri(evg18.1) 1.0
-
-# Higher-level EV value for EV 1 and input 19
-set fmri(evg19.1) 1.0
-
-# Higher-level EV value for EV 1 and input 20
-set fmri(evg20.1) 1.0
-
-# Higher-level EV value for EV 1 and input 21
-set fmri(evg21.1) 1.0
-
-# Higher-level EV value for EV 1 and input 22
-set fmri(evg22.1) 1.0
-
-# Higher-level EV value for EV 1 and input 23
-set fmri(evg23.1) 1.0
-
-# Higher-level EV value for EV 1 and input 24
-set fmri(evg24.1) 1.0
-
-# Higher-level EV value for EV 1 and input 25
-set fmri(evg25.1) 1.0
-
-# Higher-level EV value for EV 1 and input 26
-set fmri(evg26.1) 1.0
-
-# Higher-level EV value for EV 1 and input 27
-set fmri(evg27.1) 1
-
-# Higher-level EV value for EV 1 and input 28
-set fmri(evg28.1) 1
-
-# Higher-level EV value for EV 1 and input 29
-set fmri(evg29.1) 1
-
-# Higher-level EV value for EV 1 and input 30
-set fmri(evg30.1) 1
-
 # Group membership for input 1
 set fmri(groupmem.1) 1
 
@@ -524,66 +404,6 @@ set fmri(groupmem.9) 1
 
 # Group membership for input 10
 set fmri(groupmem.10) 1
-
-# Group membership for input 11
-set fmri(groupmem.11) 1
-
-# Group membership for input 12
-set fmri(groupmem.12) 1
-
-# Group membership for input 13
-set fmri(groupmem.13) 1
-
-# Group membership for input 14
-set fmri(groupmem.14) 1
-
-# Group membership for input 15
-set fmri(groupmem.15) 1
-
-# Group membership for input 16
-set fmri(groupmem.16) 1
-
-# Group membership for input 17
-set fmri(groupmem.17) 1
-
-# Group membership for input 18
-set fmri(groupmem.18) 1
-
-# Group membership for input 19
-set fmri(groupmem.19) 1
-
-# Group membership for input 20
-set fmri(groupmem.20) 1
-
-# Group membership for input 21
-set fmri(groupmem.21) 1
-
-# Group membership for input 22
-set fmri(groupmem.22) 1
-
-# Group membership for input 23
-set fmri(groupmem.23) 1
-
-# Group membership for input 24
-set fmri(groupmem.24) 1
-
-# Group membership for input 25
-set fmri(groupmem.25) 1
-
-# Group membership for input 26
-set fmri(groupmem.26) 1
-
-# Group membership for input 27
-set fmri(groupmem.27) 1
-
-# Group membership for input 28
-set fmri(groupmem.28) 1
-
-# Group membership for input 29
-set fmri(groupmem.29) 1
-
-# Group membership for input 30
-set fmri(groupmem.30) 1
 
 # Contrast & F-tests mode
 # real : control real EVs
