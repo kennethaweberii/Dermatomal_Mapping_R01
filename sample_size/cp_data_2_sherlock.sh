@@ -3,7 +3,7 @@
 #
 path_in=/home/sbedard/Projects/Dermatomal_Mapping_R01/data/BIDS/derivatives
 path_out=${SCRATCH}/dermatomal_mapping_R01/derivatives
-path_script=/scratch/janineh/dermatomal_mapping_R01/codes/Dermatomal_Mapping_R01/
+path_script=~/codes/Dermatomal_Mapping_R01/
 
 
 #Read include list yaml file
