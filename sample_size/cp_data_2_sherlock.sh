@@ -3,12 +3,12 @@
 #
 path_in=/home/sbedard/Projects/Dermatomal_Mapping_R01/data/BIDS/derivatives
 path_out=${SCRATCH}/dermatomal_mapping_R01/derivatives
-path_script=~/codes/Dermatomal_Mapping_R01/
+path_script=~/codes/Dermatomal_Mapping_R01
 
 
 #Read include list yaml file
 # TODO: check is installed
-subjects=($(< "${path_script}/dermatomal_mapping_R01/include_n40.txt"))
+subjects=($(< "${path_script}/include_n40.txt"))
 
 for subject in "${subjects[@]}"; do
     echo "Copying data for subject: $subject"
