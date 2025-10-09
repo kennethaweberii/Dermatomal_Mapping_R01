@@ -8,7 +8,7 @@ path_script=~/codes/Dermatomal_Mapping_R01/
 
 #Read include list yaml file
 # TODO: check is installed
-subjects=($(yq '.subjects[]' "${path_script}/dermatomal_mapping_R01/include_n40.yml"))
+subjects=($(< "${path_script}/dermatomal_mapping_R01/include_n40.txt"))
 
 for subject in "${subjects[@]}"; do
     echo "Copying data for subject: $subject"

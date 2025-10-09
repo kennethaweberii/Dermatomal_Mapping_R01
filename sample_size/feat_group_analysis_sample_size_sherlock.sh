@@ -1,7 +1,7 @@
 #!/bin/sh
 # 
 #
-path_script=/scratch/sbedard/dermatomal_mapping_R01/codes/Dermatomal_Mapping_R01/sample_size/
+path_script=~/codes/Dermatomal_Mapping_R01/sample_size/
 path_data=${SCRATCH}/dermatomal_mapping_R01/derivatives
 path_list=${path_data}/dermatomal_mapping_R01/sample_size/lists/
 iterations=100
