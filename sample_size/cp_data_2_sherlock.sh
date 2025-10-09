@@ -19,7 +19,7 @@ for subject in "${subjects[@]}"; do
     ret=1
     c=0
     until [ ${ret} = 0 ] || [ ${c} = 5 ]; do
-        scp sbedard@anes-nil1000.stanford.edu:${file_path}/ .
+        scp -r sbedard@anes-nil1000.stanford.edu:${file_path}/ .
         ret=$?
         ((c++))
     done
