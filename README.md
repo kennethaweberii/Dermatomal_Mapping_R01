@@ -43,3 +43,17 @@ sct_run_batch -script preprocess_spinal_cord.sh -path-data ~/Projects/Dermatomal
 
 ### 4.2. First level average across runs
 
+## 5. Statistical Analysis
+
+### 5.1. Sample Size calculation
+
+1. Create lists of subjects for monte carlo experiments
+```
+python create_lists.py -include ~/codes/Dermatomal_Mapping_R01/include_n40.yml -o ~/Projects/Dermatomal_Mapping_R01/data/BIDS/derivatives/sample_size/
+```
+Copy lists to sherlock:
+
+2. Copy data to sherlock
+```
+```
+
