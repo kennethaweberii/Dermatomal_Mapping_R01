@@ -46,7 +46,7 @@ tar -zcvf n${n}_iter_${iter}_amp4_randomise_2.3.tar.gz sample_size_${n}_iter_${i
 ret=1
 c=0
 until [  ${ret} = 0 ] || [ ${c} = 5 ]; do
-	scp n${n}_iter_${iter}_randomise_2.3.tar.gz sbedard@anes-nil1000.stanford.edu:/home/sbedard/Projects/Dermatomal_Mapping_R01/data/BIDS/derivatives/sample_size/group_level/n${n}/
+	scp n${n}_iter_${iter}_amp4_randomise_2.3.tar.gz sbedard@anes-nil1000.stanford.edu:/home/sbedard/Projects/Dermatomal_Mapping_R01/data/BIDS/derivatives/sample_size/group_level/n${n}/
 	ret=$?
 	((c++))
 done
