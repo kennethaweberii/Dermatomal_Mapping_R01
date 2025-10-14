@@ -22,7 +22,7 @@ for n in "${n_sample[@]}"; do
         subjects=($(< ${sub_list}))
         echo "${subjects[@]}"
         export path_script path_data SCRATCH time_limit memory output_path subjects n iter
-        envsubst '${path_data} ${path_script} ${SCRATCH} ${time_limit} ${memory} ${output_path} ${subjects} ${n} ${iter}' < ${path_script}/feat_analysis_sc_Sherlock.sbatch > feat_group_analysis_sample_size_sherlock_n${n}_iter${iter}.sbatch
+        envsubst '${path_data} ${path_script} ${SCRATCH} ${time_limit} ${memory} ${output_path} ${subjects} ${n} ${iter}' < ${path_script}/feat_group_analysis_sample_size_sherlock.sbatch > feat_group_analysis_sample_size_sherlock_n${n}_iter${iter}.sbatch
         sbatch feat_group_analysis_sample_size_sherlock_n${n}_iter${iter}.sbatch
         rm feat_group_analysis_sample_size_sherlock_n${n}_iter${iter}.sbatch
         sleep 10s
