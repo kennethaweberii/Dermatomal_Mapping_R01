@@ -3,13 +3,13 @@
 #all commands that start with SBATCH contain commands that are just used by SLURM for scheduling  
 #################
 #set a job name  
-#SBATCH --job-name=${subject}_${region}_${run}
+#SBATCH --job-name=${n}_${iter}
 #################  
 #a file for job output, you can check job progress
-#SBATCH --output=${subject}_${region}_${run}.out
+#SBATCH --output=${n}_${iter}.out
 #################
 # a file for errors from the job
-#SBATCH --error=${subject}_${region}_${run}.errƒ
+#SBATCH --error=${n}_${iter}.err
 #################
 #time you think you need; default is one hour
 #in minutes in this case, hh:mm:ss
