@@ -3,7 +3,7 @@
 #
 path_script=~/codes/Dermatomal_Mapping_R01/sample_size/
 path_data=${SCRATCH}/dermatomal_mapping_R01/derivatives
-path_list=${path_data}/dermatomal_mapping_R01/sample_size/lists/
+path_list=${SCRATCH}/dermatomal_mapping_R01/lists/
 iterations=100
 iterations=1
 n_sample=(10 15 20 25 30 35)
