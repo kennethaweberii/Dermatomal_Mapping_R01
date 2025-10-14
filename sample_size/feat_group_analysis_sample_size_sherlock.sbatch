@@ -28,7 +28,7 @@ echo
 
 mkdir -p ${path_data}/sample_size/n${n}/
 cd ${path_data}/sample_size/n${n}/
-
+echo subjects: ${subjects[@]}
 for i in "${!subjects[@]}"; do
   export sub${i}="${subjects[$i]}"
 done
@@ -40,8 +40,7 @@ feat "design_n${n}_iter_${iter}_amp4_randomise_2.3.fsf"
 # TODO to adjust
 rm "design_n${n}_iter_${iter}_amp4_randomise_2.3.fsf"
 cd ${path_data}/sample_size/n${n}/
-tar -zcvf n${n}_iter_${iter}_amp4_randomise_2.3.tar.gz sample_size_${n}_iter_${iter}
-
+tar -zcvf n${n}_iter_${iter}_amp4_randomise_2.3.tar.gz sample_size_${n}_iter_${iter}.gfeat
 
 
 ret=1
