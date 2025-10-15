@@ -7,7 +7,7 @@ path_list=${SCRATCH}/dermatomal_mapping_R01/lists/
 iterations=100
 #iterations=1
 n_sample=(10 15 20 25 30 35)
-n_sample=(15 20 25 30 35)
+n_sample=(35)
 #n_sample=(10)
 
 
