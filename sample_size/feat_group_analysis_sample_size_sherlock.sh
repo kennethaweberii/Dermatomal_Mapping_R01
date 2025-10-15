@@ -16,7 +16,7 @@ memory=16000
 
 for n in "${n_sample[@]}"; do
     for iter in $(seq 1 $iterations); do
-        sub_list=${path_list}/sample_${n}/include_sample_${n}_${iter}.txt
+        sub_list=${path_list}/sample_${n}/include_sample_n${n}_${iter}.txt
 
         output_path=${path_data}/sample_size/n${n}/sample_size_${n}_iter_${iter}
         #mkdir -p ${output_path}
