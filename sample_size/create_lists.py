@@ -14,17 +14,17 @@ import csv
 def get_parser():
     parser = argparse.ArgumentParser(
         description="Computes avreage tSNR map in PAM50 template space from native space tSNR maps.",)
-    parser.add_argument('-sample', required=False, type=int, nargs="+", default=[10, 15, 20, 25, 30, 35, 40],
+    parser.add_argument('-sample', required=False, type=int, nargs="+", default=[10, 15, 20, 25, 30, 35],
                         help="List of sample size.")
     parser.add_argument('-include', required=True, type=str,
                         default='include.yml',
                         help="Inlcude list .yml file with subjects to include. If not provided, all subjects found will be included.")
     parser.add_argument('-iterations', required=False, type=int,
-                        default=100,
+                        default=1000,
                         help="Number of iterations to perform.")
 
     parser.add_argument('-o', required=False, type=str,
-                        help="Path output to put tsnr maps in PAM50 template space.")
+                        help="Path with list.")
 
     return parser
 
