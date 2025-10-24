@@ -20,6 +20,7 @@ for subject in "${subjects[@]}"; do
         mkdir -p ${path_out}/${subject}/ses-spinalcord/func/run-${run}/
         cd run-${run}/
         file_path="${path_in}/${subject}/ses-spinalcord/func/run-${run}/${subject}_ses-spinalcord_task-tens_run-${run}_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat"
+    fi
     #Copy functional
     ret=1
     c=0
