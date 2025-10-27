@@ -34,8 +34,8 @@ for i in "${!subjects[@]}"; do
 done
 
 export FSLDIR output_path subjects path_data run
-envsubst < "${path_script}/design_run-${run}/design_n${n}_amp4_randomise_2.3.fsf" > "design_n${n}_iter_${iter}_amp4_randomise_2.3.fsf"
-feat "design_run-${run}n${n}_iter_${iter}_amp4_randomise_2.3.fsf"
+envsubst < "${path_script}/design_run-${run}/design_run-${run}_n${n}_amp4_randomise_2.3.fsf" > "design_n${n}_iter_${iter}_amp4_randomise_2.3.fsf"
+feat "design_n${n}_iter_${iter}_amp4_randomise_2.3.fsf"
 
 # TODO to adjust
 rm "design_n${n}_iter_${iter}_amp4_randomise_2.3.fsf"
