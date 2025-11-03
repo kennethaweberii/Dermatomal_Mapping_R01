@@ -7,11 +7,9 @@ path_list=${SCRATCH}/dermatomal_mapping_R01/lists/
 run="1"  # Or average
 iterations=1000
 #iterations=1
-#n_sample=(10 15 20 25 30 35)
-n_sample=(10 15 20 21 22 23 24 26 27 28 29 31 32 33 34 36 37 38 39)
-#n_sample=(35)
-#n_sample=(10)
-
+n_sample=(25 30 35)
+#n_sample=(10 15 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39)
+# TODO average n23
 
 time_limit=08:00:00
 memory=16000
