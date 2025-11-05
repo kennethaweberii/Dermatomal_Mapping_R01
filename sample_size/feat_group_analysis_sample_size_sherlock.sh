@@ -4,10 +4,10 @@
 path_script=~/codes/Dermatomal_Mapping_R01/sample_size/
 path_data=${SCRATCH}/dermatomal_mapping_R01/derivatives
 path_list=${SCRATCH}/dermatomal_mapping_R01/lists/
-run="1"  # Or average
+run="average"  # Or average
 iterations=1000
 #iterations=1
-n_sample=(25 30 35)
+n_sample=(39)
 #n_sample=(10 15 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39)
 # TODO average n23
 
