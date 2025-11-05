@@ -301,6 +301,93 @@ set feat_files(9) "${path_data}/${sub8}/ses-spinalcord/func/${sub8}_ses-spinalco
 # 4D AVW data or FEAT directory (10)
 set feat_files(10) "${path_data}/${sub9}/ses-spinalcord/func/${sub9}_ses-spinalcord_task-tens_run-average_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope4.feat"
 
+# 4D AVW data or FEAT directory (11)
+set feat_files(11) "${path_data}/${sub10}/ses-spinalcord/func/${sub10}_ses-spinalcord_task-tens_run-average_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope4.feat"
+
+# 4D AVW data or FEAT directory (12)
+set feat_files(12) "${path_data}/${sub11}/ses-spinalcord/func/${sub11}_ses-spinalcord_task-tens_run-average_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope4.feat"
+
+# 4D AVW data or FEAT directory (13)
+set feat_files(13) "${path_data}/${sub12}/ses-spinalcord/func/${sub12}_ses-spinalcord_task-tens_run-average_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope4.feat"
+
+# 4D AVW data or FEAT directory (14)
+set feat_files(14) "${path_data}/${sub13}/ses-spinalcord/func/${sub13}_ses-spinalcord_task-tens_run-average_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope4.feat"
+
+# 4D AVW data or FEAT directory (15)
+set feat_files(15) "${path_data}/${sub14}/ses-spinalcord/func/${sub14}_ses-spinalcord_task-tens_run-average_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope4.feat"
+
+# 4D AVW data or FEAT directory (16)
+set feat_files(16) "${path_data}/${sub15}/ses-spinalcord/func/${sub15}_ses-spinalcord_task-tens_run-average_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope4.feat"
+
+# 4D AVW data or FEAT directory (17)
+set feat_files(17) "${path_data}/${sub16}/ses-spinalcord/func/${sub16}_ses-spinalcord_task-tens_run-average_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope4.feat"
+
+# 4D AVW data or FEAT directory (18)
+set feat_files(18) "${path_data}/${sub17}/ses-spinalcord/func/${sub17}_ses-spinalcord_task-tens_run-average_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope4.feat"
+
+# 4D AVW data or FEAT directory (19)
+set feat_files(19) "${path_data}/${sub18}/ses-spinalcord/func/${sub18}_ses-spinalcord_task-tens_run-average_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope4.feat"
+
+# 4D AVW data or FEAT directory (20)
+set feat_files(20) "${path_data}/${sub19}/ses-spinalcord/func/${sub19}_ses-spinalcord_task-tens_run-average_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope4.feat"
+
+# 4D AVW data or FEAT directory (21)
+set feat_files(21) "${path_data}/${sub20}/ses-spinalcord/func/${sub20}_ses-spinalcord_task-tens_run-average_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope4.feat"
+
+# 4D AVW data or FEAT directory (22)
+set feat_files(22) "${path_data}/${sub21}/ses-spinalcord/func/${sub21}_ses-spinalcord_task-tens_run-average_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope4.feat"
+
+# 4D AVW data or FEAT directory (23)
+set feat_files(23) "${path_data}/${sub22}/ses-spinalcord/func/${sub22}_ses-spinalcord_task-tens_run-average_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope4.feat"
+
+# 4D AVW data or FEAT directory (24)
+set feat_files(24) "${path_data}/${sub23}/ses-spinalcord/func/${sub23}_ses-spinalcord_task-tens_run-average_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope4.feat"
+
+# 4D AVW data or FEAT directory (25)
+set feat_files(25) "${path_data}/${sub24}/ses-spinalcord/func/${sub24}_ses-spinalcord_task-tens_run-average_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope4.feat"
+
+# 4D AVW data or FEAT directory (26)
+set feat_files(26) "${path_data}/${sub25}/ses-spinalcord/func/${sub25}_ses-spinalcord_task-tens_run-average_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope4.feat"
+
+# 4D AVW data or FEAT directory (27)
+set feat_files(27) "${path_data}/${sub26}/ses-spinalcord/func/${sub26}_ses-spinalcord_task-tens_run-average_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope4.feat"
+
+# 4D AVW data or FEAT directory (28)
+set feat_files(28) "${path_data}/${sub27}/ses-spinalcord/func/${sub27}_ses-spinalcord_task-tens_run-average_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope4.feat"
+
+# 4D AVW data or FEAT directory (29)
+set feat_files(29) "${path_data}/${sub28}/ses-spinalcord/func/${sub28}_ses-spinalcord_task-tens_run-average_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope4.feat"
+
+# 4D AVW data or FEAT directory (30)
+set feat_files(30) "${path_data}/${sub29}/ses-spinalcord/func/${sub29}_ses-spinalcord_task-tens_run-average_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope4.feat"
+
+# 4D AVW data or FEAT directory (31)
+set feat_files(31) "${path_data}/${sub30}/ses-spinalcord/func/${sub30}_ses-spinalcord_task-tens_run-average_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope4.feat"
+
+# 4D AVW data or FEAT directory (32)
+set feat_files(32) "${path_data}/${sub31}/ses-spinalcord/func/${sub31}_ses-spinalcord_task-tens_run-average_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope4.feat"
+
+# 4D AVW data or FEAT directory (33)
+set feat_files(33) "${path_data}/${sub32}/ses-spinalcord/func/${sub32}_ses-spinalcord_task-tens_run-average_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope4.feat"
+
+# 4D AVW data or FEAT directory (34)
+set feat_files(34) "${path_data}/${sub33}/ses-spinalcord/func/${sub33}_ses-spinalcord_task-tens_run-average_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope4.feat"
+
+# 4D AVW data or FEAT directory (35)
+set feat_files(35) "${path_data}/${sub34}/ses-spinalcord/func/${sub34}_ses-spinalcord_task-tens_run-average_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope4.feat"
+
+# 4D AVW data or FEAT directory (36)
+set feat_files(36) "${path_data}/${sub35}/ses-spinalcord/func/${sub35}_ses-spinalcord_task-tens_run-average_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope4.feat"
+
+# 4D AVW data or FEAT directory (37)
+set feat_files(37) "${path_data}/${sub36}/ses-spinalcord/func/${sub36}_ses-spinalcord_task-tens_run-average_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope4.feat"
+
+# 4D AVW data or FEAT directory (38)
+set feat_files(38) "${path_data}/${sub37}/ses-spinalcord/func/${sub37}_ses-spinalcord_task-tens_run-average_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope4.feat"
+
+# 4D AVW data or FEAT directory (39)
+set feat_files(39) "${path_data}/${sub38}/ses-spinalcord/func/${sub38}_ses-spinalcord_task-tens_run-average_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/cope4.feat"
+
 # Add confound EVs text file
 set fmri(confoundevs) 0
 
