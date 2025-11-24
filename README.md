@@ -39,6 +39,11 @@ sct_run_batch -script detect_peak_batch.sh -script-arg "Sandrine Bedard" -path-d
 sct_run_batch -script preprocess_spinal_cord.sh -path-data ~/Projects/Dermatomal_Mapping_R01/data/BIDS/sourcedata/ -exclude ses-brain -include-list sub-DMAim1HC001 -path-out ~/dermatomal_mapping_proprocessing_2025-02-07
 ~~~
 
+```
+sct_run_batch -script preprocess_spinal_cord.sh -path-data ~/Projects/Dermatomal_Mapping_R01/data/BIDS/sourcedata/ -exclude ses-brain -include-list sub-DMAim1HC004 sub-DMAim1HC006 sub-DMAim1HC007 sub-DMAim1HC015 sub-DMAim1HC018 sub-DMAim1HC020 sub-DMAim1HC030 sub-DMAim1HC033 sub-DMAim1HC005 sub-DMAim1HC016 sub-DMAim1HC017 sub-DMAim1HC022 
+sub-DMAim1HC023 sub-DMAim1HC027 sub-DMAim1HC025 sub-DMAim1HC035 sub-DMAim1HC008 sub-DMAim1HC031 sub-DMAim1HC032 sub-DMAim1HC034 sub-DMAim1HC019 sub-DMAim1HC037 sub-DMAim1HC028 sub-DMAim1HC038 sub-DMAim1HC039 sub-DMAim1HC009 sub-DMAim1HC045 sub-DMAim1HC002 sub-DMAim1HC047 sub-DMAim1HC029 sub-DMAim1HC036 sub-DMAim1HC046 sub-DMAim1HC042 sub-DMAim1HC003 sub-DMAim1HC053 sub-DMAim1HC052 sub-DMAim1HC051 sub-DMAim1HC013 -jobs 1  -path-out ~/dermatomal_mapping_proprocessing_no-wm_2025-11-24/
+```
+
 ### 4.1. First level on Sherlock
 
 ### 4.2. First level average across runs
