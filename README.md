@@ -50,6 +50,13 @@ sub-DMAim1HC023 sub-DMAim1HC027 sub-DMAim1HC025 sub-DMAim1HC035 sub-DMAim1HC008 
 
 ## 5. Statistical Analysis
 
+### ROI analysis
+
+Create plots:
+```
+python analysis_plot_subject_level.py -metrics ~/Projects/Dermatomal_Mapping_R01/manuscripts/results_n40_spinalcord_Sandrine/subject_metrics.txt -path-out ~/Projects/Dermatomal_Mapping_R01/manuscripts/plots_run-average -metrics-roi ~/Projects/Dermatomal_Mapping_R01/manuscripts/results_n40_spinalcord_Sandrine/subject_metrics_rois.txt
+```
+
 ### 5.1. Sample Size calculation
 
 1. Create lists of subjects for monte carlo experiments
