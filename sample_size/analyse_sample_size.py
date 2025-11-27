@@ -16,18 +16,21 @@ THRESHOLD_Z = 2.3              # if no binary maps: threshold to binarize Z maps
 TWO_SIDED = True                # whether threshold corresponds to two-sided z
 CONSENSUS_PCT = 0.5             # voxels present in >=50% of subsamples to be in consensus map
 ROI_MASK = None                 # path to ROI nifti to compute ROI-level power (or None)
-SIZE=[10, 15, 20, 25, 30]      # list of sample sizes to process
-SIZE=[10]      # list of sample sizes to process
+SIZE=[10, 15, 20, 21, 22, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39]      # list of sample sizes to process
+SIZE=[10, 15, 20, 25, 30, 35, 39]     # list of sample sizes to process
+#SIZE=[39]      # list of sample sizes to process
 # ---------------------------------
 
+# ---------------------------------
+# TODO 23
 
 def get_parser():
     parser = argparse.ArgumentParser(
-        description="Computes avreage tSNR map in PAM50 template space from native space tSNR maps.",)
+        description="Compute frequency map of gorup level analysis with Monte Carlo.",)
     parser.add_argument('-path-in', required=True, type=str,
                         help="Path data_processed where the tSNR maps are stored.")
     parser.add_argument('-o', required=False, type=str,
-                        help="Path output to put tsnr maps in PAM50 template space.")
+                        help="Path output to put results.")
 
     return parser
 
@@ -80,8 +83,12 @@ def main():
 
         # Read first available file to grab shape/affine/header
         sample_folder = iter_folders[0]
-        sample_z_path = os.path.join(sample_folder, Z_FILENAME)
-        sample_data, affine, header = load_nifti_data(sample_z_path)
+        z_path = os.path.join(sample_folder, Z_FILENAME)
+        if not os.path.exists(z_path):
+            z_path = os.path.join(sample_folder, Z_FILENAME.replace("cope1", "cope4"))
+            if not os.path.exists(z_path):
+                raise SystemExit(f"No {Z_FILENAME} in {sample_folder}")
+        sample_data, affine, header = load_nifti_data(z_path)
 
         shape = sample_data.shape
     
@@ -99,7 +106,9 @@ def main():
             z_path = os.path.join(folder, Z_FILENAME)
 
             if not os.path.exists(z_path):
-                raise SystemExit(f"No {Z_FILENAME} in {folder}")
+                z_path = os.path.join(folder, Z_FILENAME.replace("cope1", "cope4"))
+                if not os.path.exists(z_path):
+                    raise SystemExit(f"No {Z_FILENAME} in {folder}")
             zdata, _, _ = load_nifti_data(z_path)
             # accumulate z
             z_sum += np.nan_to_num(zdata)
