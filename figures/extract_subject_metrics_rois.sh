@@ -14,7 +14,7 @@ rois=(left_sc_gm_mask right_sc_gm_mask left_sc_mask right_sc_mask C6_left_sc_gm_
 #rm -f subject_metrics_rois.txt
 #echo task cope subject roi zscore >> subject_metrics_rois.txt
 rm -f subject_metrics_rois.txt
-echo task cope subject region zscore_sc >> subject_metrics_rois.txt
+echo task cope subject region zscore_sc voxels_sc >> subject_metrics_rois.txt
 
 for cope in ${copes[@]}; do
     for subject in ${subjects[@]}; do
@@ -25,9 +25,10 @@ for cope in ${copes[@]}; do
             echo ${task} ${cope} ${subject} ${roi}
 
             zscore=`fslstats ${data_path}/${subject}/ses-${session}spinalcord/func/${subject}_ses-${session}spinalcord_task-${task}_run-average_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/${cope}.feat/thresh_zstat1.nii.gz -k ${data_path}/masks/rois_n40/${roi}.nii.gz -M`
+            voxels=`fslstats ${data_path}/${subject}/ses-${session}spinalcord/func/${subject}_ses-${session}spinalcord_task-${task}_run-average_bold_mc2_pnm_stc2template_smooth225_trialwise_second_level.gfeat/${cope}.feat/thresh_zstat1.nii.gz -k ${data_path}/masks/rois_n40/${roi}.nii.gz -V | cut -d " " -f1`
 
-            echo ${task} ${cope} ${subject} ${roi} ${zscore}
-            echo ${task} ${cope} ${subject} ${roi} ${zscore} >> subject_metrics_rois.txt
+            echo ${task} ${cope} ${subject} ${roi} ${zscore} ${voxels}
+            echo ${task} ${cope} ${subject} ${roi} ${zscore} ${voxels} >> subject_metrics_rois.txt
 
         done
     done
