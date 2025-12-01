@@ -6,7 +6,7 @@
 
 ## 1.Dependencies
 
-* SCT v6.0
+* SCT v6.0 --> version: git-master-d1c1cb248bfd153d9da454c21e49b72ec76152e8
 * FSL 6.0
 * Python 3.9
 
