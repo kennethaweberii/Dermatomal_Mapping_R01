@@ -24,13 +24,13 @@ def get_parser():
                         help="Stimulation frequency in Hz")
     parser.add_argument('-stim_pw', default=0.0002, required=False, type=float,
                         help="Stimulation pulse width in seconds")
-    parser.add_argument('-stim_duration', default=15, required=False, type=int,
+    parser.add_argument('-stim_duration', default=5, required=False, type=int,
                         help="Duration of stimulation block in seconds.")
-    parser.add_argument('-no_stim_duration', default=0, required=False, type=int,
+    parser.add_argument('-no_stim_duration', default=2, required=False, type=int,
                     help="Duration of no stimulation block in seconds.")
-    parser.add_argument('-n_stim_amps', default=5, required=False, type=int,
+    parser.add_argument('-n_stim_amps', default=4, required=False, type=int,
                         help="Number of stimulation amplitudes")
-    parser.add_argument('-n_stim_blocks', default=5, required=False, type=int,
+    parser.add_argument('-n_stim_blocks', default=18, required=False, type=int,
                         help="Number of stimulation blocks per stimulation amplitude")
     parser.add_argument('-samp_f', default=5000, required=False, type=int,
                         help="Sampling frequency of stimulation vector in Hz")
@@ -139,6 +139,8 @@ def main():
         fsl_block_start=((block*args.stim_duration) + (block*args.no_stim_duration))*100 #Using 100 Hz sampling frequency for fsl vector
         fsl_stim_vector[fsl_block_start:fsl_block_start+(args.stim_duration*100)]=fsl_stim_block #Using 100 Hz sampling frequency for fsl vector
 
+    #Patch because getting high amplitude values    
+    stim_vector[stim_vector > stim_amp_high] = 0
     #Change cwd to save directory because running into issues with long file name on some systems
     os.chdir(os.path.join(args.save_directory, subject_id, 'biopac'))
 
