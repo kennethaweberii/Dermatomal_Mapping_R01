@@ -8,8 +8,7 @@ from statsmodels.sandbox.stats.multicomp import multipletests
 
 import matplotlib.pyplot as plt
 # Example command:
-#python analysis_plot_subject_level.py -metrics subject_metrics.txt -path-out ~/Projects/Dermatomal_Mapping_R01/manuscripts/plots_test_2025-10-01 -metrics-roi ~/Projects/Dermatomal_Mapping_R01/manuscripts/results_n40_spinalcord_Sandrine/subject_metrics_rois.txt
-
+# python analysis_plot_subject_level_perRun.py -metrics-zscore ~/Projects/Dermatomal_Mapping_R01/manuscripts/results_n40_spinalcord_Sandrine/subject_metrics_rois_perRun.txt -metrics-voxels ~/Projects/Dermatomal_Mapping_R01/manuscripts/results_n40_spinalcord_Sandrine/subject_metrics_rois_perRun_voxels.txt -path-out ~/Projects/Dermatomal_Mapping_R01/manuscripts/plots_across_runs_2026-01-16
 def get_parser():
     parser = argparse.ArgumentParser(description='Create subject level plots for analysis.')
    # parser.add_argument('-metrics', type=str, required=True, help='Path to the metrics file')

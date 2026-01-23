@@ -9,7 +9,9 @@ import numpy as np
 from scipy.stats import ttest_rel
 from scipy.stats import shapiro, wilcoxon
 import matplotlib.pyplot as plt
+from statsmodels.sandbox.stats.multicomp import multipletests
 
+# python analyse_pain_ratings.py -pain-file ~/Projects/Dermatomal_Mapping_R01/manuscripts/pain_ratings/DermatomalMappingDMR-PainRatings_DATA_2025-10-01_1259.csv -include ~/codes/Dermatomal_Mapping_R01/include_n40.yml -path-out ~/Projects/Dermatomal_Mapping_R01/manuscripts/pain_ratings/
 
 def get_parser():
     parser = argparse.ArgumentParser(description='Create subject level plots for analysis.')
@@ -115,12 +117,12 @@ def main():
         color='black'
     )
 
-    plt.title(f'Pain Ratings across runs')
-    plt.ylabel('Pain Rating')
+    plt.title(f'Pain intensity across runs')
+    plt.ylabel('Pain intensity')
     plt.ylim(-0.5, 10)
     plt.grid(False)
     plt.ticklabel_format(axis='y', style='sci', scilimits=(-3,3))
-    plt.savefig(os.path.join(path_out, f'subject_pain_ratings.png'), dpi=300, bbox_inches='tight')
+    plt.savefig(os.path.join(path_out, f'subject_pain_intensity.png'), dpi=300, bbox_inches='tight')
     plt.close()
     # Paired t-tests between all pairs of runs for pain ratings
 
@@ -145,6 +147,8 @@ def main():
     print('Mean pain ratings per run:', np.nanmean(pain_matrix, axis=0))
     print('SD pain ratings per run:', np.nanstd(pain_matrix, axis=0))
     # Paired t-tests
+    pvals = []
+    pairs = []
     for i in range(n_runs):
         for j in range(i + 1, n_runs):
             run_i = run_labels[i]
@@ -169,12 +173,16 @@ def main():
                 stat, pval = wilcoxon(ratings_i[mask], ratings_j[mask])
                 test_used = "Wilcoxon signed-rank test"
             result = f"{test_used} {run_i} vs {run_j}: stat={stat:.4f}, p={pval:.4g}, n={np.sum(mask)}" if pval is not None else f"No paired data for {run_i} vs {run_j}"
-
+            pvals.append(pval)
+            pairs.append((run_i, run_j))
             outname = f"pain_rating_{run_i}_vs_{run_j}_paired_ttest.txt"
             with open(os.path.join(path_out, outname), "w") as text_file:
                 print(result, file=text_file)
-
-
+    outname = f'paired_test_Bonferroni.txt'
+    p_adjusted = multipletests(pvals, method='bonferroni', alpha=0.05)
+    pvals_corr = f"Adjusted p-values for multiple comparisons (Bonferroni): {p_adjusted} for pairs {pairs}"
+    with open(os.path.join(path_out, outname), "w") as text_file:
+                print(pvals_corr, file=text_file)
 if __name__ == "__main__":
     main()
 

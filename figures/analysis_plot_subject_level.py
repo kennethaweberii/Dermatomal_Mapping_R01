@@ -4,6 +4,7 @@ import numpy as np
 import argparse
 from scipy.stats import ttest_rel
 from scipy.stats import linregress
+from statsmodels.sandbox.stats.multicomp import multipletests
 
 import matplotlib.pyplot as plt
 # Example command:
@@ -162,15 +163,15 @@ def main():
                 ylabel = 'Voxels'
                 if region in ['left_sc_gm_mask', 'right_sc_gm_mask', "left_sc_mask", 'right_sc_mask']:
                     ylim = [0, 1500]
-                    ytickmarks = [0, 200, 400, 800, 1200, 1400]
+                    ytickmarks = [0, 200, 400, 600, 800, 1000, 1200, 1400]
                 else:
-                    ylim = [0, 650]
-                    ytickmarks = [0, 100, 200, 300, 400, 500, 600]
+                    ylim = [0, 800]
+                    ytickmarks = [0, 100, 200, 300, 400, 500, 600, 700, 800]
 
             elif measure == 'zscore_sc':
                 ylabel = 'Z Score'
-                ylim = [1.5, 4.5]
-                ytickmarks = [1.5, 2.5, 3.5, 4.5]
+                ylim = [1, 5]
+                ytickmarks = [1, 2, 3, 4, 5]
             print(dataset_roi.head())
             for subject in dataset_roi.subject.unique():
                 data = dataset_roi[
@@ -199,14 +200,23 @@ def main():
             y_all = dataset_roi[dataset_roi['region'] == region][measure].values
             slope, intercept, r_value, p_value, std_err = linregress(x_all, y_all)
             fit_line = slope * np.arange(1, 5) + intercept
+            if p_value < 0.05:
+                bold=True
+            else:
+                bold=False
 
+            if p_value < 0.001:
+                 p_value_text =  'p<0.001'
+            else:
+                p_value_text = f'p={p_value:.3f}'
             ax.text(
-                0.05, 0.1,
-                f'Linear fit: p={p_value:.3g}',
+                0.05, 0.08,
+                f'Linear fit: {p_value_text}',
                 transform=ax.transAxes,
                 fontsize=10,
                 verticalalignment='top',
-                color='black'
+                color='black',
+                fontweight='bold' if bold else 'normal'
             )
             if ylim is not None:
                 ax.set_ylim(ylim)
@@ -229,6 +239,9 @@ def main():
             # Paired t-tests between all pairs of copes for this ROI
             cope_labels = ['cope1', 'cope2', 'cope3', 'cope4']
             n_copes = len(cope_labels)
+            pvals = []
+            pairs = []
+
             for i in range(n_copes):
                 for j in range(i + 1, n_copes):
                     cope_i = cope_labels[i]
@@ -244,9 +257,16 @@ def main():
                         result = f"Paired t-test {cope_i} vs {cope_j}: t={stat:.4f}, p={pval:.4g}, n={len(merged)}"
                     else:
                         result = f"No paired data for {cope_i} vs {cope_j}"
+                    pvals.append(pval)
+                    pairs.append((cope_i, cope_j))
                     outname = f"{measure}_{region}_subject_{cope_i}_{cope_j}.txt"
                     with open(os.path.join(path_out, outname), "w") as text_file:
                         print(result, file=text_file)
+            outname = f'paired_test_Bonferroni_{measure}_{region}.txt'
+            p_adjusted = multipletests(pvals, method='bonferroni', alpha=0.05)
+            pvals_corr = f"Adjusted p-values for multiple comparisons (Bonferroni): {p_adjusted} for pairs {pairs}"
+            with open(os.path.join(path_out, outname), "w") as text_file:
+                        print(pvals_corr, file=text_file)
 
 if __name__ == "__main__":
     main()

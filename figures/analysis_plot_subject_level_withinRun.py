@@ -4,6 +4,7 @@ import numpy as np
 import argparse
 from scipy.stats import ttest_rel
 from scipy.stats import linregress
+from statsmodels.sandbox.stats.multicomp import multipletests
 
 import matplotlib.pyplot as plt
 # Example command:
@@ -54,12 +55,12 @@ def main():
             # Set y-label and limits based on measure
             ylabel = 'Z Score' if measure == 'zscore_sc' else 'Voxels'
             if measure == 'zscore_sc':
-                ylim = [1.5, 4.5]
-                ytickmarks = [1.5, 2.5, 3.5, 4.5]
+                ylim = [1, 5]
+                ytickmarks = [1,2,3,4,5]
             elif measure == 'voxels_sc':
                 if region in ['left_sc_gm_mask', 'right_sc_gm_mask', "left_sc_mask", 'right_sc_mask']:
                     ylim = [0, 1500]
-                    ytickmarks = [0, 200, 400, 800, 1200, 1400]
+                    ytickmarks = [0, 200, 400, 600, 800, 1000, 1200, 1400]
                 else:
                     ylim = [0, 650]
                     ytickmarks = [0, 100, 200, 300, 400, 500, 600]
@@ -89,20 +90,40 @@ def main():
             plt.errorbar(xlabel, means, yerr=sds, color=(0,0,0), marker=None, linewidth=3, elinewidth=3, capsize=5, markeredgewidth=3)
 
             # Linear regression
-
             x_all = dataset_roi[(dataset_roi['region'] == region)]['trial'].values
             y_all = dataset_roi[(dataset_roi['region'] == region)][measure].values
             slope, intercept, r_value, p_value, std_err = linregress(x_all, y_all)
             fit_line = slope * np.arange(1, 4) + intercept
 
-            # ax.text(
-            #     0.05, 0.1,
-            #     f'Linear fit: p={p_value:.3g}',
-            #     transform=ax.transAxes,
-            #     fontsize=10,
-            #     verticalalignment='top',
-            #     color='black'
-            # )
+            # Display equation of linear fit
+            equation_text = f'y = {slope:.2f}x + {intercept:.2f}'
+            ax.text(
+                0.05, 0.8,
+                equation_text,
+                transform=ax.transAxes,
+                fontsize=10,
+                verticalalignment='top',
+                color='black'
+            )
+            if p_value < 0.05:
+                bold=True
+            else:
+                bold=False
+            if p_value < 0.001:
+                p_value_text =  'p<0.001'
+            else:
+                p_value_text = f'p={p_value:.3f}'
+
+            ax.text(
+                0.05, 0.9,
+                f'Linear fit: {p_value_text}',
+                transform=ax.transAxes,
+                fontsize=10,
+                verticalalignment='top',
+                color='black',
+                fontweight='bold' if bold else 'normal'
+    
+            )
             if ylim is not None:
                 ax.set_ylim(ylim)
             if ytickmarks is not None:
