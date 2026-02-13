@@ -164,15 +164,17 @@ fslsplit ${input} ${input}_slice -z
 
 for ((k=0; k<$zdimi; k++)) ; do
 	slice_number=$((10000+$k))
-	fslstats -t ${input}_slice${slice_number:1:4} -k ${mask}_slice${slice_number:1:4} -m >> ${input}_slice${slice_number:1:4}_mean.txt
-	fslascii2img ${input}_slice${slice_number:1:4}_mean.txt 1 1 1 $tdimi 1 1 1 $tr ${input}_slice${slice_number:1:4}_mean
-	fslmaths ${input}_slice${slice_number:1:4}_mean -Tmean mean
-	fslmaths ${input}_slice${slice_number:1:4}_mean -sub mean ${input}_slice${slice_number:1:4}_mean
-	rm mean.nii.gz
-	rm ${input}_slice${slice_number:1:4}_mean.txt
+	#fslstats -t ${input}_slice${slice_number:1:4} -k ${mask}_slice${slice_number:1:4} -m >> ${input}_slice${slice_number:1:4}_eig.txt
+	fslmeants -i ${input}_slice${slice_number:1:4} --eig -m ${mask}_slice${slice_number:1:4} -o ${input}_slice${slice_number:1:4}_eig.txt
+	fslascii2img ${input}_slice${slice_number:1:4}_eig.txt 1 1 1 $tdimi 1 1 1 $tr ${input}_slice${slice_number:1:4}_eig
+	#fslmaths ${input}_slice${slice_number:1:4}_eig -Tmean mean
+	#fslmaths ${input}_slice${slice_number:1:4}_mean -sub mean ${input}_slice${slice_number:1:4}_mean
+  #fslmeants -i sub-NSPilot${subject}_ses-01brain_task-${scan}_bold_moco_topup --eig -m sub-NSPilot${subject}_ses-01brain_${scan}_CSF.nii.gz -o time_series/CSF_eig_${scan}.txt
+ # rm mean.nii.gz
+	rm ${input}_slice${slice_number:1:4}_eig.txt
 done
 
-v="${input}_slice0???_mean.nii.gz"
+v="${input}_slice0???_eig.nii.gz"
 fslmerge -z ${input}_${output} $v
 
 #Copy files to parent directory

@@ -1,18 +1,8 @@
 #!/bin/bash
 # 
+# v2    07/29/20    run jobs in parallel
 #
-# Slicewise confound Rz, Tx, and Ty images output by Kenneth Weber on 8/14/2023.
-# Created by Kenneth Weber and Megan McAndrews on 5/18/2016.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-#
-
+# Created by Megan McAndrews and Kenneth Weber on 5/18/2016.
 # Please cite:
 #	Weber II KA, Chen Y, Wang X, Kahnt T, Parrish TB. Lateralization of Cervical Spinal Cord Activity During an Isometric Upper Extremity Motor Task. NeuroImage 2016;125:233-243.
 #	Jenkinson, M., Bannister, P., Brady, M., Smith, S., 2002. Improved optimization for the robust and accurate linear registration and motion correction of brain images. Neuroimage 17, 825-841.
@@ -26,8 +16,8 @@ cat << EOF
 
 DESCRIPTION
   Perform 2D slicewise registration of the 4D time series input image to the reference image using the reference weighting mask image.
-  Outputs include the motion corrected image time series, the motion corrected mean image, the motion corrected TSNR image, slicewise motion confounds, and a compressed folder containing the transformation matrices.
-  Requires that FSL is installed. This was last updated using FSL Version 6.0.
+  Outputs include the motion corrected image time series, the motion corrected mean image, the motion corrected TSNR image, and a compressed folder containing the transformation matrices.
+  Requires that FSL is installed. This was last updated using FSL Version 5.0.
   
 USAGE
   `basename ${0}` -i <input> -r <reference> -m <mask> -o <output>
@@ -60,22 +50,22 @@ do
 			usage
 			exit 1
 			;;
-         i)
+     i)
 		 	input=$OPTARG
-         		;;
+         	;;
 	 r)
-	                reference=$OPTARG
-	                ;;
-         m)
+	        reference=$OPTARG
+	        ;;
+     m)
 			mask=$OPTARG
-         		;;
+         	;;
 	 o)
-	                output=$OPTARG
-		        ;;
-         ?)
-             usage
-             exit
-             ;;
+	        output=$OPTARG
+		    ;;
+     ?)
+            usage
+            exit
+            ;;
      esac
 done
 
@@ -175,7 +165,7 @@ fi
 
 tmp_folder=`mktemp -u tmp.XXXXXXXXXX`
 mkdir ${tmp_folder}
-imcp ${input} ${reference} ${mask} ./${tmp_folder}
+imcp ${input} ${reference} ${mask} ${tmp_folder}	#imcp ${input} ${reference} ${mask} ./${tmp_folder}
 cd ${tmp_folder}
 
 #Remove path from input files
@@ -209,28 +199,62 @@ last_volume=$(echo "scale=0; $tdimi-1" | bc) #Find index of last volume
 fslsplit ${reference} ref_slice -z ## split ${reference} into slices 
 
 fslsplit ${input} vol -t # Split ${input} into volumes
-for ((i=0; i<=$last_volume; i++)); do 
+
+
+foo1() {
+  local i=$1
   vol="$(printf "vol%04d" ${i})"
   fslsplit ${vol} ${vol}_slice -z # Split each volume of input into slices
-done
+}
 
-for ((i=0; i<=$last_slice; i++)) ; do #For loop for slices
+for ((i=0; i<=$last_volume; i++))
+do
+  foo1 "$i" &
+done
+wait
+
+
+#trap "kill 0" EXIT
+foo3() {
+  local i=$1
+  #echo "i = $i"
+  
   slice="$(printf "slice%04d" ${i})"
   for ((j=0; j<=$last_volume; j++)); do  #Performs FLIRT for each volume of the slice specified by ${vol} and ${slice}  
     vol="$(printf "vol%04d" ${j})"
-    flirt -in ${vol}_${slice} -ref ref_${slice} -out ${vol}_${slice}_mcf -omat ${vol}_${slice}_mcf.mat -bins 256 -cost normcorr -nosearch -2D -refweight mask_${slice} -interp trilinear
-    echo "flirt -in ${vol}_${slice} -ref ref_${slice} -out ${vol}_${slice}_mcf -omat ${vol}_${slice}_mcf.mat -bins 256 -cost normcorr -nosearch -2D -refweight mask_${slice} -interp spline"
-	avscale --allparams ${vol}_${slice}_mcf.mat ${vol}_${slice} | head -7| tail -1| cut -d " " -f8 >> Rz_${slice}.txt
-	avscale --allparams ${vol}_${slice}_mcf.mat ${vol}_${slice} | head -9| tail -1| cut -d " " -f5 >> Tx_${slice}.txt
-	avscale --allparams ${vol}_${slice}_mcf.mat ${vol}_${slice} | head -9| tail -1| cut -d " " -f6 >> Ty_${slice}.txt
+    #echo "flirt -in ${vol}_${slice} -ref ref_${slice} -out ${vol}_${slice}_mcf -omat ${vol}_${slice}_mcf.mat -bins 256 -cost normcorr -nosearch -2D -refweight mask_${slice} -interp spline "
+    flirt -in ${vol}_${slice} -ref ref_${slice} -out ${vol}_${slice}_mcf -omat ${vol}_${slice}_mcf.mat -bins 256 -cost normcorr -nosearch -2D -refweight mask_${slice} -interp spline 
+      avscale --allparams ${vol}_${slice}_mcf.mat ${vol}_${slice} | head -7| tail -1| cut -d " " -f8 >> Rz_${slice}.txt
+      avscale --allparams ${vol}_${slice}_mcf.mat ${vol}_${slice} | head -9| tail -1| cut -d " " -f5 >> Tx_${slice}.txt
+      avscale --allparams ${vol}_${slice}_mcf.mat ${vol}_${slice} | head -9| tail -1| cut -d " " -f6 >> Ty_${slice}.txt
   done
-  v="vol????_${slice}_mcf.${file_ext}"
-  fslmerge -tr merge_${slice} $v $tr #Merge motion corrected volumes of the ${slice_number} slice together
   
-  fslascii2img Rz_${slice}.txt 1 1 1 $tdimi 1 1 1 $tr Rz_${slice}
-  fslascii2img Tx_${slice}.txt 1 1 1 $tdimi 1 1 1 $tr Tx_${slice}
-  fslascii2img Ty_${slice}.txt 1 1 1 $tdimi 1 1 1 $tr Ty_${slice}
+}
+
+for ((i=0; i<=$last_slice; i++))
+do
+  foo3 "$i" &
 done
+wait
+
+
+#trap 'kill $(jobs -p)' EXIT
+foo5() {
+    local i=$1
+    slice="$(printf "slice%04d" ${i})"
+    v="vol????_${slice}_mcf.${file_ext}"
+    fslmerge -tr merge_${slice} ${v} ${tr} #Merge motion corrected volumes of the ${slice_number} slice together
+    fslascii2img Rz_${slice}.txt 1 1 1 $tdimi 1 1 1 $tr Rz_${slice}
+    fslascii2img Tx_${slice}.txt 1 1 1 $tdimi 1 1 1 $tr Tx_${slice}
+    fslascii2img Ty_${slice}.txt 1 1 1 $tdimi 1 1 1 $tr Ty_${slice}
+}
+
+
+for ((i=0; i<=$last_slice; i++)) ; do #For loop for slices
+    foo5 "$i" &  
+done
+
+wait
 
 v="merge_slice????.${file_ext}"
 fslmerge -z ${output} $v #Merge the slices together
@@ -246,10 +270,18 @@ fslmerge -z Ty $v
 
 v="vol0???_slice????_mcf.mat"
 mkdir ${output}_mat #Save the .mat files for later use
+<<<<<<< HEAD
+mv $v ${output}_mat/				#mv $v ./${output}_mat/
+tar -czf ${output}_mat.tar.gz ${output}_mat	#tar -czf ${output}_mat.tar.gz ./${output}_mat
+
+#Compute mean and TSNR images
+echo "compute mean and TSNR images"
+=======
 mv $v ./${output}_mat/
 tar -czf ${output}_mat.tar.gz ./${output}_mat
 
 #Compute mean and TSNR images
+>>>>>>> main
 fslmaths ${output} -Tmean ${output}_mean
 fslmaths ${output} -Tstd ${output}_std
 fslmaths ${output}_mean -div ${output}_std ${output}_tsnr
@@ -265,7 +297,7 @@ cd ..
 
 rm -rf ${tmp_folder}
 
-echo "Run the following to view the results:"
-echo "fslview ${output} ${output}_mean ${output}_tsnr -l render3 &"
+#echo "Run the following to view the results:"
+#echo "fslview ${output} ${output}_mean ${output}_tsnr -l render3 &"
 
 exit 0
