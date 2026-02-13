@@ -286,7 +286,7 @@ runs=(1)
       convert_xfm -inverse -omat ${func_data}_highres2example_func.mat ${func_data}_example_func2highres.mat
       flirt -in ${analysis_path}/ses-brain${coil}${session}/anat/${subject}_ses-brain${coil}${session}_T1w_brain_wm_seg.nii.gz -ref ${func_data}_mean -out ${func_data}_wm_seg -applyxfm -init ${func_data}_highres2example_func.mat -interp nearestneighbour
       flirt -in ${analysis_path}/ses-brain${coil}${session}/anat/${subject}_ses-brain${coil}${session}_T1w_brain_csf_seg.nii.gz -ref ${func_data}_mean -out ${func_data}_csf_seg -applyxfm -init ${func_data}_highres2example_func.mat -interp nearestneighbour
-
+      
       fslmeants -i ${func_data} --eig -m ${func_data}_csf_seg -o ${func_data}_csf.txt
       fslmeants -i ${func_data} --eig -m ${func_data}_wm_seg -o ${func_data}_wm.txt
 
@@ -365,8 +365,13 @@ runs=(1)
 
       #Run first-level analysis
       region=brain
-      smoothing=5
-      export analysis_path subject smoothing coil session run func_data region tr number_of_volumes stim_parameters confoundevs
+
+      #Get stim parameters
+      stim_file=./fsl_stim_vectors/*_stim_amp_1.txt
+      stim_parameters=`echo ${stim_file} | awk -F 'fsl_stim_vector_' '{print $2}' | awk -F '_stim_amp' '{print $1}'`
+
+      stim_params=./fsl_stim_vectors/*_stim_amp_1.txt
+      export analysis_path subject coil session run func_data region tr number_of_volumes stim_parameters
       envsubst < "${script_path}/first_level.fsf" > "${func_data}_first_level.fsf"
 	    feat ${func_data}_first_level.fsf
 
@@ -388,8 +393,7 @@ runs=(1)
      
       #Run first-level trialwise analysis
       region=brain
-      smoothing=5
-      export analysis_path subject coil session run func_data region tr number_of_volumes stim_parameters smoothing confoundevs
+      export analysis_path subject coil session run func_data region tr number_of_volumes stim_parameters
       envsubst < "${script_path}/first_level_trialwise.fsf" > "${func_data}_first_level_trialwise.fsf"
 	    feat ${func_data}_first_level_trialwise.fsf
 
@@ -410,7 +414,7 @@ runs=(1)
 
       #Run second-level trialwise analysis
       region=brain
-      export analysis_path subject coil session run func_data region tr number_of_volumes
+      export analysis_path subject coil session run func_data region tr number_of_volumes stim_parameters
       envsubst < "${script_path}/second_level_trialwise.fsf" > "${func_data}_second_level_trialwise.fsf"
 	    feat ${func_data}_second_level_trialwise.fsf
       

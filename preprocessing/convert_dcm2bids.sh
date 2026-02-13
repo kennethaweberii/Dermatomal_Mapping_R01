@@ -155,34 +155,42 @@ elif [ -d ${analysis_path}/anat ]; then
         dcm2niix -b y  -f %s -z y -x n -v y -o ../nii_${dir} ./${dir}
       done
 
+if [ -d ${analysis_path}/${folder:1}_*-*-* ]; then
+  cd ${analysis_path}/${folder:1}*
+  echo Converting ${analysis_path}/${folder:1}* to NIFTI
+  for dir in */ ; do
+    echo Converting ${dir} to NIFTI
+    rm -rf ${analysis_path}/nii_${dir}
+    mkdir ${analysis_path}/nii_${dir}
+    dcm2niix -b y  -f %s -z y -x n -v y -o ${analysis_path}/nii_${dir} ./${dir}
+  done
+else
+  echo Skipping ${analysis_path}/anat. Folder does not exist.
+fi
+
+if [ -d ${analysis_path}/anat ]; then
+  cd ${analysis_path}/anat
+  echo Converting ${analysis_path}/anat to NIFTI
+  for dir in */ ; do
+    echo Converting ${dir} to NIFTI
+    rm -rf ${analysis_path}/nii_${dir}
+    mkdir ${analysis_path}/nii_${dir}
+    dcm2niix -b y  -f %s -z y -x n -v y -o ${analysis_path}/nii_${dir} ./${dir}
+  done
 else
   echo Skipping ${analysis_path}/${anat_folder} or ${analysis_path}/anat. Folder does not exist.
 fi
 
 #Convert func files
-if [ -d ${analysis_path}/data ]; then
-  cd ${analysis_path}/data
-  echo Converting ${analysis_path}/data to NIFTI
-  echo ${analysis_path}
-  for dir in e${folder:1}*/ ; do
-    echo Converting ${dir} to NIFTI
-    rm -rf ../nii_${dir}
-    mkdir ../nii_${dir}
-    dcm2niix -b y -f %s -z y -x n -v y -o ../nii_${dir} ./${dir}/matlabDicoms
-  done
-elif [ -d ${analysis_path} ]; then
-  cd ${analysis_path}
-  echo Converting ${analysis_path} to NIFTI
-  echo ${analysis_path}
-  for dir in e${folder:1}*/ ; do
-    echo Converting ${dir} to NIFTI
-    rm -rf ../nii_${dir}
-    mkdir ../nii_${dir}
-    dcm2niix -b y -f %s -z y -x n -v y -o ../nii_${dir} ./${dir}/matlabDicoms
-  done
-else
-  echo Skipping ${analysis_path}/data or ${analysis_path}. Folder does not exist.
-fi
+
+cd ${analysis_path}/data
+echo Converting ${analysis_path}/data to NIFTI
+for dir in e${folder:1}*/ ; do
+  echo Converting ${dir} to NIFTI
+  rm -rf ${analysis_path}/nii_${dir}
+  mkdir ${analysis_path}/nii_${dir}
+  dcm2niix -b y -f %s -z y -x n -v y -o ${analysis_path}/nii_${dir} ./${dir}/matlabDicoms
+done
 
 cd ${analysis_path}
 
@@ -300,7 +308,7 @@ for dir in nii_*/ ; do
     #SC Functional Scans
     ###########################################################################################
 
-    elif ([[ ${series} == *"run-1"* ]] || [[ ${series} == *"run-2"* ]] || [[ ${series} == *"run-3"* ]]) && [[ ${dir} == "nii_e"* ]] && [[ ${series} == *"SC"* ]]  && [[ ${series} != *"pepolar"* ]]; then
+    elif ([[ ${series} == *"run-1"* ]] || [[ ${series} == *"run-2"* ]]) && [[ ${dir} != "nii_e"* ]] && [[ ${series} == *"SC"* ]]  && [[ ${series} != *"pepolar"* ]]; then
 
       if [[ ${series} == *"run-1"* ]]; then
         run=1
@@ -344,6 +352,76 @@ for dir in nii_*/ ; do
       sed -i 's/"ConversionSoftwareVersion"/"PhaseEncodingDirection": "j",\n\t"ConversionSoftwareVersion"/' ${output_path}/ses-spinalcord${coil}${session}/func/${subject}_ses-spinalcord${coil}${session}_task-tens_run-${run}_bold.json
       sed -i 's/"SAR"/"TaskName": "'"tens"'",\n\t"SAR"/' ${output_path}/ses-spinalcord${coil}${session}/func/${subject}_ses-spinalcord${coil}${session}_task-tens_run-${run}_bold.json
       sed -i 's/"SAR"/"TotalReadoutTime": "'"${TotalReadoutTime}"'",\n\t"SAR"/' ${output_path}/ses-spinalcord${coil}${session}/func/${subject}_ses-spinalcord${coil}${session}_task-tens_run-${run}_bold.json
+
+    ###########################################################################################
+    #SC pepolar
+    ###########################################################################################
+
+    elif ([[ ${series} == *"run-1_pepolar"* ]] || [[ ${series} == *"run-2_pepolar"* ]]) && [[ ${dir} != "nii_e"* ]] && [[ ${series} == *"SC"* ]] && [[ ${series} == *"pepolar"* ]]; then
+      
+      if [[ ${series} == *"run-1"* ]]; then
+        run=1
+      elif [[ ${series} == *"run-2"* ]]; then
+        run=2
+      else
+        run=
+      fi
+      
+      series_folder=`echo ${dir} | cut -d "_" -f2`
+      recon_json_file=${analysis_path}/${series_folder}/*.json
+
+      # calculate TotalReadoutTime 
+      # if PartialFourer=1, TotalReadoutTime = EffectiveEchoSpacing * (rdb_hdr_rc_yres / ksepi_multishot_control / 2 + kynover / ksepi_multishot_control)
+      # if PartialFourer=0, TotalReadoutTime = EffectiveEchoSpacing * rdb_hdr_rc_yres / ksepi_multishot_control 
+      EES=`grep 'EffectiveEchoSpacing' ${recon_json_file} | cut -f3 -d ' '`
+      Ny=`grep 'rdb_hdr_rc_yres' ${recon_json_file} | cut -f3 -d ' ' | cut -f1 -d ','`
+      R=`grep 'ksepi_multishot_control' ${recon_json_file} | cut -f3 -d ' ' | cut -f1 -d ','`
+      kynover=`grep 'kynover' ${recon_json_file} | cut -f3 -d ' ' | cut -f1 -d ','`
+      PartialFourier=0
+      if [[ ${PartialFourier} -eq 1 ]]; then
+        TotalReadoutTime=`echo "$EES*$Ny/$R/2+$EES*$kynover/$R" | bc -l`
+      else
+        TotalReadoutTime=`echo "$EES*$Ny/$R" | bc -l`
+      fi
+      echo "EES=$EES, Ny=$Ny, R=$R, kynover=$kynover, TotalReadoutTime=$TotalReadoutTime"
+
+      cp ${filename}.json ${output_path}/ses-spinalcord${coil}${session}/fmap/${subject}_ses-spinalcord${coil}${session}_task-tens_run-${run}_dir-AP_bold.json
+      cp ${filename}.nii.gz ${output_path}/ses-spinalcord${coil}${session}/fmap/${subject}_ses-spinalcord${coil}${session}_task-tens_run-${run}_dir-AP_bold.nii.gz
+
+      sed -i 's/"ConversionSoftwareVersion"/"PhaseEncodingDirection": "j-",\n\t"ConversionSoftwareVersion"/' ${output_path}/ses-spinalcord${coil}${session}/fmap/${subject}_ses-spinalcord${coil}${session}_task-tens_run-${run}_dir-AP_bold.json
+      sed -i 's/"ConversionSoftwareVersion"/"IntendedFor": "ses-spinalcord${coil}${session}\/func\/'${subject}'_ses-spinalcord${coil}${session}_task-tens_run-${run}_bold.nii.gz",\n\t"ConversionSoftwareVersion"/' ${output_path}/ses-spinalcord${coil}${session}/fmap/${subject}_ses-spinalcord${coil}${session}_task-tens_run-${run}_dir-AP_bold.json
+      sed -i 's/"SAR"/"TaskName": "'"tens"'",\n\t"SAR"/' ${output_path}/ses-spinalcord${coil}${session}/fmap/${subject}_ses-spinalcord${coil}${session}_task-tens_run-${run}_dir-AP_bold.json
+      sed -i 's/"SAR"/"TotalReadoutTime": "'"${TotalReadoutTime}"'",\n\t"SAR"/' ${output_path}/ses-spinalcord${coil}${session}/fmap/${subject}_ses-spinalcord${coil}${session}_task-tens_run-${run}_dir-AP_bold.json
+    
+    ###########################################################################################
+    #highres
+    ###########################################################################################
+
+    elif [[ ${series} == *"highres"* ]] && [[ ${dir} == "nii_e"* ]] && [[ ${series} == *"SC"* ]]; then
+      
+      series_folder=`echo ${dir} | cut -d "_" -f2`
+      recon_json_file=${analysis_path}/${series_folder}/*.json
+
+      # calculate TotalReadoutTime
+      # if PartialFourer=1, TotalReadoutTime = EffectiveEchoSpacing * (rdb_hdr_rc_yres / ksepi_multishot_control / 2 + kynover / ksepi_multishot_control)
+      # if PartialFourer=0, TotalReadoutTime = EffectiveEchoSpacing * rdb_hdr_rc_yres / ksepi_multishot_control 
+      EES=`grep 'EffectiveEchoSpacing' ${recon_json_file} | cut -f3 -d ' '`
+      Ny=`grep 'rdb_hdr_rc_yres' ${recon_json_file} | cut -f3 -d ' ' | cut -f1 -d ','`
+      R=`grep 'ksepi_multishot_control' ${recon_json_file} | cut -f3 -d ' ' | cut -f1 -d ','`
+      kynover=`grep 'kynover' ${recon_json_file} | cut -f3 -d ' ' | cut -f1 -d ','`
+      PartialFourier=0
+      if [[ ${PartialFourier} -eq 1 ]]; then
+        TotalReadoutTime=`echo "$EES*$Ny/$R/2+$EES*$kynover/$R" | bc -l`
+      else
+        TotalReadoutTime=`echo "$EES*$Ny/$R" | bc -l`
+      fi
+      echo "EES=$EES, Ny=$Ny, R=$R, kynover=$kynover, TotalReadoutTime=$TotalReadoutTime"
+
+      cp ${filename}.json ${output_path}/ses-spinalcord${coil}${session}/func/${subject}_ses-spinalcord${coil}${session}_acq-highres_bold.json
+      cp ${filename}.nii.gz ${output_path}/ses-spinalcord${coil}${session}/func/${subject}_ses-spinalcord${coil}${session}_acq-highres_bold.nii.gz
+
+      sed -i 's/"ConversionSoftwareVersion"/"PhaseEncodingDirection": "j",\n\t"ConversionSoftwareVersion"/' ${output_path}/ses-spinalcord${coil}${session}/func/${subject}_ses-spinalcord${coil}${session}_acq-highres_bold.json
+      sed -i 's/"SAR"/"TotalReadoutTime": "'"${TotalReadoutTime}"'",\n\t"SAR"/' ${output_path}/ses-spinalcord${coil}${session}/func/${subject}_ses-spinalcord${coil}${session}_acq-highres_bold.json
 
     ###########################################################################################
     #SC_DWI

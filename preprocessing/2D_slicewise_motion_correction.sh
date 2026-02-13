@@ -10,7 +10,6 @@
 #	Cohen-Adad, J., et al. (2009). Slice-by-slice motion correction in spinal cord fMRI: SliceCorr. Proceedings of the 17th Annual Meeting of the International Society for Magnetic Resonance in Medicine, Honolulu, USA 
 #	Weber II, K. A., et al. (2014). Choice of Motion Correction Method Affects Spinal Cord fMRI Results. 20th Annual Meeting of  the Organization for Human Brain Mapping, Hamburg, Germany.
 
-
 function usage()
 {
 cat << EOF
@@ -271,11 +270,18 @@ fslmerge -z Ty $v
 
 v="vol0???_slice????_mcf.mat"
 mkdir ${output}_mat #Save the .mat files for later use
+<<<<<<< HEAD
 mv $v ${output}_mat/				#mv $v ./${output}_mat/
 tar -czf ${output}_mat.tar.gz ${output}_mat	#tar -czf ${output}_mat.tar.gz ./${output}_mat
 
 #Compute mean and TSNR images
 echo "compute mean and TSNR images"
+=======
+mv $v ./${output}_mat/
+tar -czf ${output}_mat.tar.gz ./${output}_mat
+
+#Compute mean and TSNR images
+>>>>>>> main
 fslmaths ${output} -Tmean ${output}_mean
 fslmaths ${output} -Tstd ${output}_std
 fslmaths ${output}_mean -div ${output}_std ${output}_tsnr
