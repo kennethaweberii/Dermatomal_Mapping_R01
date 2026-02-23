@@ -32,7 +32,7 @@ export SCT_DIR="/root/sct/"
 PATH_SCRIPTS=$path_script
 
 export PATH_DATA_PROCESSED PATH_RESULTS PATH_LOG PATH_QC PATH_DATA PATH_DERIVATIVES PATH_SCRIPTS SCT_DIR
-bash ${path_script}/preprocess_spinalcord.sh $subject/$ses
+bash ${path_script}/preprocess_spinal_cord.sh $subject/$ses
 
 # ret=1
 # c=0
