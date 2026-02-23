@@ -545,11 +545,10 @@ if [[ $SES == *"spinalcord"* ]];then
       mkdir -p reg
       cp /usr/local/fsl/etc/flirtsch/ident.mat reg/example_func2standard.mat
       cp example_func.nii.gz reg/example_func.nii.gz
-      cp $SCT_DIR/data/PAM50/template/PAM50_t2s.nii.gz reg/standard.nii.gz
-      cp $SCT_DIR/data/PAM50/template/PAM50_cord.nii.gz PAM50_cord.nii.gz
-      fslmaths reg/standard.nii.gz -mas PAM50_cord.nii.gz reg/standard_masked.nii.gz
+      $SCT_EXEC cp $SCT_DIR/data/PAM50/template/PAM50_t2s.nii.gz reg/standard.nii.gz
+      $SCT_EXEC cp $SCT_DIR/data/PAM50/template/PAM50_cord.nii.gz reg/.
+      fslmaths reg/standard.nii.gz -mas reg/PAM50_cord.nii.gz reg/standard_masked.nii.gz
       fslroi reg/standard_masked.nii.gz reg/standard.nii.gz 32 75 34 75 691 263
-      rm PAM50_cord.nii.gz
       cd ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}
       #Run first-level trialwise analysis
       # Remove existing feat repo if already exists
@@ -566,11 +565,10 @@ if [[ $SES == *"spinalcord"* ]];then
       mkdir -p reg
       cp /usr/local/fsl/etc/flirtsch/ident.mat reg/example_func2standard.mat
       cp example_func.nii.gz reg/example_func.nii.gz
-      cp $SCT_DIR/data/PAM50/template/PAM50_t2s.nii.gz reg/standard.nii.gz
-      cp $SCT_DIR/data/PAM50/template/PAM50_cord.nii.gz PAM50_cord.nii.gz
-      fslmaths reg/standard.nii.gz -mas PAM50_cord.nii.gz reg/standard_masked.nii.gz
+      $SCT_EXEC cp $SCT_DIR/data/PAM50/template/PAM50_t2s.nii.gz reg/standard.nii.gz
+      $SCT_EXEC cp $SCT_DIR/data/PAM50/template/PAM50_cord.nii.gz reg/.
+      fslmaths reg/standard.nii.gz -mas reg/PAM50_cord.nii.gz reg/standard_masked.nii.gz
       fslroi reg/standard_masked.nii.gz reg/standard.nii.gz 32 75 34 75 691 263
-      rm PAM50_cord.nii.gz
       cd ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}
 
       #Run second-level trialwise analysis
@@ -589,7 +587,7 @@ if [[ $SES == *"spinalcord"* ]];then
 fi
 
 #Copy PAM50 template for masking the group level results
-cp $SCT_DIR/data/PAM50/template/PAM50_cord.nii.gz PAM50_cord.nii.gz
+$SCT_EXEC cp $SCT_DIR/data/PAM50/template/PAM50_cord.nii.gz PAM50_cord.nii.gz
 fslroi PAM50_cord.nii.gz PAM50_cord_cropped.nii.gz 32 75 34 75 691 263
 
 
