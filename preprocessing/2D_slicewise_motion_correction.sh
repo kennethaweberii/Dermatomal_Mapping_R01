@@ -270,18 +270,10 @@ fslmerge -z Ty $v
 
 v="vol0???_slice????_mcf.mat"
 mkdir ${output}_mat #Save the .mat files for later use
-<<<<<<< HEAD
-mv $v ${output}_mat/				#mv $v ./${output}_mat/
-tar -czf ${output}_mat.tar.gz ${output}_mat	#tar -czf ${output}_mat.tar.gz ./${output}_mat
-
-#Compute mean and TSNR images
-echo "compute mean and TSNR images"
-=======
 mv $v ./${output}_mat/
 tar -czf ${output}_mat.tar.gz ./${output}_mat
 
 #Compute mean and TSNR images
->>>>>>> main
 fslmaths ${output} -Tmean ${output}_mean
 fslmaths ${output} -Tstd ${output}_std
 fslmaths ${output}_mean -div ${output}_std ${output}_tsnr
