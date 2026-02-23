@@ -546,9 +546,10 @@ if [[ $SES == *"spinalcord"* ]];then
       cp /usr/local/fsl/etc/flirtsch/ident.mat reg/example_func2standard.mat
       cp example_func.nii.gz reg/example_func.nii.gz
       cp $SCT_DIR/data/PAM50/template/PAM50_t2s.nii.gz reg/standard.nii.gz
-      fslmaths reg/standard.nii.gz -mas $SCT_DIR/data/PAM50/template/PAM50_cord.nii.gz reg/standard_masked.nii.gz
+      cp $SCT_DIR/data/PAM50/template/PAM50_cord.nii.gz PAM50_cord.nii.gz
+      fslmaths reg/standard.nii.gz -mas PAM50_cord.nii.gz reg/standard_masked.nii.gz
       fslroi reg/standard_masked.nii.gz reg/standard.nii.gz 32 75 34 75 691 263
-
+      rm PAM50_cord.nii.gz
       cd ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}
       #Run first-level trialwise analysis
       # Remove existing feat repo if already exists
@@ -566,9 +567,10 @@ if [[ $SES == *"spinalcord"* ]];then
       cp /usr/local/fsl/etc/flirtsch/ident.mat reg/example_func2standard.mat
       cp example_func.nii.gz reg/example_func.nii.gz
       cp $SCT_DIR/data/PAM50/template/PAM50_t2s.nii.gz reg/standard.nii.gz
-      fslmaths reg/standard.nii.gz -mas $SCT_DIR/data/PAM50/template/PAM50_cord.nii.gz reg/standard_masked.nii.gz
+      cp $SCT_DIR/data/PAM50/template/PAM50_cord.nii.gz PAM50_cord.nii.gz
+      fslmaths reg/standard.nii.gz -mas PAM50_cord.nii.gz reg/standard_masked.nii.gz
       fslroi reg/standard_masked.nii.gz reg/standard.nii.gz 32 75 34 75 691 263
-
+      rm PAM50_cord.nii.gz
       cd ${PATH_DATA_PROCESSED}/${SUBJECT}/func/run-${run}
 
       #Run second-level trialwise analysis
