@@ -15,8 +15,7 @@ mkdir -p ${output_path}
 PATH_DATA_PROCESSED="${output_path}/data_processed"
 PATH_RESULTS="${output_path}/results"
 PATH_LOG="${output_path}/log"
-PATH_QC="${output_path}/qc"git add -u
-
+PATH_QC="${output_path}/qc"
 mkdir -p ${PATH_DATA_PROCESSED}
 mkdir -p ${PATH_RESULTS}
 mkdir -p ${PATH_LOG}
