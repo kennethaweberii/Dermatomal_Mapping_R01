@@ -20,7 +20,7 @@ mkdir -p ${PATH_DATA_PROCESSED}
 mkdir -p ${PATH_RESULTS}
 mkdir -p ${PATH_LOG}
 mkdir -p ${PATH_QC}
-
+echo "PATH_QC: ${PATH_QC}"
 for subject in "${subjects[@]}"; do
     echo "Preprocessing data for subject: $subject"
     export subject path_script PATH_DATA SCRATCH output_path time_limit memory PATH_DATA PATH_DATA_PROCESSED PATH_RESULTS PATH_LOG PATH_QC ses PATH_SEGMANUAL
